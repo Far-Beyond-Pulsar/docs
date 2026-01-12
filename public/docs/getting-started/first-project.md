@@ -11,7 +11,7 @@ related: ["getting-started/quick-start", "core-concepts/architecture"]
 
 ## Obtain an Engine Binary
 
-You can obtain an engine binary by cloning the repository and building a stable commit locally:
+You can obtain an engine binary by cloning the repository and building a stable commit locally or by going to [The Releases Page](https://github.com/Far-Beyond-Pulsar/Pulsar-Native/releases):
 
 ```bash
 cargo build --release
