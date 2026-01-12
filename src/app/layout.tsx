@@ -26,7 +26,7 @@ if (typeof window !== 'undefined') {
 
 
 const metadata = {
-  title: 'Blog - Tristan Poland',
+  title: 'Pulsar Docs',
   description: 'A blog about game and web development, backend programming, hardware, security, privacy, and technology.',
 };
 
