@@ -20,21 +20,39 @@ const customSchema = {
     ...defaultSchema.attributes,
     div: [
       ...(defaultSchema.attributes?.div || []),
-      ['className', 'mermaid'], // Allow mermaid class
-      'className', // Allow className for GitHub alerts
-      'dataType', // Allow data-type for alerts
+      'className',
+      'dir',
     ],
+    blockquote: [
+      ...(defaultSchema.attributes?.blockquote || []),
+      'className',
+      'dir',
+    ],
+    p: [
+      ...(defaultSchema.attributes?.p || []),
+      'className',
+      'dir',
+    ],
+    svg: [
+      'className',
+      'viewBox',
+      'width',
+      'height',
+      'ariaHidden',
+      ['aria-hidden', 'true'],
+    ],
+    path: ['d'],
     h1: [...(defaultSchema.attributes?.h1 || []), 'id'],
     h2: [...(defaultSchema.attributes?.h2 || []), 'id'],
     h3: [...(defaultSchema.attributes?.h3 || []), 'id'],
     h4: [...(defaultSchema.attributes?.h4 || []), 'id'],
     h5: [...(defaultSchema.attributes?.h5 || []), 'id'],
     h6: [...(defaultSchema.attributes?.h6 || []), 'id'],
-    section: ['className', 'dataType'], // Allow section with className and data-type
   },
   tagNames: [
     ...(defaultSchema.tagNames || []),
-    'section', // Allow section tags for alerts
+    'svg',
+    'path',
   ],
 };
 
@@ -543,14 +561,9 @@ useEffect(() => {
           font-size: 0.95rem;
         }
 
-        .markdown-alert-title::before {
-          content: '';
-          display: inline-block;
-          width: 1.2rem;
-          height: 1.2rem;
+        .markdown-alert-title svg {
           margin-right: 0.5rem;
-          background-size: contain;
-          background-repeat: no-repeat;
+          flex-shrink: 0;
         }
 
         /* NOTE (blue) */
@@ -561,8 +574,8 @@ useEffect(() => {
         .markdown-alert.markdown-alert-note .markdown-alert-title {
           color: #3b82f6;
         }
-        .markdown-alert.markdown-alert-note .markdown-alert-title::before {
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%233b82f6' viewBox='0 0 16 16'%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z'/%3E%3C/svg%3E");
+        .markdown-alert.markdown-alert-note svg {
+          fill: #3b82f6;
         }
 
         /* TIP (green) */
@@ -573,8 +586,8 @@ useEffect(() => {
         .markdown-alert.markdown-alert-tip .markdown-alert-title {
           color: #10b981;
         }
-        .markdown-alert.markdown-alert-tip .markdown-alert-title::before {
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2310b981' viewBox='0 0 16 16'%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z'/%3E%3C/svg%3E");
+        .markdown-alert.markdown-alert-tip svg {
+          fill: #10b981;
         }
 
         /* IMPORTANT (purple) */
@@ -585,8 +598,8 @@ useEffect(() => {
         .markdown-alert.markdown-alert-important .markdown-alert-title {
           color: #a855f7;
         }
-        .markdown-alert.markdown-alert-important .markdown-alert-title::before {
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23a855f7' viewBox='0 0 16 16'%3E%3Cpath d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z'/%3E%3C/svg%3E");
+        .markdown-alert.markdown-alert-important svg {
+          fill: #a855f7;
         }
 
         /* WARNING (yellow/orange) */
@@ -597,8 +610,8 @@ useEffect(() => {
         .markdown-alert.markdown-alert-warning .markdown-alert-title {
           color: #f59e0b;
         }
-        .markdown-alert.markdown-alert-warning .markdown-alert-title::before {
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23f59e0b' viewBox='0 0 16 16'%3E%3Cpath d='M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z'/%3E%3C/svg%3E");
+        .markdown-alert.markdown-alert-warning svg {
+          fill: #f59e0b;
         }
 
         /* CAUTION (red) */
@@ -609,8 +622,8 @@ useEffect(() => {
         .markdown-alert.markdown-alert-caution .markdown-alert-title {
           color: #ef4444;
         }
-        .markdown-alert.markdown-alert-caution .markdown-alert-title::before {
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ef4444' viewBox='0 0 16 16'%3E%3Cpath d='M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z'/%3E%3C/svg%3E");
+        .markdown-alert.markdown-alert-caution svg {
+          fill: #ef4444;
         }
       `}</style>
     </div>
