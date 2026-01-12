@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   try {
     const awaitedParams = await params;
     const { slug } = awaitedParams;
-    const doc = await getDocByPath(slug);
+    const doc = await getDocByPath(slug) as any;
 
     if (!doc) {
       return {
@@ -60,7 +60,7 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
   try {
     const awaitedParams = await params;
     const { slug } = awaitedParams;
-    const doc = await getDocByPath(slug);
+    const doc = await getDocByPath(slug) as any;
 
     if (!doc) {
       notFound();
@@ -70,10 +70,10 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
     const headings = extractHeadings(doc.content);
 
     // Get adjacent docs for navigation
-    const { prev, next } = await getAdjacentDocs(slug);
+    const { prev, next } = await getAdjacentDocs(slug) as any;
 
     // Get related docs
-    const related = await getRelatedDocs(doc, 3);
+    const related = await getRelatedDocs(doc, 3) as any;
 
     return (
       <div className="doc-page">
@@ -99,7 +99,7 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
                 <>
                   <span>•</span>
                   <div className="flex gap-2">
-                    {doc.tags.slice(0, 3).map(tag => (
+                    {doc.tags.slice(0, 3).map((tag: string) => (
                       <span
                         key={tag}
                         className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs"
@@ -130,7 +130,7 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
 
           {/* Main content */}
           <div className="prose prose-lg max-w-none dark:prose-invert">
-            <Markdown content={doc.content} headings={headings} />
+            <Markdown content={doc.content} />
           </div>
 
           {/* Related docs */}
@@ -138,7 +138,7 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
             <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
               <h2 className="text-2xl font-bold mb-4">Related Documentation</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {related.map(relatedDoc => (
+                {related.map((relatedDoc: any) => (
                   <Link
                     key={relatedDoc.slug}
                     href={`/docs/${relatedDoc.slug}`}

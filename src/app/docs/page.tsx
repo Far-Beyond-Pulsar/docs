@@ -13,19 +13,26 @@ export const metadata = {
 };
 
 export default async function DocsHomePage() {
-  const structure = await getNavigationTree();
+  const structure = await getNavigationTree() as any;
   const categories = structure.navigation || [];
 
   // Transform categories for DocsGrid
-  const categoryCards = categories.map(cat => ({
-    title: cat.title,
-    description: cat.description,
-    path: cat.children?.[0]?.path || `/docs/${cat.slug}`,
-    icon: cat.icon,
-    slug: cat.slug,
-    order: cat.order,
-    tags: [] // Categories don't have tags
-  }));
+  const categoryCards = categories.map((cat: any) => {
+    // Find first child path for the category
+    const firstChildPath = cat.children?.[0]?.path || cat.children?.[0]?.slug
+      ? `/docs/${cat.slug}/${cat.children[0].slug}`
+      : `/docs/${cat.slug}`;
+    
+    return {
+      title: cat.title,
+      description: cat.description,
+      path: firstChildPath,
+      icon: cat.icon,
+      slug: cat.slug,
+      order: cat.order,
+      tags: [] // Categories don't have tags
+    };
+  });
 
   return (
     <div className="docs-home max-w-7xl mx-auto px-4 py-12">

@@ -82,7 +82,7 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
   };
 
   const hasActivePage = (section: NavSection | NavItem, currentPath: string): boolean => {
-    if (section.path && currentPath.startsWith(section.path)) {
+    if ('path' in section && section.path && currentPath.startsWith(section.path)) {
       return true;
     }
     if (section.children) {
