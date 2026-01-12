@@ -1,0 +1,116 @@
+[
+  {
+    "title": "Overview",
+    "path": "/docs/getting-started/index",
+    "slug": "getting-started/index",
+    "category": "getting-started"
+  },
+  {
+    "title": "Windows",
+    "path": "/docs/getting-started/installation/windows",
+    "slug": "getting-started/getting-started/installation/windows",
+    "category": "getting-started/getting-started/installation"
+  },
+  {
+    "title": "Linux",
+    "path": "/docs/getting-started/installation/linux",
+    "slug": "getting-started/getting-started/installation/linux",
+    "category": "getting-started/getting-started/installation"
+  },
+  {
+    "title": "macOS",
+    "path": "/docs/getting-started/installation/macos",
+    "slug": "getting-started/getting-started/installation/macos",
+    "category": "getting-started/getting-started/installation"
+  },
+  {
+    "title": "Quick Start",
+    "path": "/docs/getting-started/quick-start",
+    "slug": "getting-started/quick-start",
+    "category": "getting-started"
+  },
+  {
+    "title": "First Project",
+    "path": "/docs/getting-started/first-project",
+    "slug": "getting-started/first-project",
+    "category": "getting-started"
+  },
+  {
+    "title": "Overview",
+    "path": "/docs/core-concepts/index",
+    "slug": "core-concepts/index",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Architecture",
+    "path": "/docs/core-concepts/architecture",
+    "slug": "core-concepts/architecture",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Rendering Pipeline",
+    "path": "/docs/core-concepts/rendering-pipeline",
+    "slug": "core-concepts/rendering-pipeline",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Entity Component System",
+    "path": "/docs/core-concepts/entity-component-system",
+    "slug": "core-concepts/entity-component-system",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Overview",
+    "path": "/docs/api-reference/index",
+    "slug": "api-reference/index",
+    "category": "api-reference"
+  },
+  {
+    "title": "Engine",
+    "path": "/docs/api-reference/core/Engine",
+    "slug": "api-reference/api-reference/core/Engine",
+    "category": "api-reference/api-reference/core"
+  },
+  {
+    "title": "GameObject",
+    "path": "/docs/api-reference/core/GameObject",
+    "slug": "api-reference/api-reference/core/GameObject",
+    "category": "api-reference/api-reference/core"
+  },
+  {
+    "title": "Component",
+    "path": "/docs/api-reference/core/Component",
+    "slug": "api-reference/api-reference/core/Component",
+    "category": "api-reference/api-reference/core"
+  },
+  {
+    "title": "Overview",
+    "path": "/docs/guides/index",
+    "slug": "guides/index",
+    "category": "guides"
+  },
+  {
+    "title": "Creating Plugins",
+    "path": "/docs/guides/creating-plugins",
+    "slug": "guides/creating-plugins",
+    "category": "guides"
+  },
+  {
+    "title": "Creating Materials",
+    "path": "/docs/guides/creating-materials",
+    "slug": "guides/creating-materials",
+    "category": "guides"
+  },
+  {
+    "title": "Physics Basics",
+    "path": "/docs/guides/physics-basics",
+    "slug": "guides/physics-basics",
+    "category": "guides"
+  },
+  {
+    "title": "Working with Assets",
+    "path": "/docs/guides/working-with-assets",
+    "slug": "guides/working-with-assets",
+    "category": "guides"
+  }
+]

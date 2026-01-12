@@ -1,0 +1,39 @@
+{
+  "title": "Guides",
+  "order": 4,
+  "icon": "Map",
+  "description": "Step-by-step tutorials and guides",
+  "collapsed": false,
+  "items": [
+    {
+      "title": "Overview",
+      "slug": "index",
+      "order": 0,
+      "type": "page"
+    },
+    {
+      "title": "Creating Plugins",
+      "slug": "creating-plugins",
+      "order": 1,
+      "type": "page"
+    },
+    {
+      "title": "Creating Materials",
+      "slug": "creating-materials",
+      "order": 2,
+      "type": "page"
+    },
+    {
+      "title": "Physics Basics",
+      "slug": "physics-basics",
+      "order": 3,
+      "type": "page"
+    },
+    {
+      "title": "Working with Assets",
+      "slug": "working-with-assets",
+      "order": 4,
+      "type": "page"
+    }
+  ]
+}

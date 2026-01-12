@@ -1,0 +1,33 @@
+{
+  "title": "Core Concepts",
+  "order": 2,
+  "icon": "BookOpen",
+  "description": "Fundamental concepts of the game engine",
+  "collapsed": false,
+  "items": [
+    {
+      "title": "Overview",
+      "slug": "index",
+      "order": 0,
+      "type": "page"
+    },
+    {
+      "title": "Architecture",
+      "slug": "architecture",
+      "order": 1,
+      "type": "page"
+    },
+    {
+      "title": "Rendering Pipeline",
+      "slug": "rendering-pipeline",
+      "order": 2,
+      "type": "page"
+    },
+    {
+      "title": "Entity Component System",
+      "slug": "entity-component-system",
+      "order": 3,
+      "type": "page"
+    }
+  ]
+}

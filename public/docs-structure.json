@@ -1,0 +1,199 @@
+{
+  "navigation": [
+    {
+      "title": "Getting Started",
+      "slug": "getting-started",
+      "icon": "Rocket",
+      "description": "Quick start guides for the game engine",
+      "order": 1,
+      "collapsed": false,
+      "children": [
+        {
+          "title": "Overview",
+          "slug": "index",
+          "path": "/docs/getting-started/index",
+          "type": "page",
+          "order": 0
+        },
+        {
+          "title": "Installation",
+          "slug": "getting-started/installation",
+          "icon": "Download",
+          "description": "Installation guides for different platforms",
+          "order": 1,
+          "collapsed": false,
+          "children": [
+            {
+              "title": "Windows",
+              "slug": "windows",
+              "path": "/docs/getting-started/installation/windows",
+              "type": "page",
+              "order": 1
+            },
+            {
+              "title": "Linux",
+              "slug": "linux",
+              "path": "/docs/getting-started/installation/linux",
+              "type": "page",
+              "order": 2
+            },
+            {
+              "title": "macOS",
+              "slug": "macos",
+              "path": "/docs/getting-started/installation/macos",
+              "type": "page",
+              "order": 3
+            }
+          ]
+        },
+        {
+          "title": "Quick Start",
+          "slug": "quick-start",
+          "path": "/docs/getting-started/quick-start",
+          "type": "page",
+          "order": 2
+        },
+        {
+          "title": "First Project",
+          "slug": "first-project",
+          "path": "/docs/getting-started/first-project",
+          "type": "page",
+          "order": 3
+        }
+      ]
+    },
+    {
+      "title": "Core Concepts",
+      "slug": "core-concepts",
+      "icon": "BookOpen",
+      "description": "Fundamental concepts of the game engine",
+      "order": 2,
+      "collapsed": false,
+      "children": [
+        {
+          "title": "Overview",
+          "slug": "index",
+          "path": "/docs/core-concepts/index",
+          "type": "page",
+          "order": 0
+        },
+        {
+          "title": "Architecture",
+          "slug": "architecture",
+          "path": "/docs/core-concepts/architecture",
+          "type": "page",
+          "order": 1
+        },
+        {
+          "title": "Rendering Pipeline",
+          "slug": "rendering-pipeline",
+          "path": "/docs/core-concepts/rendering-pipeline",
+          "type": "page",
+          "order": 2
+        },
+        {
+          "title": "Entity Component System",
+          "slug": "entity-component-system",
+          "path": "/docs/core-concepts/entity-component-system",
+          "type": "page",
+          "order": 3
+        }
+      ]
+    },
+    {
+      "title": "API Reference",
+      "slug": "api-reference",
+      "icon": "Code",
+      "description": "Complete API documentation",
+      "order": 3,
+      "collapsed": false,
+      "children": [
+        {
+          "title": "Overview",
+          "slug": "index",
+          "path": "/docs/api-reference/index",
+          "type": "page",
+          "order": 0
+        },
+        {
+          "title": "Core",
+          "slug": "api-reference/core",
+          "icon": "Cpu",
+          "description": "Core engine APIs",
+          "order": 1,
+          "collapsed": false,
+          "children": [
+            {
+              "title": "Engine",
+              "slug": "Engine",
+              "path": "/docs/api-reference/core/Engine",
+              "type": "page",
+              "order": 1
+            },
+            {
+              "title": "GameObject",
+              "slug": "GameObject",
+              "path": "/docs/api-reference/core/GameObject",
+              "type": "page",
+              "order": 2
+            },
+            {
+              "title": "Component",
+              "slug": "Component",
+              "path": "/docs/api-reference/core/Component",
+              "type": "page",
+              "order": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Guides",
+      "slug": "guides",
+      "icon": "Map",
+      "description": "Step-by-step tutorials and guides",
+      "order": 4,
+      "collapsed": false,
+      "children": [
+        {
+          "title": "Overview",
+          "slug": "index",
+          "path": "/docs/guides/index",
+          "type": "page",
+          "order": 0
+        },
+        {
+          "title": "Creating Plugins",
+          "slug": "creating-plugins",
+          "path": "/docs/guides/creating-plugins",
+          "type": "page",
+          "order": 1
+        },
+        {
+          "title": "Creating Materials",
+          "slug": "creating-materials",
+          "path": "/docs/guides/creating-materials",
+          "type": "page",
+          "order": 2
+        },
+        {
+          "title": "Physics Basics",
+          "slug": "physics-basics",
+          "path": "/docs/guides/physics-basics",
+          "type": "page",
+          "order": 3
+        },
+        {
+          "title": "Working with Assets",
+          "slug": "working-with-assets",
+          "path": "/docs/guides/working-with-assets",
+          "type": "page",
+          "order": 4
+        }
+      ]
+    }
+  ],
+  "lastGenerated": "2026-01-12T04:37:54.997Z",
+  "version": "1.0.0"
+}
