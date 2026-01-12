@@ -71,24 +71,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div className="docs-layout flex flex-col min-h-screen">
-      {/* Documentation Notice Banner */}
-      <div className="bg-yellow-500/10 border-b border-yellow-500/20 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 py-3">
-          <div className="flex items-start gap-3">
-            <svg className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <div className="flex-1">
-              <p className="text-sm text-yellow-200">
-                <strong className="font-semibold">Documentation Under Active Development:</strong> Many sections of this documentation are being updated to reflect the current state of Pulsar Engine. Information may be incomplete or not yet accurate. Thank you for your patience as we improve the docs.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-1">
+    <div className="docs-layout flex min-h-screen">
       {/* Left Sidebar - Navigation */}
       {isNavigationLoading ? (
         <aside className="hidden lg:block w-80 flex-shrink-0 border-r border-gray-800 bg-black sticky top-0 h-screen overflow-hidden">
@@ -155,7 +138,6 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
           )}
         </div>
       </main>
-      </div>
 
       <BackToTop />
     </div>
