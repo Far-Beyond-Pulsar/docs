@@ -1,3 +1,13 @@
+---
+title: "Windows Installation"
+description: "Complete installation guide for Windows 10 and 11"
+category: "installation"
+order: 1
+icon: "Windows"
+lastUpdated: "2026-01-12"
+tags: ["installation", "windows", "setup"]
+---
+
 # Windows Installation
 
 Welcome to the Pulsar Engine installation guide for Windows! This guide will walk you through everything you need to get up and running with Pulsar on Windows 10 or Windows 11.

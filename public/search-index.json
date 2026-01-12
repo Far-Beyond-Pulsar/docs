@@ -2616,12 +2616,16 @@
     },
     {
       "id": "getting-started-installation-windows",
-      "title": "Untitled",
-      "description": "Windows Installation\r\n\r\nWelcome to the Pulsar Engine installation guide for Windows! This guide will walk you through everything you need to get up and running with Pulsar on Windows 10 or Windows 11.",
+      "title": "Windows Installation",
+      "description": "Complete installation guide for Windows 10 and 11",
       "url": "/docs/getting-started/installation/windows",
       "slug": "getting-started/installation/windows",
       "category": "getting-started/installation",
-      "tags": [],
+      "tags": [
+        "installation",
+        "windows",
+        "setup"
+      ],
       "headings": [
         {
           "level": 1,
@@ -2744,10 +2748,10 @@
           "slug": "next-steps"
         }
       ],
-      "excerpt": "Windows Installation\r\n\r\nWelcome to the Pulsar Engine installation guide for Windows! This guide will walk you through everything you need to get up...",
+      "excerpt": "Complete installation guide for Windows 10 and 11",
       "readingTime": 7,
-      "lastUpdated": "2026-01-12T04:37:00.681Z",
-      "searchText": "untitled windows installation\r\n\r\nwelcome to the pulsar engine installation guide for windows! this guide will walk you through everything you need to get up and running with pulsar on windows 10 or windows 11. windows installation prerequisites installation methods method 1: using the installer (recommended) method 2: building from source setting up visual studio integration graphics api setup directx 11 (default) directx 12 (recommended) common installation issues issue: \"vcruntime140.dll was not found\" issue: \"the code execution cannot proceed because msvcp140.dll was not found\" issue: installer fails with \"access denied\" issue: command pulsar not recognized issue: build fails with cmake errors issue: \"cannot open include file: 'pulsar/core.h'\" post-installation steps updating pulsar if installed via installer: if built from source: uninstallation if installed via installer: if built from source: next steps windows installation\r\n\r\nwelcome to the pulsar engine installation guide for windows! this guide will walk you through everything you need to get up and running with pulsar on windows 10 or windows 11.\r\n\r\nprerequisites\r\n\r\nbefore installing pulsar engine, make sure your system meets these requirements:\r\n\r\n- operating system: windows 10 (version 1909 or later) or windows 11\r\n- ram: 8gb minimum, 16gb recommended for larger projects\r\n- disk space: 2gb for the engine and tools, plus space for your projects\r\n- graphics: directx 11 compatible gpu (directx 12 recommended)\r\n- visual studio: 2019 or later (community edition works fine)\r\n\r\ninstallation methods\r\n\r\nyou have two ways to install pulsar engine on windows: using the installer or building from source. we'll cover both methods.\r\n\r\nmethod 1: using the installer (recommended)\r\n\r\nthe installer is the fastest way to get started and includes everything you need:\r\n\r\n1. download the installer\r\n   - visit the pulsar engine downloads page\r\n   - do"
+      "lastUpdated": "2026-01-12",
+      "searchText": "windows installation complete installation guide for windows 10 and 11 windows installation prerequisites installation methods method 1: using the installer (recommended) method 2: building from source setting up visual studio integration graphics api setup directx 11 (default) directx 12 (recommended) common installation issues issue: \"vcruntime140.dll was not found\" issue: \"the code execution cannot proceed because msvcp140.dll was not found\" issue: installer fails with \"access denied\" issue: command pulsar not recognized issue: build fails with cmake errors issue: \"cannot open include file: 'pulsar/core.h'\" post-installation steps updating pulsar if installed via installer: if built from source: uninstallation if installed via installer: if built from source: next steps installation windows setup windows installation\r\n\r\nwelcome to the pulsar engine installation guide for windows! this guide will walk you through everything you need to get up and running with pulsar on windows 10 or windows 11.\r\n\r\nprerequisites\r\n\r\nbefore installing pulsar engine, make sure your system meets these requirements:\r\n\r\n- operating system: windows 10 (version 1909 or later) or windows 11\r\n- ram: 8gb minimum, 16gb recommended for larger projects\r\n- disk space: 2gb for the engine and tools, plus space for your projects\r\n- graphics: directx 11 compatible gpu (directx 12 recommended)\r\n- visual studio: 2019 or later (community edition works fine)\r\n\r\ninstallation methods\r\n\r\nyou have two ways to install pulsar engine on windows: using the installer or building from source. we'll cover both methods.\r\n\r\nmethod 1: using the installer (recommended)\r\n\r\nthe installer is the fastest way to get started and includes everything you need:\r\n\r\n1. download the installer\r\n   - visit the pulsar engine downloads page\r\n   - do"
     },
     {
       "id": "getting-started-quick-start",
@@ -2897,26 +2901,6 @@
       "readingTime": 6,
       "lastUpdated": "2026-01-12",
       "searchText": "quick start guide get the pulsar editor running and explore your first project quick start guide running pulsar for the first time the launcher creating your first project the editor interface the main viewport the file manager the problems panel the terminal understanding pulsar projects project.toml plugins your project uses go here the cargo workspace the game crate running your game from the editor from the terminal working with assets using assets in code exploring the type debugger where to go from here common questions why isn't there a visual scene editor yet? can i use pulsar for 2d games? what if i find a bug? can i contribute to pulsar? tutorial quickstart beginner quick start guide\r\n\r\nlet's get pulsar running and take a tour of the editor. this guide assumes you've already installed rust and cloned the pulsar repository.\r\n\r\nrunning pulsar for the first time\r\n\r\nopen your terminal in the pulsar directory and run:\r\n::: info\r\nthe first build will take a while as cargo compiles all dependencies. subsequent runs will be much faster.\r\n:::\r\n\r\nif you're missing any required dependencies, pulsar will detect this and guide you through installation before launching the editor.\r\n\r\nthe launcher\r\n\r\nwhen pulsar starts, you'll see the launcher screen. this is your project hub where you can:\r\n\r\n- open existing projects\r\n- create new projects\r\n- configure engine settings\r\n- view recent projects\r\n\r\ncreating your first project\r\n\r\n1. click \"new project\"\r\n2. choose a name for your project (e.g., \"my-first-game\")\r\n3. select a location on your file system\r\n4. choose a template (start with \"empty project\" for now)\r\n5. click \"create\"\r\n\r\npulsar will generate the project st"
-    },
-    {
-      "id": "getting-started-test-callouts",
-      "title": "Test Callouts",
-      "description": "Testing GitHub-style callouts",
-      "url": "/docs/getting-started/test-callouts",
-      "slug": "getting-started/test-callouts",
-      "category": "getting-started",
-      "tags": [],
-      "headings": [
-        {
-          "level": 1,
-          "text": "Test Callouts",
-          "slug": "test-callouts"
-        }
-      ],
-      "excerpt": "Testing GitHub-style callouts",
-      "readingTime": 1,
-      "lastUpdated": "2026-01-12T05:07:08.983Z",
-      "searchText": "test callouts testing github-style callouts test callouts test callouts\n[!note]\nthis is a note callout with some bold text and code.\n[!tip]\nthis is a helpful tip for users.\n[!important]\nthis is important information users must read.\n[!warning]\nthis is a warning about potential issues.\n[!caution]\nthis is a caution about dangerous actions.\n\nregular blockquote without alert:\nthis is just a normal blockquote."
     },
     {
       "id": "guides-creating-materials",
@@ -3908,8 +3892,8 @@
     }
   ],
   "metadata": {
-    "totalDocs": 23,
-    "totalWords": 18421,
+    "totalDocs": 22,
+    "totalWords": 18365,
     "categories": [
       "api-reference",
       "api-reference/core",
@@ -3982,9 +3966,10 @@
       "ui",
       "validation",
       "views",
-      "wgsl"
+      "wgsl",
+      "windows"
     ],
-    "lastGenerated": "2026-01-12T05:07:24.620Z",
+    "lastGenerated": "2026-01-12T05:19:03.840Z",
     "version": "1.0.0"
   }
 }

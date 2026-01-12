@@ -1,66 +1,6 @@
 [
   {
-    "title": "Overview",
-    "path": "/docs/getting-started/index",
-    "slug": "getting-started/index",
-    "category": "getting-started"
-  },
-  {
-    "title": "Windows",
-    "path": "/docs/getting-started/installation/windows",
-    "slug": "getting-started/getting-started/installation/windows",
-    "category": "getting-started/getting-started/installation"
-  },
-  {
-    "title": "Linux",
-    "path": "/docs/getting-started/installation/linux",
-    "slug": "getting-started/getting-started/installation/linux",
-    "category": "getting-started/getting-started/installation"
-  },
-  {
-    "title": "macOS",
-    "path": "/docs/getting-started/installation/macos",
-    "slug": "getting-started/getting-started/installation/macos",
-    "category": "getting-started/getting-started/installation"
-  },
-  {
-    "title": "Quick Start",
-    "path": "/docs/getting-started/quick-start",
-    "slug": "getting-started/quick-start",
-    "category": "getting-started"
-  },
-  {
-    "title": "First Project",
-    "path": "/docs/getting-started/first-project",
-    "slug": "getting-started/first-project",
-    "category": "getting-started"
-  },
-  {
-    "title": "Overview",
-    "path": "/docs/core-concepts/index",
-    "slug": "core-concepts/index",
-    "category": "core-concepts"
-  },
-  {
-    "title": "Architecture",
-    "path": "/docs/core-concepts/architecture",
-    "slug": "core-concepts/architecture",
-    "category": "core-concepts"
-  },
-  {
-    "title": "Rendering Pipeline",
-    "path": "/docs/core-concepts/rendering-pipeline",
-    "slug": "core-concepts/rendering-pipeline",
-    "category": "core-concepts"
-  },
-  {
-    "title": "Entity Component System",
-    "path": "/docs/core-concepts/entity-component-system",
-    "slug": "core-concepts/entity-component-system",
-    "category": "core-concepts"
-  },
-  {
-    "title": "Overview",
+    "title": "API Reference",
     "path": "/docs/api-reference/index",
     "slug": "api-reference/index",
     "category": "api-reference"
@@ -84,25 +24,103 @@
     "category": "api-reference/api-reference/core"
   },
   {
-    "title": "Overview",
+    "title": "Core Concepts",
+    "path": "/docs/core-concepts/index",
+    "slug": "core-concepts/index",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Pulsar Architecture",
+    "path": "/docs/core-concepts/architecture",
+    "slug": "core-concepts/architecture",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Plugin System",
+    "path": "/docs/core-concepts/plugin-system",
+    "slug": "core-concepts/plugin-system",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Type System",
+    "path": "/docs/core-concepts/type-system",
+    "slug": "core-concepts/type-system",
+    "category": "core-concepts"
+  },
+  {
+    "title": "UI Framework (GPUI)",
+    "path": "/docs/core-concepts/ui-framework",
+    "slug": "core-concepts/ui-framework",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Rendering Pipeline",
+    "path": "/docs/core-concepts/rendering-pipeline",
+    "slug": "core-concepts/rendering-pipeline",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Entity Component System",
+    "path": "/docs/core-concepts/entity-component-system",
+    "slug": "core-concepts/entity-component-system",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Getting Started with Pulsar",
+    "path": "/docs/getting-started/index",
+    "slug": "getting-started/index",
+    "category": "getting-started"
+  },
+  {
+    "title": "Quick Start Guide",
+    "path": "/docs/getting-started/quick-start",
+    "slug": "getting-started/quick-start",
+    "category": "getting-started"
+  },
+  {
+    "title": "Your First Project",
+    "path": "/docs/getting-started/first-project",
+    "slug": "getting-started/first-project",
+    "category": "getting-started"
+  },
+  {
+    "title": "Windows Installation",
+    "path": "/docs/getting-started/installation/windows",
+    "slug": "getting-started/getting-started/installation/windows",
+    "category": "getting-started/getting-started/installation"
+  },
+  {
+    "title": "Linux Installation",
+    "path": "/docs/getting-started/installation/linux",
+    "slug": "getting-started/getting-started/installation/linux",
+    "category": "getting-started/getting-started/installation"
+  },
+  {
+    "title": "macOS Installation",
+    "path": "/docs/getting-started/installation/macos",
+    "slug": "getting-started/getting-started/installation/macos",
+    "category": "getting-started/getting-started/installation"
+  },
+  {
+    "title": "Guides",
     "path": "/docs/guides/index",
     "slug": "guides/index",
     "category": "guides"
   },
   {
-    "title": "Creating Plugins",
+    "title": "Creating Plugins for Pulsar",
     "path": "/docs/guides/creating-plugins",
     "slug": "guides/creating-plugins",
     "category": "guides"
   },
   {
-    "title": "Creating Materials",
+    "title": "Creating Materials and Shaders",
     "path": "/docs/guides/creating-materials",
     "slug": "guides/creating-materials",
     "category": "guides"
   },
   {
-    "title": "Physics Basics",
+    "title": "Physics Basics with Rapier3D",
     "path": "/docs/guides/physics-basics",
     "slug": "guides/physics-basics",
     "category": "guides"

@@ -1,115 +1,15 @@
 {
   "navigation": [
     {
-      "title": "Getting Started",
-      "slug": "getting-started",
-      "icon": "Rocket",
-      "description": "Quick start guides for the game engine",
-      "order": 1,
-      "collapsed": false,
-      "children": [
-        {
-          "title": "Overview",
-          "slug": "index",
-          "path": "/docs/getting-started/index",
-          "type": "page",
-          "order": 0
-        },
-        {
-          "title": "Installation",
-          "slug": "getting-started/installation",
-          "icon": "Download",
-          "description": "Installation guides for different platforms",
-          "order": 1,
-          "collapsed": false,
-          "children": [
-            {
-              "title": "Windows",
-              "slug": "windows",
-              "path": "/docs/getting-started/installation/windows",
-              "type": "page",
-              "order": 1
-            },
-            {
-              "title": "Linux",
-              "slug": "linux",
-              "path": "/docs/getting-started/installation/linux",
-              "type": "page",
-              "order": 2
-            },
-            {
-              "title": "macOS",
-              "slug": "macos",
-              "path": "/docs/getting-started/installation/macos",
-              "type": "page",
-              "order": 3
-            }
-          ]
-        },
-        {
-          "title": "Quick Start",
-          "slug": "quick-start",
-          "path": "/docs/getting-started/quick-start",
-          "type": "page",
-          "order": 2
-        },
-        {
-          "title": "First Project",
-          "slug": "first-project",
-          "path": "/docs/getting-started/first-project",
-          "type": "page",
-          "order": 3
-        }
-      ]
-    },
-    {
-      "title": "Core Concepts",
-      "slug": "core-concepts",
-      "icon": "BookOpen",
-      "description": "Fundamental concepts of the game engine",
-      "order": 2,
-      "collapsed": false,
-      "children": [
-        {
-          "title": "Overview",
-          "slug": "index",
-          "path": "/docs/core-concepts/index",
-          "type": "page",
-          "order": 0
-        },
-        {
-          "title": "Architecture",
-          "slug": "architecture",
-          "path": "/docs/core-concepts/architecture",
-          "type": "page",
-          "order": 1
-        },
-        {
-          "title": "Rendering Pipeline",
-          "slug": "rendering-pipeline",
-          "path": "/docs/core-concepts/rendering-pipeline",
-          "type": "page",
-          "order": 2
-        },
-        {
-          "title": "Entity Component System",
-          "slug": "entity-component-system",
-          "path": "/docs/core-concepts/entity-component-system",
-          "type": "page",
-          "order": 3
-        }
-      ]
-    },
-    {
       "title": "API Reference",
       "slug": "api-reference",
       "icon": "Code",
-      "description": "Complete API documentation",
-      "order": 3,
+      "description": "Complete API documentation for the game engine",
+      "order": 0,
       "collapsed": false,
       "children": [
         {
-          "title": "Overview",
+          "title": "API Reference",
           "slug": "index",
           "path": "/docs/api-reference/index",
           "type": "page",
@@ -119,8 +19,8 @@
           "title": "Core",
           "slug": "api-reference/core",
           "icon": "Cpu",
-          "description": "Core engine APIs",
-          "order": 1,
+          "description": "Documentation for core",
+          "order": 999,
           "collapsed": false,
           "children": [
             {
@@ -149,36 +49,157 @@
       ]
     },
     {
-      "title": "Guides",
-      "slug": "guides",
-      "icon": "Map",
-      "description": "Step-by-step tutorials and guides",
-      "order": 4,
+      "title": "Core Concepts",
+      "slug": "core-concepts",
+      "icon": "BookOpen",
+      "description": "Understanding the fundamental concepts behind Pulsar Engine",
+      "order": 0,
       "collapsed": false,
       "children": [
         {
-          "title": "Overview",
+          "title": "Core Concepts",
+          "slug": "index",
+          "path": "/docs/core-concepts/index",
+          "type": "page",
+          "order": 0
+        },
+        {
+          "title": "Pulsar Architecture",
+          "slug": "architecture",
+          "path": "/docs/core-concepts/architecture",
+          "type": "page",
+          "order": 1
+        },
+        {
+          "title": "Plugin System",
+          "slug": "plugin-system",
+          "path": "/docs/core-concepts/plugin-system",
+          "type": "page",
+          "order": 2
+        },
+        {
+          "title": "Type System",
+          "slug": "type-system",
+          "path": "/docs/core-concepts/type-system",
+          "type": "page",
+          "order": 3
+        },
+        {
+          "title": "UI Framework (GPUI)",
+          "slug": "ui-framework",
+          "path": "/docs/core-concepts/ui-framework",
+          "type": "page",
+          "order": 3
+        },
+        {
+          "title": "Rendering Pipeline",
+          "slug": "rendering-pipeline",
+          "path": "/docs/core-concepts/rendering-pipeline",
+          "type": "page",
+          "order": 4
+        },
+        {
+          "title": "Entity Component System",
+          "slug": "entity-component-system",
+          "path": "/docs/core-concepts/entity-component-system",
+          "type": "page",
+          "order": 5
+        }
+      ]
+    },
+    {
+      "title": "Getting Started with Pulsar",
+      "slug": "getting-started",
+      "icon": "Rocket",
+      "description": "Your introduction to the Pulsar game engine",
+      "order": 0,
+      "collapsed": false,
+      "children": [
+        {
+          "title": "Getting Started with Pulsar",
+          "slug": "index",
+          "path": "/docs/getting-started/index",
+          "type": "page",
+          "order": 0
+        },
+        {
+          "title": "Quick Start Guide",
+          "slug": "quick-start",
+          "path": "/docs/getting-started/quick-start",
+          "type": "page",
+          "order": 2
+        },
+        {
+          "title": "Your First Project",
+          "slug": "first-project",
+          "path": "/docs/getting-started/first-project",
+          "type": "page",
+          "order": 3
+        },
+        {
+          "title": "Installation",
+          "slug": "getting-started/installation",
+          "icon": "Download",
+          "description": "Documentation for installation",
+          "order": 999,
+          "collapsed": false,
+          "children": [
+            {
+              "title": "Windows Installation",
+              "slug": "windows",
+              "path": "/docs/getting-started/installation/windows",
+              "type": "page",
+              "order": 1
+            },
+            {
+              "title": "Linux Installation",
+              "slug": "linux",
+              "path": "/docs/getting-started/installation/linux",
+              "type": "page",
+              "order": 2
+            },
+            {
+              "title": "macOS Installation",
+              "slug": "macos",
+              "path": "/docs/getting-started/installation/macos",
+              "type": "page",
+              "order": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Guides",
+      "slug": "guides",
+      "icon": "Map",
+      "description": "Step-by-step tutorials for building with Pulsar Engine",
+      "order": 0,
+      "collapsed": false,
+      "children": [
+        {
+          "title": "Guides",
           "slug": "index",
           "path": "/docs/guides/index",
           "type": "page",
           "order": 0
         },
         {
-          "title": "Creating Plugins",
+          "title": "Creating Plugins for Pulsar",
           "slug": "creating-plugins",
           "path": "/docs/guides/creating-plugins",
           "type": "page",
           "order": 1
         },
         {
-          "title": "Creating Materials",
+          "title": "Creating Materials and Shaders",
           "slug": "creating-materials",
           "path": "/docs/guides/creating-materials",
           "type": "page",
           "order": 2
         },
         {
-          "title": "Physics Basics",
+          "title": "Physics Basics with Rapier3D",
           "slug": "physics-basics",
           "path": "/docs/guides/physics-basics",
           "type": "page",
@@ -194,6 +215,6 @@
       ]
     }
   ],
-  "lastGenerated": "2026-01-12T05:07:23.998Z",
+  "lastGenerated": "2026-01-12T05:19:03.340Z",
   "version": "1.0.0"
 }

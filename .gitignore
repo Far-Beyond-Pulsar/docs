@@ -33,3 +33,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Auto-generated documentation files
+/public/docs/**/_meta.json
+/public/docs-structure.json
+/public/docs-flat.json
+/public/search-index.json
