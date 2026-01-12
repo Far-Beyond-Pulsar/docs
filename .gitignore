@@ -39,3 +39,5 @@ next-env.d.ts
 /public/docs-structure.json
 /public/docs-flat.json
 /public/search-index.json
+public/docs-structure.json
+public/search-index.json
