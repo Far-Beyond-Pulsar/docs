@@ -1,8 +1,9 @@
 ---
 title: "macOS Installation"
 description: "Install Pulsar Engine on macOS"
-category: "getting-started"
-order: 3
+category: "installation"
+position: 3
+icon: "Apple"
 lastUpdated: "2026-01-12"
 tags: ["installation", "macos", "setup"]
 ---

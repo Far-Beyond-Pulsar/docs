@@ -1,11 +1,20 @@
 ---
-title: "GameObject"
-description: "Entity-based game object system for the ECS architecture"
-category: "api-reference/core"
-order: 2
-lastUpdated: "2026-01-12"
-tags: ["api", "core", "ecs", "entity", "gameobject"]
-related: ["api-reference/core/Component", "api-reference/core/Engine", "guides/ecs-basics"]
+title: GameObject
+description: Entity-based game object system for the ECS architecture
+category: api-reference/core
+lastUpdated: '2026-01-12'
+tags:
+  - api
+  - core
+  - ecs
+  - entity
+  - gameobject
+related:
+  - api-reference/core/Component
+  - api-reference/core/Engine
+  - guides/ecs-basics
+position: 2
+icon: Gamepad2
 ---
 
 # GameObject

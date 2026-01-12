@@ -2,7 +2,8 @@
 title: "Your First Project"
 description: "Create and understand your first Pulsar project"
 category: "getting-started"
-order: 3
+position: 3
+icon: "FolderPlus"
 lastUpdated: "2026-01-12"
 tags: ["tutorial", "project", "beginner"]
 related: ["getting-started/quick-start", "core-concepts/architecture"]

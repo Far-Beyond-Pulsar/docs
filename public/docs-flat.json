@@ -1,38 +1,50 @@
 [
   {
-    "title": "API Reference",
-    "path": "/docs/api-reference/index",
-    "slug": "api-reference/index",
-    "category": "api-reference"
+    "title": "Getting Started with Pulsar",
+    "path": "/docs/getting-started/index",
+    "slug": "getting-started/index",
+    "category": "getting-started"
   },
   {
-    "title": "Engine",
-    "path": "/docs/api-reference/core/Engine",
-    "slug": "api-reference/api-reference/core/Engine",
-    "category": "api-reference/api-reference/core"
+    "title": "Windows Installation",
+    "path": "/docs/getting-started/installation/windows",
+    "slug": "getting-started/getting-started/installation/windows",
+    "category": "getting-started/getting-started/installation"
   },
   {
-    "title": "GameObject",
-    "path": "/docs/api-reference/core/GameObject",
-    "slug": "api-reference/api-reference/core/GameObject",
-    "category": "api-reference/api-reference/core"
+    "title": "Linux Installation",
+    "path": "/docs/getting-started/installation/linux",
+    "slug": "getting-started/getting-started/installation/linux",
+    "category": "getting-started/getting-started/installation"
   },
   {
-    "title": "Component",
-    "path": "/docs/api-reference/core/Component",
-    "slug": "api-reference/api-reference/core/Component",
-    "category": "api-reference/api-reference/core"
+    "title": "macOS Installation",
+    "path": "/docs/getting-started/installation/macos",
+    "slug": "getting-started/getting-started/installation/macos",
+    "category": "getting-started/getting-started/installation"
   },
   {
-    "title": "Core Concepts",
-    "path": "/docs/core-concepts/index",
-    "slug": "core-concepts/index",
-    "category": "core-concepts"
+    "title": "Quick Start Guide",
+    "path": "/docs/getting-started/quick-start",
+    "slug": "getting-started/quick-start",
+    "category": "getting-started"
+  },
+  {
+    "title": "Your First Project",
+    "path": "/docs/getting-started/first-project",
+    "slug": "getting-started/first-project",
+    "category": "getting-started"
   },
   {
     "title": "Pulsar Architecture",
     "path": "/docs/core-concepts/architecture",
     "slug": "core-concepts/architecture",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Core Concepts",
+    "path": "/docs/core-concepts/index",
+    "slug": "core-concepts/index",
     "category": "core-concepts"
   },
   {
@@ -66,46 +78,28 @@
     "category": "core-concepts"
   },
   {
-    "title": "Getting Started with Pulsar",
-    "path": "/docs/getting-started/index",
-    "slug": "getting-started/index",
-    "category": "getting-started"
+    "title": "Engine",
+    "path": "/docs/api-reference/core/Engine",
+    "slug": "api-reference/api-reference/core/Engine",
+    "category": "api-reference/api-reference/core"
   },
   {
-    "title": "Quick Start Guide",
-    "path": "/docs/getting-started/quick-start",
-    "slug": "getting-started/quick-start",
-    "category": "getting-started"
+    "title": "GameObject",
+    "path": "/docs/api-reference/core/GameObject",
+    "slug": "api-reference/api-reference/core/GameObject",
+    "category": "api-reference/api-reference/core"
   },
   {
-    "title": "Your First Project",
-    "path": "/docs/getting-started/first-project",
-    "slug": "getting-started/first-project",
-    "category": "getting-started"
+    "title": "Component",
+    "path": "/docs/api-reference/core/Component",
+    "slug": "api-reference/api-reference/core/Component",
+    "category": "api-reference/api-reference/core"
   },
   {
-    "title": "Windows Installation",
-    "path": "/docs/getting-started/installation/windows",
-    "slug": "getting-started/getting-started/installation/windows",
-    "category": "getting-started/getting-started/installation"
-  },
-  {
-    "title": "Linux Installation",
-    "path": "/docs/getting-started/installation/linux",
-    "slug": "getting-started/getting-started/installation/linux",
-    "category": "getting-started/getting-started/installation"
-  },
-  {
-    "title": "macOS Installation",
-    "path": "/docs/getting-started/installation/macos",
-    "slug": "getting-started/getting-started/installation/macos",
-    "category": "getting-started/getting-started/installation"
-  },
-  {
-    "title": "Guides",
-    "path": "/docs/guides/index",
-    "slug": "guides/index",
-    "category": "guides"
+    "title": "API Reference",
+    "path": "/docs/api-reference/index",
+    "slug": "api-reference/index",
+    "category": "api-reference"
   },
   {
     "title": "Creating Plugins for Pulsar",
@@ -123,6 +117,12 @@
     "title": "Physics Basics with Rapier3D",
     "path": "/docs/guides/physics-basics",
     "slug": "guides/physics-basics",
+    "category": "guides"
+  },
+  {
+    "title": "Guides",
+    "path": "/docs/guides/index",
+    "slug": "guides/index",
     "category": "guides"
   },
   {

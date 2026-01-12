@@ -142,7 +142,9 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
 
         {hasChildren && isExpanded && (
           <div className="mt-1">
-            {item.children!.map(child => renderNavItem(child, depth + 1))}
+            {item.children!
+              .sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
+              .map(child => renderNavItem(child, depth + 1))}
           </div>
         )}
       </div>
@@ -192,7 +194,9 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
                   {/* Section items */}
                   {isExpanded && section.children && (
                     <div className="mt-2 space-y-1">
-                      {section.children.map(item => renderNavItem(item, 0))}
+                      {section.children
+                        .sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
+                        .map(item => renderNavItem(item, 0))}
                     </div>
                   )}
                 </div>

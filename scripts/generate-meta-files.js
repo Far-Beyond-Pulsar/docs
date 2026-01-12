@@ -110,15 +110,24 @@ async function generateMetaForDirectory(dirPath, categorySlug) {
     // Skip if no title and no fallback
     const title = frontmatter.title || filenameToTitle(mdFile);
     
-    items.push({
+    // Use position if available, otherwise fall back to order
+    const order = frontmatter.position ?? frontmatter.order ?? 999;
+    
+    const item = {
       title,
       slug,
-      order: frontmatter.order ?? 999,
+      order,
       type: 'page',
-      ...(frontmatter.icon && { icon: frontmatter.icon }),
-    });
+    };
     
-    console.log(`  ✓ Added page: ${title} (order: ${frontmatter.order ?? 'default'})`);
+    // Add icon if present
+    if (frontmatter.icon) {
+      item.icon = frontmatter.icon;
+    }
+    
+    items.push(item);
+    
+    console.log(`  ✓ Added page: ${title} (order: ${order}${frontmatter.icon ? `, icon: ${frontmatter.icon}` : ''})`);
   }
   
   // Process subdirectories (categories)
@@ -137,16 +146,24 @@ async function generateMetaForDirectory(dirPath, categorySlug) {
     
     const title = subdirMeta.title || dirToTitle(subdir);
     const icon = subdirMeta.icon || DEFAULT_ICONS[subdir];
+    // Give categories a default order of 1 (after index which is 0) if not specified
+    const order = subdirMeta.position ?? subdirMeta.order ?? 1;
     
-    items.push({
+    const item = {
       title,
       slug: subdir,
-      order: subdirMeta.order ?? 999,
+      order,
       type: 'category',
-      ...(icon && { icon }),
-    });
+    };
     
-    console.log(`  ✓ Added category: ${title} (order: ${subdirMeta.order ?? 'default'})`);
+    // Add icon if present
+    if (icon) {
+      item.icon = icon;
+    }
+    
+    items.push(item);
+    
+    console.log(`  ✓ Added category: ${title} (order: ${order}${icon ? `, icon: ${icon}` : ''})`);
   }
   
   // Sort items by order
@@ -155,7 +172,7 @@ async function generateMetaForDirectory(dirPath, categorySlug) {
   // Build meta object
   const meta = {
     title: categoryMeta.title || dirToTitle(categorySlug),
-    order: categoryMeta.order ?? 1,
+    order: categoryMeta.position ?? categoryMeta.order ?? 1,
     icon: categoryMeta.icon || DEFAULT_ICONS[categorySlug] || 'BookOpen',
     description: categoryMeta.description || `Documentation for ${categorySlug}`,
     collapsed: categoryMeta.collapsed ?? false,

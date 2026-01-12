@@ -1,11 +1,17 @@
 ---
-title: "Pulsar Architecture"
-description: "Understanding how Pulsar Engine is built"
-category: "core-concepts"
-order: 1
-lastUpdated: "2026-01-12"
-tags: ["architecture", "design", "systems"]
-related: ["core-concepts/plugin-system", "core-concepts/type-system"]
+title: Pulsar Architecture
+description: Understanding how Pulsar Engine is built
+category: core-concepts
+lastUpdated: '2026-01-12'
+tags:
+  - architecture
+  - design
+  - systems
+related:
+  - core-concepts/plugin-system
+  - core-concepts/type-system
+position: 1
+icon: Network
 ---
 
 # Pulsar Architecture

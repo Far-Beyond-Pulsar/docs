@@ -1,11 +1,24 @@
 ---
-title: "Physics Basics with Rapier3D"
-description: "Complete physics integration guide covering Rapier3D rigid bodies, colliders, raycasting, character controllers, physics debugging, and performance optimization"
-category: "guides"
-order: 3
-lastUpdated: "2026-01-12"
-tags: ["physics", "rapier3d", "rigid-bodies", "colliders", "character-controller", "simulation"]
-related: ["gameplay-programming", "component-system", "performance"]
+title: Physics Basics with Rapier3D
+description: >-
+  Complete physics integration guide covering Rapier3D rigid bodies, colliders,
+  raycasting, character controllers, physics debugging, and performance
+  optimization
+category: guides
+lastUpdated: '2026-01-12'
+tags:
+  - physics
+  - rapier3d
+  - rigid-bodies
+  - colliders
+  - character-controller
+  - simulation
+related:
+  - gameplay-programming
+  - component-system
+  - performance
+position: 3
+icon: Code
 ---
 
 # Physics Basics with Rapier3D

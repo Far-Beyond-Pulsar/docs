@@ -1,11 +1,25 @@
 ---
-title: "Working with Assets"
-description: "Complete asset pipeline guide covering importing meshes, textures, and audio, AssetHandle system, hot-reloading, organization strategies, and custom asset types"
-category: "guides"
-order: 4
-lastUpdated: "2026-01-12"
-tags: ["assets", "pipeline", "import", "hot-reload", "textures", "meshes", "audio"]
-related: ["rendering-pipeline", "creating-materials", "project-structure"]
+title: Working with Assets
+description: >-
+  Complete asset pipeline guide covering importing meshes, textures, and audio,
+  AssetHandle system, hot-reloading, organization strategies, and custom asset
+  types
+category: guides
+lastUpdated: '2026-01-12'
+tags:
+  - assets
+  - pipeline
+  - import
+  - hot-reload
+  - textures
+  - meshes
+  - audio
+related:
+  - rendering-pipeline
+  - creating-materials
+  - project-structure
+position: 4
+icon: FileBox
 ---
 
 # Working with Assets

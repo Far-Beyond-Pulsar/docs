@@ -1,11 +1,23 @@
 ---
-title: "Creating Plugins for Pulsar"
-description: "Complete step-by-step tutorial for building custom plugins - from cargo new to finished editor with GPUI rendering, file type registration, and error handling"
-category: "guides"
-order: 1
-lastUpdated: "2026-01-12"
-tags: ["plugins", "tutorial", "rust", "gpui", "editor"]
-related: ["plugin-api", "gpui-basics", "project-structure"]
+title: Creating Plugins for Pulsar
+description: >-
+  Complete step-by-step tutorial for building custom plugins - from cargo new to
+  finished editor with GPUI rendering, file type registration, and error
+  handling
+category: guides
+lastUpdated: '2026-01-12'
+tags:
+  - plugins
+  - tutorial
+  - rust
+  - gpui
+  - editor
+related:
+  - plugin-api
+  - gpui-basics
+  - project-structure
+position: 1
+icon: Puzzle
 ---
 
 # Creating Plugins for Pulsar

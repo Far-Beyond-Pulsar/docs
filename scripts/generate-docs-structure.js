@@ -88,13 +88,20 @@ async function buildNavigationNode(dirPath, basePath = '') {
         const hasFile = await markdownFileExists(dirPath, itemSlug);
 
         if (hasFile) {
-          node.children.push({
+          const pageNode = {
             title: item.title || itemSlug,
             slug: itemSlug,
             path: `/docs/${itemPath}`,
             type: 'page',
             order: item.order !== undefined ? item.order : 999
-          });
+          };
+          
+          // Add icon if present
+          if (item.icon) {
+            pageNode.icon = item.icon;
+          }
+          
+          node.children.push(pageNode);
         } else {
           console.warn(`Markdown file not found: ${itemSlug}.md in ${dirPath}`);
         }

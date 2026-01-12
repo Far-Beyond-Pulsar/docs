@@ -1,11 +1,19 @@
 ---
-title: "Core Concepts"
-description: "Understanding the fundamental concepts behind Pulsar Engine"
-category: "core-concepts"
-order: 0
-lastUpdated: "2026-01-12"
-tags: ["core", "concepts", "fundamentals", "overview"]
-related: ["core-concepts/architecture", "core-concepts/plugin-system", "core-concepts/type-system"]
+title: Core Concepts
+description: Understanding the fundamental concepts behind Pulsar Engine
+category: core-concepts
+position: 2
+icon: BookOpen
+lastUpdated: '2026-01-12'
+tags:
+  - core
+  - concepts
+  - fundamentals
+  - overview
+related:
+  - core-concepts/architecture
+  - core-concepts/plugin-system
+  - core-concepts/type-system
 ---
 
 # Core Concepts
@@ -131,3 +139,4 @@ That said, the core ideas are solid. Understanding these concepts will serve you
 ---
 
 Let's explore what makes Pulsar tick. Choose a concept above and dive in.
+position: 2

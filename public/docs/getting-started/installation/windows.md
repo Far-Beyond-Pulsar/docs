@@ -2,8 +2,8 @@
 title: "Windows Installation"
 description: "Complete installation guide for Windows 10 and 11"
 category: "installation"
-order: 1
-icon: "Windows"
+position: 1
+icon: "MonitorSmartphone"
 lastUpdated: "2026-01-12"
 tags: ["installation", "windows", "setup"]
 ---

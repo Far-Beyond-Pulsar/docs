@@ -1,10 +1,14 @@
 ---
-title: "API Reference"
-description: "Complete API documentation for the game engine"
-category: "api-reference"
-order: 0
-lastUpdated: "2026-01-11"
-tags: ["api", "reference", "documentation"]
+title: API Reference
+description: Complete API documentation for the game engine
+category: api-reference
+lastUpdated: '2026-01-12'
+tags:
+  - api
+  - reference
+  - documentation
+position: 3
+icon: BookOpen
 ---
 
 # API Reference

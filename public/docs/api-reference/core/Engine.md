@@ -1,11 +1,17 @@
 ---
-title: "Engine"
-description: "Main engine class for initialization and game loop management"
-category: "api-reference/core"
-order: 1
-lastUpdated: "2026-01-11"
-tags: ["api", "core", "engine"]
-related: ["api-reference/core/GameObject", "getting-started/quick-start"]
+title: Engine
+description: Main engine class for initialization and game loop management
+category: api-reference/core
+lastUpdated: '2026-01-11'
+tags:
+  - api
+  - core
+  - engine
+related:
+  - api-reference/core/GameObject
+  - getting-started/quick-start
+position: 1
+icon: Cpu
 ---
 
 # Engine

@@ -1,11 +1,19 @@
 ---
-title: "Type System"
-description: "Pulsar's custom type system for strongly-typed game data"
-category: "core-concepts"
-order: 3
-lastUpdated: "2026-01-12"
-tags: ["types", "data", "validation", "type-system"]
-related: ["core-concepts/architecture", "guides/working-with-assets", "api-reference/type-database"]
+title: Type System
+description: Pulsar's custom type system for strongly-typed game data
+category: core-concepts
+lastUpdated: '2026-01-12'
+tags:
+  - types
+  - data
+  - validation
+  - type-system
+related:
+  - core-concepts/architecture
+  - guides/working-with-assets
+  - api-reference/type-database
+position: 3
+icon: TypeOutline
 ---
 
 # Type System

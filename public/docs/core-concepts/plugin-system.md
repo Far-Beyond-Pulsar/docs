@@ -1,11 +1,19 @@
 ---
-title: "Plugin System"
-description: "Understanding Pulsar's dynamic plugin architecture"
-category: "core-concepts"
-order: 2
-lastUpdated: "2026-01-12"
-tags: ["plugins", "architecture", "extensibility", "dlls"]
-related: ["guides/creating-plugins", "core-concepts/architecture", "api-reference/plugin-api"]
+title: Plugin System
+description: Understanding Pulsar's dynamic plugin architecture
+category: core-concepts
+lastUpdated: '2026-01-12'
+tags:
+  - plugins
+  - architecture
+  - extensibility
+  - dlls
+related:
+  - guides/creating-plugins
+  - core-concepts/architecture
+  - api-reference/plugin-api
+position: 2
+icon: Puzzle
 ---
 
 # Plugin System

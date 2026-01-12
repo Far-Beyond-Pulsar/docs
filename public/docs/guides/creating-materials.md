@@ -1,11 +1,23 @@
 ---
-title: "Creating Materials and Shaders"
-description: "Complete shader writing tutorial covering WGSL syntax, material properties, PBR rendering, texture sampling, lighting, and hot-reload workflow"
-category: "guides"
-order: 2
-lastUpdated: "2026-01-12"
-tags: ["materials", "shaders", "wgsl", "rendering", "pbr", "graphics"]
-related: ["rendering-pipeline", "asset-system", "graphics-basics"]
+title: Creating Materials and Shaders
+description: >-
+  Complete shader writing tutorial covering WGSL syntax, material properties,
+  PBR rendering, texture sampling, lighting, and hot-reload workflow
+category: guides
+lastUpdated: '2026-01-12'
+tags:
+  - materials
+  - shaders
+  - wgsl
+  - rendering
+  - pbr
+  - graphics
+related:
+  - rendering-pipeline
+  - asset-system
+  - graphics-basics
+position: 2
+icon: Sparkles
 ---
 
 # Creating Materials and Shaders

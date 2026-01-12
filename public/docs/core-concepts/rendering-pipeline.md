@@ -1,11 +1,20 @@
 ---
-title: "Rendering Pipeline"
-description: "Understanding Pulsar's GPU-driven rendering architecture"
-category: "core-concepts"
-order: 4
-lastUpdated: "2026-01-12"
-tags: ["rendering", "gpu", "graphics", "shaders", "pipeline"]
-related: ["core-concepts/ui-framework", "core-concepts/entity-component-system", "guides/custom-shaders"]
+title: Rendering Pipeline
+description: Understanding Pulsar's GPU-driven rendering architecture
+category: core-concepts
+lastUpdated: '2026-01-12'
+tags:
+  - rendering
+  - gpu
+  - graphics
+  - shaders
+  - pipeline
+related:
+  - core-concepts/ui-framework
+  - core-concepts/entity-component-system
+  - guides/custom-shaders
+position: 4
+icon: Palette
 ---
 
 # Rendering Pipeline

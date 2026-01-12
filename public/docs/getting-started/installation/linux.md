@@ -1,8 +1,9 @@
 ---
 title: "Linux Installation"
 description: "Install Pulsar Engine on Linux"
-category: "getting-started"
-order: 2
+category: "installation"
+position: 2
+icon: "Laptop"
 lastUpdated: "2026-01-12"
 tags: ["installation", "linux", "setup"]
 ---

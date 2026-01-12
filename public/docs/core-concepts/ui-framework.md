@@ -1,11 +1,20 @@
 ---
-title: "UI Framework (GPUI)"
-description: "Deep dive into Pulsar's GPU-accelerated UI framework"
-category: "core-concepts"
-order: 3
-lastUpdated: "2026-01-12"
-tags: ["ui", "gpui", "rendering", "views", "components"]
-related: ["core-concepts/architecture", "core-concepts/rendering-pipeline", "guides/creating-plugins"]
+title: UI Framework (GPUI)
+description: Deep dive into Pulsar's GPU-accelerated UI framework
+category: core-concepts
+lastUpdated: '2026-01-12'
+tags:
+  - ui
+  - gpui
+  - rendering
+  - views
+  - components
+related:
+  - core-concepts/architecture
+  - core-concepts/rendering-pipeline
+  - guides/creating-plugins
+position: 3
+icon: LayoutTemplate
 ---
 
 # UI Framework (GPUI)

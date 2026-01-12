@@ -2,7 +2,8 @@
 title: "Quick Start Guide"
 description: "Get the Pulsar editor running and explore your first project"
 category: "getting-started"
-order: 2
+position: 2
+icon: "Zap"
 lastUpdated: "2026-01-12"
 tags: ["tutorial", "quickstart", "beginner"]
 related: ["getting-started/installation/windows", "core-concepts/architecture"]

@@ -1,11 +1,18 @@
 ---
-title: "Guides"
-description: "Step-by-step tutorials for building with Pulsar Engine"
-category: "guides"
-order: 0
-lastUpdated: "2026-01-12"
-tags: ["guides", "tutorials", "how-to", "learning"]
-related: ["getting-started/index", "core-concepts/index"]
+title: Guides
+description: Step-by-step tutorials for building with Pulsar Engine
+category: guides
+position: 4
+icon: BookOpen
+lastUpdated: '2026-01-12'
+tags:
+  - guides
+  - tutorials
+  - how-to
+  - learning
+related:
+  - getting-started/index
+  - core-concepts/index
 ---
 
 # Guides
@@ -225,3 +232,4 @@ Subscribe to the [GitHub releases](https://github.com/Far-Beyond-Pulsar/Pulsar-N
 ---
 
 Choose a guide and dive in. The best way to learn Pulsar is to build with it.
+position: 4

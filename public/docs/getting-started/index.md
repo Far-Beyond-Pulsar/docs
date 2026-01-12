@@ -2,7 +2,8 @@
 title: "Getting Started with Pulsar"
 description: "Your introduction to the Pulsar game engine"
 category: "getting-started"
-order: 0
+position: 1
+icon: "Home"
 lastUpdated: "2026-01-12"
 tags: ["introduction", "getting-started", "overview"]
 ---

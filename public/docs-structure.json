@@ -1,50 +1,70 @@
 {
   "navigation": [
     {
-      "title": "API Reference",
-      "slug": "api-reference",
-      "icon": "Code",
-      "description": "Complete API documentation for the game engine",
-      "order": 0,
+      "title": "Getting Started with Pulsar",
+      "slug": "getting-started",
+      "icon": "Home",
+      "description": "Your introduction to the Pulsar game engine",
+      "order": 1,
       "collapsed": false,
       "children": [
         {
-          "title": "API Reference",
+          "title": "Getting Started with Pulsar",
           "slug": "index",
-          "path": "/docs/api-reference/index",
+          "path": "/docs/getting-started/index",
           "type": "page",
-          "order": 0
+          "order": 1,
+          "icon": "Home"
         },
         {
-          "title": "Core",
-          "slug": "api-reference/core",
-          "icon": "Cpu",
-          "description": "Documentation for core",
-          "order": 999,
+          "title": "Installation",
+          "slug": "getting-started/installation",
+          "icon": "Download",
+          "description": "Documentation for installation",
+          "order": 1,
           "collapsed": false,
           "children": [
             {
-              "title": "Engine",
-              "slug": "Engine",
-              "path": "/docs/api-reference/core/Engine",
+              "title": "Windows Installation",
+              "slug": "windows",
+              "path": "/docs/getting-started/installation/windows",
               "type": "page",
-              "order": 1
+              "order": 1,
+              "icon": "MonitorSmartphone"
             },
             {
-              "title": "GameObject",
-              "slug": "GameObject",
-              "path": "/docs/api-reference/core/GameObject",
+              "title": "Linux Installation",
+              "slug": "linux",
+              "path": "/docs/getting-started/installation/linux",
               "type": "page",
-              "order": 2
+              "order": 2,
+              "icon": "Laptop"
             },
             {
-              "title": "Component",
-              "slug": "Component",
-              "path": "/docs/api-reference/core/Component",
+              "title": "macOS Installation",
+              "slug": "macos",
+              "path": "/docs/getting-started/installation/macos",
               "type": "page",
-              "order": 3
+              "order": 3,
+              "icon": "Apple"
             }
           ]
+        },
+        {
+          "title": "Quick Start Guide",
+          "slug": "quick-start",
+          "path": "/docs/getting-started/quick-start",
+          "type": "page",
+          "order": 2,
+          "icon": "Zap"
+        },
+        {
+          "title": "Your First Project",
+          "slug": "first-project",
+          "path": "/docs/getting-started/first-project",
+          "type": "page",
+          "order": 3,
+          "icon": "FolderPlus"
         }
       ]
     },
@@ -53,168 +73,170 @@
       "slug": "core-concepts",
       "icon": "BookOpen",
       "description": "Understanding the fundamental concepts behind Pulsar Engine",
-      "order": 0,
+      "order": 2,
       "collapsed": false,
       "children": [
-        {
-          "title": "Core Concepts",
-          "slug": "index",
-          "path": "/docs/core-concepts/index",
-          "type": "page",
-          "order": 0
-        },
         {
           "title": "Pulsar Architecture",
           "slug": "architecture",
           "path": "/docs/core-concepts/architecture",
           "type": "page",
-          "order": 1
+          "order": 1,
+          "icon": "Network"
+        },
+        {
+          "title": "Core Concepts",
+          "slug": "index",
+          "path": "/docs/core-concepts/index",
+          "type": "page",
+          "order": 2,
+          "icon": "BookOpen"
         },
         {
           "title": "Plugin System",
           "slug": "plugin-system",
           "path": "/docs/core-concepts/plugin-system",
           "type": "page",
-          "order": 2
+          "order": 2,
+          "icon": "Puzzle"
         },
         {
           "title": "Type System",
           "slug": "type-system",
           "path": "/docs/core-concepts/type-system",
           "type": "page",
-          "order": 3
+          "order": 3,
+          "icon": "TypeOutline"
         },
         {
           "title": "UI Framework (GPUI)",
           "slug": "ui-framework",
           "path": "/docs/core-concepts/ui-framework",
           "type": "page",
-          "order": 3
+          "order": 3,
+          "icon": "LayoutTemplate"
         },
         {
           "title": "Rendering Pipeline",
           "slug": "rendering-pipeline",
           "path": "/docs/core-concepts/rendering-pipeline",
           "type": "page",
-          "order": 4
+          "order": 4,
+          "icon": "Palette"
         },
         {
           "title": "Entity Component System",
           "slug": "entity-component-system",
           "path": "/docs/core-concepts/entity-component-system",
           "type": "page",
-          "order": 5
+          "order": 5,
+          "icon": "Box"
         }
       ]
     },
     {
-      "title": "Getting Started with Pulsar",
-      "slug": "getting-started",
-      "icon": "Rocket",
-      "description": "Your introduction to the Pulsar game engine",
-      "order": 0,
+      "title": "API Reference",
+      "slug": "api-reference",
+      "icon": "BookOpen",
+      "description": "Complete API documentation for the game engine",
+      "order": 3,
       "collapsed": false,
       "children": [
         {
-          "title": "Getting Started with Pulsar",
-          "slug": "index",
-          "path": "/docs/getting-started/index",
-          "type": "page",
-          "order": 0
-        },
-        {
-          "title": "Quick Start Guide",
-          "slug": "quick-start",
-          "path": "/docs/getting-started/quick-start",
-          "type": "page",
-          "order": 2
-        },
-        {
-          "title": "Your First Project",
-          "slug": "first-project",
-          "path": "/docs/getting-started/first-project",
-          "type": "page",
-          "order": 3
-        },
-        {
-          "title": "Installation",
-          "slug": "getting-started/installation",
-          "icon": "Download",
-          "description": "Documentation for installation",
-          "order": 999,
+          "title": "Core",
+          "slug": "api-reference/core",
+          "icon": "Cpu",
+          "description": "Documentation for core",
+          "order": 1,
           "collapsed": false,
           "children": [
             {
-              "title": "Windows Installation",
-              "slug": "windows",
-              "path": "/docs/getting-started/installation/windows",
+              "title": "Engine",
+              "slug": "Engine",
+              "path": "/docs/api-reference/core/Engine",
               "type": "page",
-              "order": 1
+              "order": 1,
+              "icon": "Cpu"
             },
             {
-              "title": "Linux Installation",
-              "slug": "linux",
-              "path": "/docs/getting-started/installation/linux",
+              "title": "GameObject",
+              "slug": "GameObject",
+              "path": "/docs/api-reference/core/GameObject",
               "type": "page",
-              "order": 2
+              "order": 2,
+              "icon": "Gamepad2"
             },
             {
-              "title": "macOS Installation",
-              "slug": "macos",
-              "path": "/docs/getting-started/installation/macos",
+              "title": "Component",
+              "slug": "Component",
+              "path": "/docs/api-reference/core/Component",
               "type": "page",
-              "order": 3
+              "order": 3,
+              "icon": "Box"
             }
           ]
+        },
+        {
+          "title": "API Reference",
+          "slug": "index",
+          "path": "/docs/api-reference/index",
+          "type": "page",
+          "order": 3,
+          "icon": "BookOpen"
         }
       ]
     },
     {
       "title": "Guides",
       "slug": "guides",
-      "icon": "Map",
+      "icon": "BookOpen",
       "description": "Step-by-step tutorials for building with Pulsar Engine",
-      "order": 0,
+      "order": 4,
       "collapsed": false,
       "children": [
-        {
-          "title": "Guides",
-          "slug": "index",
-          "path": "/docs/guides/index",
-          "type": "page",
-          "order": 0
-        },
         {
           "title": "Creating Plugins for Pulsar",
           "slug": "creating-plugins",
           "path": "/docs/guides/creating-plugins",
           "type": "page",
-          "order": 1
+          "order": 1,
+          "icon": "Puzzle"
         },
         {
           "title": "Creating Materials and Shaders",
           "slug": "creating-materials",
           "path": "/docs/guides/creating-materials",
           "type": "page",
-          "order": 2
+          "order": 2,
+          "icon": "Sparkles"
         },
         {
           "title": "Physics Basics with Rapier3D",
           "slug": "physics-basics",
           "path": "/docs/guides/physics-basics",
           "type": "page",
-          "order": 3
+          "order": 3,
+          "icon": "Code"
+        },
+        {
+          "title": "Guides",
+          "slug": "index",
+          "path": "/docs/guides/index",
+          "type": "page",
+          "order": 4,
+          "icon": "BookOpen"
         },
         {
           "title": "Working with Assets",
           "slug": "working-with-assets",
           "path": "/docs/guides/working-with-assets",
           "type": "page",
-          "order": 4
+          "order": 4,
+          "icon": "FileBox"
         }
       ]
     }
   ],
-  "lastGenerated": "2026-01-12T05:19:03.340Z",
+  "lastGenerated": "2026-01-12T07:06:13.328Z",
   "version": "1.0.0"
 }

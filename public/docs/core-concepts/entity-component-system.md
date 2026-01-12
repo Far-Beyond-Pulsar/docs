@@ -1,11 +1,21 @@
 ---
-title: "Entity Component System"
-description: "Understanding Pulsar's ECS architecture and why it matters"
-category: "core-concepts"
-order: 5
-lastUpdated: "2026-01-12"
-tags: ["ecs", "architecture", "entities", "components", "systems", "performance"]
-related: ["core-concepts/architecture", "core-concepts/rendering-pipeline", "guides/creating-entities"]
+title: Entity Component System
+description: Understanding Pulsar's ECS architecture and why it matters
+category: core-concepts
+lastUpdated: '2026-01-12'
+tags:
+  - ecs
+  - architecture
+  - entities
+  - components
+  - systems
+  - performance
+related:
+  - core-concepts/architecture
+  - core-concepts/rendering-pipeline
+  - guides/creating-entities
+position: 5
+icon: Box
 ---
 
 # Entity Component System

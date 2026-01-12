@@ -1,11 +1,20 @@
 ---
-title: "Component"
-description: "Component trait and built-in components for the ECS architecture"
-category: "api-reference/core"
-order: 3
-lastUpdated: "2026-01-12"
-tags: ["api", "core", "ecs", "component", "data"]
-related: ["api-reference/core/GameObject", "api-reference/core/Engine", "guides/custom-components"]
+title: Component
+description: Component trait and built-in components for the ECS architecture
+category: api-reference/core
+lastUpdated: '2026-01-12'
+tags:
+  - api
+  - core
+  - ecs
+  - component
+  - data
+related:
+  - api-reference/core/GameObject
+  - api-reference/core/Engine
+  - guides/custom-components
+position: 3
+icon: Box
 ---
 
 # Component
