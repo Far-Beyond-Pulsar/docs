@@ -17,6 +17,9 @@ icon: TypeOutline
 
 # Type Database
 
+> [!NOTE]
+> The Type Database is a registry for type metadata, not a validation system. It powers the Type Debugger UI panel.
+
 Pulsar includes a **Type Database** (`type_db` crate) - an in-memory registry for storing and querying Rust types from your project. This powers the **Type Debugger** UI panel, which lets you browse and inspect all the structs, enums, traits, and type aliases in your codebase.
 
 ## What Is the Type Database?
@@ -179,6 +182,9 @@ This keeps the Type Database synchronized with your actual code.
 
 ## Performance
 
+> [!TIP]
+> The Type Database is highly optimized for concurrent access with minimal locking.
+
 The Type Database uses `DashMap` for concurrent access:
 
 - **Thread-safe** - Multiple threads can query simultaneously
@@ -204,6 +210,9 @@ Performance characteristics:
 **Refactoring** - Find all uses of a type by category or name
 
 ## Limitations
+
+> [!WARNING]
+> The Type Database stores only metadata. For detailed type information (fields, methods), use Rust Analyzer.
 
 **No detailed type information** - Stores metadata only, not field definitions or method signatures (use Rust Analyzer for that)
 

@@ -18,6 +18,9 @@ icon: Puzzle
 
 # Plugin System
 
+> [!NOTE]
+> Pulsar plugins are compiled Rust DLLs, not scripts. This gives you native performance and full API access.
+
 Pulsar's plugin system is one of its most distinctive features. Unlike engines that use scripting languages or interpreted code for extensions, Pulsar plugins are compiled Rust dynamic libraries loaded at runtime. This gives you native performance, full type safety, and complete access to the editor API—while maintaining the flexibility of a plugin architecture.
 
 ## Why Dynamic Libraries?
@@ -133,6 +136,9 @@ pub trait EditorPlugin: Send + Sync {
 This interface is a contract. The editor knows how to call these methods, and plugins know what to implement. The trait abstraction gives us polymorphism without inheritance or virtual dispatch overhead (beyond the trait object itself).
 
 ### Memory Management Across the FFI Boundary
+
+> [!WARNING]
+> Plugins and the editor have separate heaps. Never allocate in one and free in the other - this will crash on Windows.
 
 Here's where things get interesting. Plugins and the main editor run in different memory spaces—the plugin allocates in its DLL heap, the editor in its own heap. You cannot allocate memory in one and free it in the other on Windows (you can on Unix, but for portability we don't).
 
@@ -482,6 +488,9 @@ The editor displays errors in the Problems panel and in notification popups.
 
 ## Version Compatibility
 
+> [!IMPORTANT]
+> Plugins must be compiled with the exact same Rust version as the engine. Version mismatches will be rejected at load time.
+
 Plugins must match the engine's version. The plugin system checks:
 
 1. **Engine version** - Major and minor must match (patch differences are okay)
@@ -490,7 +499,8 @@ Plugins must match the engine's version. The plugin system checks:
 
 If any check fails, the plugin is rejected with a clear error message.
 
-This might seem strict, but it prevents subtle bugs from version mismatches. It's better to refuse to load than to crash mysteriously later.
+> [!TIP]
+> This might seem strict, but it prevents subtle bugs from version mismatches. It's better to refuse to load than to crash mysteriously later.
 
 ## Performance Considerations
 
@@ -506,6 +516,9 @@ Plugins run in the same process as the editor, so performance matters:
 
 ## Security Considerations
 
+> [!CAUTION]
+> Plugins have full system access with no sandboxing. Only load plugins from trusted sources.
+
 Plugins have full system access. They can:
 - Read/write any file
 - Make network requests
@@ -513,10 +526,8 @@ Plugins have full system access. They can:
 
 Only load plugins from sources you trust. Pulsar doesn't sandbox plugins (yet).
 
-Future plans include:
-- WebAssembly plugin option for sandboxing
-- Permission system (request file access, network access, etc.)
-- Code signing for verified plugins
+> [!NOTE]
+> Future plans include WebAssembly plugins, permission systems, and code signing for verified plugins.
 
 ## Example Plugins
 

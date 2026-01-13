@@ -247,9 +247,148 @@ The rendering system is optimized for editor workflows:
 
 These appear in the viewport overlay or problems panel.
 
+## The Compositor
+
+> [!IMPORTANT]
+> The compositor is the heart of Pulsar's rendering architecture - it layers Bevy's 3D output with GPUI's UI to create the final window.
+
+Pulsar uses a **3-layer D3D11 compositor** that combines multiple rendering sources into the final frame:
+
+```mermaid
+graph TD
+    A[Layer 0: Black Background] --> D[D3D11 Compositor]
+    B[Layer 1: Bevy 3D<br/>D3D12 Shared Texture] --> D
+    C[Layer 2: GPUI UI<br/>Alpha Blended] --> D
+    D --> E[Final Window<br/>Swap Chain Present]
+
+    style A fill:#000,stroke:#333,stroke-width:2px,color:#fff
+    style B fill:#FF9800,stroke:#333,stroke-width:2px,color:#fff
+    style C fill:#4CAF50,stroke:#333,stroke-width:2px,color:#fff
+    style D fill:#2196F3,stroke:#333,stroke-width:2px,color:#fff
+    style E fill:#9C27B0,stroke:#333,stroke-width:2px,color:#fff
+```
+
+### Composition Process
+
+**Layer 0 (Bottom): Black Background**
+- Solid black clear color
+- Base layer for composition
+
+**Layer 1 (Middle): Bevy 3D Rendering**
+- Opaque 3D scene from Bevy renderer
+- Shared via D3D12→D3D11 zero-copy texture
+- Uses `NativeTextureHandle` for interop
+- Rendered continuously at ~60 FPS
+
+**Layer 2 (Top): GPUI UI**
+- Editor UI, buttons, panels, overlays
+- Alpha-blended on top of Bevy layer
+- Lazy rendering (only when UI changes)
+- Shared via DXGI shared texture handle
+
+### Zero-Copy GPU Texture Sharing
+
+The compositor achieves zero-copy by using GPU-native texture sharing:
+
+```rust
+// Bevy (D3D12) exports a shared texture handle
+let bevy_handle: NativeTextureHandle = bevy_renderer.get_current_native_handle();
+
+// Compositor (D3D11) opens the shared handle
+unsafe {
+    let mut bevy_texture: Option<ID3D11Texture2D> = None;
+    device.OpenSharedResource(HANDLE(bevy_handle as *mut _), &mut bevy_texture)?;
+
+    // Create shader resource view for rendering
+    let srv = device.CreateShaderResourceView(&bevy_texture, None)?;
+}
+```
+
+> [!NOTE]
+> No CPU copies occur - textures are shared directly in GPU memory. The compositor simply references textures from both renderers.
+
+### Rendering Pipeline
+
+```mermaid
+sequenceDiagram
+    participant Bevy as Bevy Renderer<br/>(D3D12)
+    participant Comp as Compositor<br/>(D3D11)
+    participant GPUI as GPUI<br/>(GPUI Window)
+    participant Window as Final Window
+
+    loop Every Frame
+        Bevy->>Bevy: Render 3D scene (60 FPS)
+        Bevy->>Comp: Export shared texture handle
+
+        alt GPUI needs update
+            GPUI->>GPUI: Render UI
+            GPUI->>Comp: Export shared texture handle
+            Comp->>Comp: Copy GPUI texture to persistent buffer
+        end
+
+        Comp->>Comp: Clear to black
+        Comp->>Comp: Draw Bevy layer (opaque)
+        Comp->>Comp: Draw GPUI layer (alpha blend)
+        Comp->>Window: Present to swap chain
+    end
+```
+
+### Performance Characteristics
+
+**Decoupled Rendering:**
+- Bevy renders continuously (~60 FPS)
+- GPUI renders on-demand (UI changes only)
+- Compositor always runs at display refresh rate
+
+**Lazy GPUI Rendering:**
+```rust
+if window_state.needs_render {
+    gpui_app.draw_windows();  // Only when UI changed
+    window_state.needs_render = false;
+}
+// Bevy texture is always composited (continuous 3D viewport)
+```
+
+> [!TIP]
+> This decoupled approach means a static UI doesn't waste GPU cycles re-rendering, while the 3D viewport stays smooth.
+
+### Device Error Recovery
+
+The compositor handles GPU device errors gracefully:
+
+```rust
+// Periodic device health check
+if DEVICE_CHECK_COUNTER % 300 == 0 {
+    let device_reason = device.GetDeviceRemovedReason();
+    if device_reason.is_err() {
+        // Clear cached textures, will reinitialize
+        window_state.bevy_texture = None;
+        window_state.bevy_srv = None;
+    }
+}
+```
+
+> [!WARNING]
+> GPU driver crashes or device resets will clear compositor state. Textures will be recreated on the next frame.
+
+### Platform Support
+
+> [!CAUTION]
+> The D3D11 compositor is **Windows-only**. Linux and macOS support is planned but not yet implemented.
+
+**Windows (Current):**
+- Full D3D11 composition with zero-copy sharing
+- D3D12 (Bevy) → D3D11 (Compositor) interop
+- DXGI shared texture handles
+
+**Linux/macOS (Planned):**
+- Vulkan-based compositor
+- Metal-based compositor (macOS)
+- Cross-platform texture sharing via wgpu
+
 ## Integration with GPUI
 
-The 3D viewport is a GPUI view that displays the Bevy framebuffer:
+The 3D viewport is a GPUI view that provides its framebuffer to the compositor:
 
 ```rust
 impl Render for LevelEditorView {
@@ -257,16 +396,15 @@ impl Render for LevelEditorView {
         div()
             .size_full()
             .child(
-                // Display the Bevy-rendered framebuffer
-                image()
-                    .source(self.framebuffer)
-                    .size_full()
+                // GPUI renders to shared texture
+                // Compositor displays the combined result
+                viewport_surface()
             )
     }
 }
 ```
 
-GPUI handles the UI overlay (gizmos, buttons, statusbar) while Bevy handles 3D scene rendering.
+GPUI handles the UI overlay (gizmos, buttons, statusbar) while Bevy handles 3D scene rendering. The compositor combines them transparently.
 
 ## Limitations
 

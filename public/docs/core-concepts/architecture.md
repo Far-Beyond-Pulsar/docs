@@ -20,6 +20,9 @@ Pulsar is a **game editor and engine** built in Rust with a focus on modularity,
 
 ## What Is Pulsar?
 
+> [!NOTE]
+> Pulsar is primarily a **game editor**, not a runtime engine. Think Unity Editor or Unreal Editor, built from scratch in Rust.
+
 Pulsar is primarily a **game editor** - think of it like Unity's editor or Unreal's editor, but built from the ground up in Rust. It's not a runtime engine like Bevy where you write code and run it separately. Instead, Pulsar provides:
 
 - A launcher for managing and creating projects
@@ -169,6 +172,9 @@ Real-time 3D scene view showing:
 
 ## Game Object System
 
+> [!IMPORTANT]
+> Pulsar does NOT use an Entity-Component-System (ECS). It uses simple GameObject structs.
+
 Pulsar uses a **simple GameObject struct**, not an Entity-Component-System (ECS) like Bevy. GameObjects have:
 
 ```rust
@@ -182,7 +188,8 @@ pub struct GameObject {
 }
 ```
 
-GameObjects are managed by a GameThread that runs at a fixed tick rate (60 TPS by default), updating positions, velocities, and other properties.
+> [!TIP]
+> GameObjects are managed by a GameThread that runs at a fixed tick rate (60 TPS by default), updating positions, velocities, and other properties.
 
 ## Plugin System
 
@@ -234,6 +241,9 @@ Shared state between the editor and backend:
 
 ## Threading Model
 
+> [!NOTE]
+> Understanding the threading model is crucial for working with Pulsar. Each thread has specific responsibilities and communication patterns.
+
 Pulsar uses multiple threads for responsiveness:
 
 ```mermaid
@@ -273,6 +283,9 @@ Communication uses:
 - GPUI contexts for UI updates from background threads
 
 ## Project Structure
+
+> [!IMPORTANT]
+> Pulsar projects are standard Rust workspaces. You can use all normal Cargo commands.
 
 A Pulsar project is a **Rust workspace**:
 
@@ -356,7 +369,10 @@ Per-project settings:
 
 ## Future Directions
 
-Pulsar is actively developed. Planned features:
+> [!NOTE]
+> Pulsar is under active development. These features are planned but not yet implemented.
+
+Planned features:
 
 - **Collaborative editing** - Multiple users editing simultaneously
 - **Visual scripting** - Node-based logic editor
