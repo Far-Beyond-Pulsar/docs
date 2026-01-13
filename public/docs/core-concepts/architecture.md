@@ -9,288 +9,322 @@ tags:
   - systems
 related:
   - core-concepts/plugin-system
-  - core-concepts/type-system
+  - getting-started/first-project
 position: 1
 icon: Network
 ---
 
 # Pulsar Architecture
 
-Pulsar Engine is built from the ground up with a focus on modularity, clarity, and long-term maintainability. This document explains how the major systems fit together and why they're designed the way they are.
+Pulsar is a **game editor and engine** built in Rust with a focus on modularity, editor stability, and modern development workflows. This document explains how the major systems fit together.
+
+## What Is Pulsar?
+
+Pulsar is primarily a **game editor** - think of it like Unity's editor or Unreal's editor, but built from the ground up in Rust. It's not a runtime engine like Bevy where you write code and run it separately. Instead, Pulsar provides:
+
+- A launcher for managing and creating projects
+- File management and asset browsers
+- Code editing with Rust Analyzer integration
+- A 3D scene viewport with real-time rendering
+- Plugin system for custom editors and tools
+- Integrated terminal and problem diagnostics
+- Type inspection and debugging tools
 
 ## Design Philosophy
 
-Before diving into the technical details, let's talk about the principles that guide Pulsar's architecture:
+**Editor stability is paramount** - The editor should never crash, even when your game code does. Pulsar runs the editor UI separately from game logic to achieve this.
 
-**Editor stability is paramount** - The editor should never crash, even when your game code does. Pulsar achieves this by running game code in separate processes and isolating plugin failures.
+**Rust all the way down** - Projects are Rust workspaces. The editor is Rust. Plugins are compiled Rust DLLs. This gives you native performance and compile-time safety everywhere.
 
-**Modular by default** - Systems have clear boundaries and communicate through well-defined interfaces. You can understand one part of Pulsar without needing to understand all of it.
+**Git-first collaboration** - Pulsar integrates deeply with Git, treating it as a first-class feature for team workflows and version control.
 
-**Type safety everywhere** - Rust's type system enforces correctness at compile time. Pulsar extends this with its own type database for game data.
+**Modular by default** - Systems have clear boundaries. The renderer, physics, UI, and plugins all operate independently.
 
-**No magic** - If something happens in Pulsar, there's explicit code making it happen. No hidden conventions or implicit behavior.
+**No magic** - If something happens, there's explicit code making it happen. No hidden conventions.
 
-## System Layers
+## Core Technologies
 
-Pulsar is organized into distinct layers, each with specific responsibilities:
+### GPUI - The UI Framework
 
-```
-┌─────────────────────────────────────────────────────┐
-│                  UI Layer (GPUI)                    │
-│   Editor windows │ Panels │ Menus │ Interactions    │
-└─────────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────────┐
-│               Editor Services                       │
-│   File Manager │ Terminal │ Problems │ Debugger     │
-└─────────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────────┐
-│                Plugin System                        │
-│   File Types │ Editors │ Statusbar │ Lifecycle      │
-└─────────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────────┐
-│               Backend Services                      │
-│   Rust Analyzer │ Type DB │ File Watchers           │
-└─────────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────────┐
-│                Core Engine                          │
-│   Rendering │ ECS │ Physics │ Assets                 │
-└─────────────────────────────────────────────────────┘
-```
+The entire Pulsar editor interface is built with **GPUI**, a GPU-accelerated UI framework originally from the Zed editor. GPUI provides:
 
-Let's explore each layer.
+- GPU-rendered UI for smooth performance
+- Declarative view syntax (similar to SwiftUI/Flutter)
+- Strong typing for UI components
+- Efficient re-rendering
 
-## The UI Layer
+All editor windows, panels, and controls use GPUI.
 
-Pulsar's entire editor interface is built with GPUI, a GPU-accelerated UI framework. This isn't just a styling choice—it's fundamental to how the editor works.
+### Winit - Window Management
 
-### Why GPUI?
+**Winit** handles OS window creation and event management. Pulsar coordinates between Winit (for system events) and GPUI (for rendering).
 
-Traditional UI frameworks (like Qt or immediate-mode GUIs) can struggle with complex editor layouts, especially when you're displaying thousands of items or doing real-time updates. GPUI leverages the GPU for rendering, meaning the UI stays smooth even under heavy load.
+### Bevy Renderer - 3D Graphics
 
-### Key Concepts
+For 3D scene rendering, Pulsar uses **Bevy's rendering modules** (`bevy_render`, `bevy_pbr`), not the full Bevy engine. This provides:
 
-**Entities** - Managed containers for UI state. Think of them like React components but with strong ownership semantics:
+- PBR (Physically Based Rendering) materials
+- Modern graphics pipeline via wgpu
+- Entity rendering in the viewport
+- Cross-platform graphics support
 
-```rust
-struct MyPanel {
-    data: Model<PanelData>,
-    // ...
-}
+### Rapier3D - Physics
 
-impl MyPanel {
-    fn new(cx: &mut WindowContext) -> Self {
-        let data = cx.new_model(|_| PanelData::default());
-        Self { data }
-    }
-}
-```
+Physics simulation uses **Rapier3D**, a Rust physics engine providing:
 
-**Views** - Renderable UI elements that produce element trees:
+- Rigid body dynamics
+- Collision detection
+- Constraints and joints
 
-```rust
-impl Render for MyPanel {
-    fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
-        div()
-            .child(Label::new("My Panel"))
-            .child(Button::new("Click Me"))
-    }
-}
-```
+### Rust Analyzer - Code Intelligence
 
-**Contexts** - Manage threading and state access. Different contexts provide different capabilities (WindowContext, ViewContext, etc.).
+Pulsar integrates **Rust Analyzer** (the Rust language server) to provide:
 
-### UI Crates
-
-The `ui-crates/` directory contains all the editor windows and panels:
-
-- `ui_core` - Main application shell, window management
-- `ui_entry` - Launcher/welcome screen
-- `ui_project_launcher` - Project selection and creation
-- `ui_file_manager` - File browser and navigation
-- `ui_problems` - Diagnostic viewer (errors, warnings)
-- `ui_terminal` - Integrated terminal
-- `ui_type_debugger` - Type system inspection
-- `ui_level_editor` - 3D scene editor (in development)
-- `ui_settings` - Preferences and configuration
-
-Each is a separate crate that can be developed and tested independently.
-
-## Editor Services
-
-These are the background systems that keep the editor running smoothly.
-
-### File Manager Service
-
-Watches your project directory for changes and maintains an in-memory representation of your project structure. When you add, delete, or rename files, the file manager detects it immediately and updates the UI.
-
-**Key features:**
-- Recursive directory watching
-- File type detection
-- Change debouncing (avoid spam from rapid file changes)
-- Integration with the plugin system for custom file types
-
-### Problems Service
-
-Aggregates diagnostics from multiple sources:
-- Rust Analyzer (compiler errors, warnings, lints)
-- Custom plugin validators
-- Build system output
-
-The problems panel displays all of these in one place, sorted by severity and location.
-
-### Terminal Service
-
-Provides an integrated terminal that can:
-- Run arbitrary shell commands
-- Execute Cargo commands with special handling
-- Display colored output
-- Maintain history across sessions
-
-The terminal runs in a separate thread to avoid blocking the UI.
-
-## The Plugin System
-
-This is one of Pulsar's most distinctive features. Plugins aren't scripts or interpreted code—they're compiled Rust dynamic libraries (DLLs) loaded at runtime.
-
-### Why Dynamic Libraries?
-
-**Performance** - Native code runs at full speed. No interpretation overhead.
-
-**Type safety** - Plugins are checked by the Rust compiler. If it compiles, most bugs are already caught.
-
-**Full API access** - Plugins have access to the entire editor API, not a restricted sandbox.
-
-**Hot reloading** - (Planned) Plugins can be reloaded without restarting the editor.
-
-### Plugin Capabilities
-
-Plugins can:
-
-1. **Register file types** - Define new asset types with custom extensions and default content
-2. **Provide editors** - Implement custom editors for those file types
-3. **Add statusbar buttons** - Quick actions in the editor footer
-4. **Hook lifecycle events** - Respond to plugin load/unload, project open/close, etc.
-
-### Plugin Architecture
-
-```rust
-pub trait EditorPlugin: Send + Sync {
-    fn metadata(&self) -> PluginMetadata;
-    fn file_types(&self) -> Vec<FileTypeDefinition>;
-    fn editors(&self) -> Vec<EditorMetadata>;
-    fn create_editor(...) -> Result<(Arc<dyn PanelView>, Box<dyn EditorInstance>)>;
-    // Optional hooks
-    fn on_load(&mut self) {}
-    fn on_unload(&mut self) {}
-}
-```
-
-Plugins export a C-ABI compatible function that returns a trait object:
-
-```rust
-#[no_mangle]
-pub extern "C" fn _plugin_create() -> *mut dyn EditorPlugin {
-    Box::into_raw(Box::new(MyPlugin::default()))
-}
-```
-
-The plugin manager loads the DLL, calls this function, and gets a plugin instance.
-
-### Memory Safety
-
-Since plugins cross the DLL boundary, memory management needs special attention:
-
-- **Allocation** - Plugins allocate memory in their own heap
-- **Deallocation** - The main app never frees plugin memory directly
-- **Cleanup** - Plugins provide `_plugin_destroy` to clean up properly
-
-## Backend Services
-
-These services run on background threads and communicate with the editor through async channels.
-
-### Rust Analyzer Manager
-
-Rust Analyzer (rust-analyzer) is the language server for Rust. Pulsar integrates it to provide:
 - Code completion
+- Error diagnostics
 - Type information on hover
 - Go-to-definition
-- Diagnostics (errors and warnings)
+- Real-time compilation feedback
 
-The manager:
-1. Spawns rust-analyzer as a child process
-2. Communicates via JSON-RPC (LSP protocol)
-3. Parses responses and updates the editor
-4. Handles crashes and restarts automatically
+## System Architecture
 
-### Type Database
+```mermaid
+graph TD
+    A[UI Layer<br/>GPUI + Winit<br/>Launcher, Editor Shell, Panels, Viewport] --> B[Editor UI Crates<br/>ui_core, ui_file_manager, ui_problems<br/>ui_terminal, ui_type_debugger, ui_level_editor]
+    B --> C[Plugin System<br/>Editor Plugins DLLs<br/>File Types, Custom Editors]
+    C --> D[Engine Backend<br/>engine_backend<br/>Rendering, Physics, Assets, Networking]
+    D --> E[Background Services<br/>Rust Analyzer, Type DB, File Watchers]
 
-Pulsar maintains a database of all types in your project:
-- Structs and their fields
-- Enums and their variants
-- Traits and their methods
-- Type aliases
-- Function signatures
+    style A fill:#4CAF50,stroke:#333,stroke-width:2px,color:#fff
+    style B fill:#2196F3,stroke:#333,stroke-width:2px,color:#fff
+    style C fill:#FF9800,stroke:#333,stroke-width:2px,color:#fff
+    style D fill:#9C27B0,stroke:#333,stroke-width:2px,color:#fff
+    style E fill:#607D8B,stroke:#333,stroke-width:2px,color:#fff
+```
 
-This enables:
-- The type debugger UI
-- Validation of data files
-- Cross-reference navigation
-- Intelligent autocomplete in custom editors
+## Major Components
 
-The type database is populated by:
-1. Parsing Rust source files
-2. Extracting type information from rust-analyzer
-3. Processing procedural macro outputs
+### The Launcher (`ui_entry`, `ui_project_launcher`)
 
-### File System Watchers
+When you start Pulsar, you see the launcher. This provides:
 
-File system events (create, modify, delete) are detected using platform-specific APIs (inotify on Linux, FSEvents on macOS, ReadDirectoryChangesW on Windows).
+- Project selection (recent projects list)
+- Project creation from templates
+- Settings access
+- Direct project opening
 
-Changes trigger:
-- UI updates in the file manager
-- Re-indexing in rust-analyzer
-- Type database refresh
-- Plugin file type handlers
+### The Editor Shell (`ui_core`)
 
-## The Core Engine
+Once a project opens, the editor shell provides:
 
-While the editor is Pulsar's current focus, the core game engine is being developed in parallel. This includes:
+- Window management
+- Tab system for editors
+- Panel layout and docking
+- Menu bar and toolbar
+- Status bar
 
-### Rendering System
-- Vulkan/Metal/DirectX backends
-- Physically-based rendering (PBR)
-- Deferred rendering pipeline
-- GPU-driven rendering
-- Compute shader integration
+### File Manager (`ui_file_manager`)
 
-### Entity-Component-System (ECS)
-- Custom ECS implementation optimized for game workloads
-- Archetype-based storage for cache efficiency
-- Parallel system execution
-- Query DSL for component access
+Displays your project's file structure and provides:
 
-### Physics
-- Integration with external physics engines
-- Custom collision detection
-- Deterministic simulation for multiplayer
+- Directory tree navigation
+- File type detection
+- Asset previews
+- Context menus for file operations
+- Real-time file system watching
 
-### Asset Pipeline
-- Streaming asset loading
-- Hot-reload support
-- Format conversion (glTF → internal format)
-- LOD generation
+### Problems Panel (`ui_problems`)
 
-## Data Flow Examples
+Shows diagnostics from:
 
-Let's walk through some common scenarios to see how the systems interact.
+- Rust Analyzer (compiler errors, warnings, lints)
+- Build output
+- Custom validators
 
-### Opening a Project
+### Terminal (`ui_terminal`)
 
-1. User selects a project in the launcher (`ui_project_launcher`)
+Integrated terminal for:
+
+- Running Cargo commands
+- Git operations
+- Shell access without leaving the editor
+
+### Type Debugger (`ui_type_debugger`)
+
+Unique to Pulsar - inspect Rust types in your project:
+
+- Browse all structs, enums, traits
+- View type definitions
+- See type relationships
+- Explore module structure
+
+### 3D Viewport (`ui_level_editor`)
+
+Real-time 3D scene view showing:
+
+- Game objects with transforms
+- Materials and meshes
+- Camera controls (pan, zoom, rotate)
+- Gizmos for object manipulation
+
+## Game Object System
+
+Pulsar uses a **simple GameObject struct**, not an Entity-Component-System (ECS) like Bevy. GameObjects have:
+
+```rust
+pub struct GameObject {
+    pub id: u64,
+    pub position: [f32; 3],
+    pub velocity: [f32; 3],
+    pub rotation: [f32; 3],
+    pub scale: [f32; 3],
+    pub active: bool,
+}
+```
+
+GameObjects are managed by a GameThread that runs at a fixed tick rate (60 TPS by default), updating positions, velocities, and other properties.
+
+## Plugin System
+
+Editor plugins are compiled Rust **dynamic libraries (DLLs)** that extend the editor. Plugins can:
+
+- Register custom file types
+- Provide custom editors for those file types
+- Add status bar buttons
+- Hook into lifecycle events (load, unload)
+
+See [Plugin System](./plugin-system) for details.
+
+## Engine Backend (`engine_backend`)
+
+The `engine_backend` crate provides game runtime services:
+
+### Subsystems
+
+**Rendering** (`subsystems/render`) - Uses Bevy's renderer for 3D graphics
+
+**Physics** (`subsystems/physics`) - Rapier3D integration for collision and dynamics
+
+**Assets** (`subsystems/assets`) - Asset loading and management
+
+**Audio** (`subsystems/audio`) - Sound playback
+
+**Networking** (`subsystems/networking`) - Multiplayer via Horizon game server
+
+**Scripting** (`subsystems/scripting`) - (In development) Script execution
+
+**World** (`subsystems/world`) - Scene and world state management
+
+### Services
+
+**GpuRenderer** - Manages render thread and GPU resources
+
+**RustAnalyzerManager** - Spawns and communicates with rust-analyzer
+
+**CompletionProvider** - Code completion from Rust Analyzer
+
+## Engine State (`engine_state`)
+
+Shared state between the editor and backend:
+
+- Current project path
+- Window management requests
+- Metadata storage
+- Discord Rich Presence integration
+
+## Threading Model
+
+Pulsar uses multiple threads for responsiveness:
+
+```mermaid
+graph LR
+    A[Main Thread<br/>UI / GPUI<br/>~60 FPS]
+    B[Game Thread<br/>Fixed Timestep<br/>60 TPS]
+    C[Render Thread<br/>Bevy Renderer<br/>GPU Commands]
+    D[Background Threads<br/>File Watching<br/>Rust Analyzer<br/>Asset Loading]
+    E[Tokio Runtime<br/>Async I/O<br/>Networking]
+
+    A <-->|tokio channels| B
+    B <-->|Arc<Mutex<T>>| C
+    A <-->|GPUI contexts| D
+    D <-->|async| E
+    B <-->|State Sync| C
+
+    style A fill:#4CAF50,stroke:#333,stroke-width:2px,color:#fff
+    style B fill:#2196F3,stroke:#333,stroke-width:2px,color:#fff
+    style C fill:#FF9800,stroke:#333,stroke-width:2px,color:#fff
+    style D fill:#9C27B0,stroke:#333,stroke-width:2px,color:#fff
+    style E fill:#607D8B,stroke:#333,stroke-width:2px,color:#fff
+```
+
+**Main Thread (UI)** - All GPUI rendering and user input (must never block, <16ms for 60fps)
+
+**Game Thread** - Fixed timestep game loop (60 TPS), updates GameObjects
+
+**Render Thread** - Bevy renderer execution, submits GPU commands
+
+**Background Threads** - File watching, Rust Analyzer communication, asset loading
+
+**Tokio Runtime** - Async operations for networking, I/O, long-running tasks
+
+Communication uses:
+- `tokio` channels for async messaging
+- `Arc<Mutex<T>>` for shared state
+- GPUI contexts for UI updates from background threads
+
+## Project Structure
+
+A Pulsar project is a **Rust workspace**:
+
+```
+my-game/
+├── Cargo.toml          # Workspace manifest
+├── project.toml        # Pulsar project config
+├── .pulsar/            # Editor metadata (don't commit)
+├── assets/             # Game assets
+├── scenes/             # Scene files
+├── scripts/            # Game logic
+└── game/               # Main game crate
+    ├── Cargo.toml
+    └── src/
+        └── main.rs
+```
+
+Projects use standard Cargo tooling - you can build, run, and test with `cargo` commands.
+
+## Data Flow Example: Opening a Project
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Launcher as ui_project_launcher
+    participant Core as ui_core
+    participant FileManager as ui_file_manager
+    participant PluginMgr as Plugin Manager
+    participant Plugins as Editor Plugins
+    participant RA as Rust Analyzer
+    participant TypeDB as Type Database
+
+    User->>Launcher: Select project
+    Launcher->>Core: Send project path
+    Core->>FileManager: Start watching directory
+    Core->>PluginMgr: Load plugins from plugins/editor/
+    PluginMgr->>Plugins: Load DLLs
+    Plugins->>PluginMgr: Register file types & editors
+    Core->>RA: Spawn rust-analyzer process
+    RA-->>Core: Begin indexing project
+    RA->>TypeDB: Extract type information
+    TypeDB-->>TypeDB: Register types (structs, enums, traits)
+    FileManager->>FileManager: Populate file tree
+    Core->>Core: Activate editor windows
+    Core-->>User: Editor ready
+
+    Note over User,TypeDB: Project loaded and ready for editing
+```
+
+**Step-by-step:**
+
+1. User selects project in launcher (`ui_project_launcher`)
 2. `ui_core` receives the project path
 3. File manager starts watching the project directory
 4. Plugin manager loads editor plugins from `plugins/editor/`
@@ -299,61 +333,13 @@ Let's walk through some common scenarios to see how the systems interact.
 7. Type database starts loading project types
 8. File manager populates the file tree
 9. Editor windows become active
+10. User can now edit files, browse assets, etc.
 
-### Editing a File
-
-1. User double-clicks `game/src/player.rs` in the file manager
-2. File manager checks the file type (`.rs` → Rust source)
-3. Plugin manager finds a suitable editor (built-in Rust editor)
-4. Editor loads the file content
-5. Rust Analyzer provides diagnostics
-6. Problems panel displays any errors
-7. User makes changes
-8. File watcher detects the modification
-9. Rust Analyzer re-analyzes the file
-10. Diagnostics update in real-time
-
-### Running a Build
-
-1. User clicks "Build" or runs `cargo build` in the terminal
-2. Terminal service spawns Cargo process
-3. Cargo output streams to the terminal
-4. Errors/warnings are parsed
-5. Problems panel updates with build diagnostics
-6. On success, Type database refreshes
-7. Plugins can react to build completion
-
-## Threading Model
-
-Pulsar uses a hybrid threading approach to balance responsiveness and performance:
-
-**Main Thread**
-- All UI rendering (GPUI requirement)
-- User input handling
-- Editor state updates
-- Must never block (< 16ms for 60fps)
-
-**Background Threads**
-- Rust Analyzer communication
-- File system watching
-- Type database queries
-- Plugin operations
-
-**Tokio Async Runtime**
-- Network requests (multiplayer)
-- Long-running operations
-- File I/O
-
-Communication uses:
-- `tokio` channels for async message passing
-- `Arc<Mutex<T>>` for shared state (sparingly)
-- GPUI's `Context` for UI updates from background threads
-
-## Configuration and Settings
+## Configuration
 
 ### Engine Configuration
 
-Global settings stored in `%AppData%/Pulsar/` (Windows) or `~/.config/pulsar/` (Linux):
+Global settings in `%AppData%/Pulsar/` (Windows) or `~/.config/pulsar/` (Linux):
 
 - `config.json` - Editor preferences
 - `themes/` - UI themes
@@ -362,44 +348,34 @@ Global settings stored in `%AppData%/Pulsar/` (Windows) or `~/.config/pulsar/` (
 
 ### Project Configuration
 
-Per-project settings in the project root:
+Per-project settings:
 
 - `Cargo.toml` - Rust workspace manifest
-- `project.toml` - Pulsar-specific settings
-- `.pulsar/` - Editor metadata (don't commit to Git)
-- `assets/` - Game assets
-- `src/` or `game/src/` - Source code
-
-## Extension Points
-
-Want to extend Pulsar? Here are the official extension mechanisms:
-
-1. **Editor Plugins** - Custom file types and editors
-2. **Themes** - UI appearance customization
-3. **Language Support** - Via Rust Analyzer extensions
-4. **Asset Importers** - Convert external formats to Pulsar assets
-5. **Build Scripts** - Custom build steps via Cargo
-
-More extension points (scripting, visual node editors, etc.) are planned as the architecture matures.
+- `project.toml` - Pulsar-specific settings (version, build target, plugins)
+- `.pulsar/` - Editor metadata (window layout, recent files)
 
 ## Future Directions
 
-Pulsar's architecture is designed to support features currently in development:
+Pulsar is actively developed. Planned features:
 
-- **Collaborative Editing** - Multiple users editing the same project simultaneously
-- **Visual Scripting** - Node-based logic for non-programmers
-- **Integrated Profiler** - Performance analysis directly in the editor
-- **Asset Streaming** - Large worlds loaded on-demand
-- **Platform Abstraction** - Restored Linux and macOS support
+- **Collaborative editing** - Multiple users editing simultaneously
+- **Visual scripting** - Node-based logic editor
+- **Asset streaming** - Large world loading on-demand
+- **Platform restoration** - Bringing back Linux and macOS support
+- **Integrated profiler** - Performance analysis in the editor
 
 ## Wrapping Up
 
-Pulsar's architecture prioritizes clarity and modularity. Each system has a specific job and communicates through well-defined interfaces. This makes the codebase easier to understand, maintain, and extend.
+Pulsar's architecture separates the editor (GPUI-based UI) from the game runtime (backend subsystems). This provides:
 
-If you want to dive deeper:
-- [Plugin Development](../guides/creating-plugins) - Build your own editor plugins
-- [Type System](./type-system) - How Pulsar's type database works
-- [UI Framework](./ui-framework) - GPUI in detail
+- Stable editor even when game code crashes
+- Native Rust performance throughout
+- Modular systems that can be developed independently
+- Standard Rust tooling (Cargo, rust-analyzer)
 
-Or just browse the source code—it's well-commented and organized to be readable.
+The architecture prioritizes clarity: each system has a specific job and communicates through well-defined interfaces.
 
+For deeper dives:
+- [Plugin Development](./plugin-system) - Build custom editor plugins
+- [First Project](../getting-started/first-project) - Create and run a project
+- [Quick Start](../getting-started/quick-start) - Editor tour

@@ -101,7 +101,7 @@
           "icon": "Puzzle"
         },
         {
-          "title": "Type System",
+          "title": "Type Database",
           "slug": "type-system",
           "path": "/docs/core-concepts/type-system",
           "type": "page",
@@ -117,72 +117,12 @@
           "icon": "LayoutTemplate"
         },
         {
-          "title": "Rendering Pipeline",
+          "title": "Rendering System",
           "slug": "rendering-pipeline",
           "path": "/docs/core-concepts/rendering-pipeline",
           "type": "page",
           "order": 4,
           "icon": "Palette"
-        },
-        {
-          "title": "Entity Component System",
-          "slug": "entity-component-system",
-          "path": "/docs/core-concepts/entity-component-system",
-          "type": "page",
-          "order": 5,
-          "icon": "Box"
-        }
-      ]
-    },
-    {
-      "title": "API Reference",
-      "slug": "api-reference",
-      "icon": "BookOpen",
-      "description": "Complete API documentation for the game engine",
-      "order": 3,
-      "collapsed": false,
-      "children": [
-        {
-          "title": "Core",
-          "slug": "api-reference/core",
-          "icon": "Cpu",
-          "description": "Documentation for core",
-          "order": 1,
-          "collapsed": false,
-          "children": [
-            {
-              "title": "Engine",
-              "slug": "Engine",
-              "path": "/docs/api-reference/core/Engine",
-              "type": "page",
-              "order": 1,
-              "icon": "Cpu"
-            },
-            {
-              "title": "GameObject",
-              "slug": "GameObject",
-              "path": "/docs/api-reference/core/GameObject",
-              "type": "page",
-              "order": 2,
-              "icon": "Gamepad2"
-            },
-            {
-              "title": "Component",
-              "slug": "Component",
-              "path": "/docs/api-reference/core/Component",
-              "type": "page",
-              "order": 3,
-              "icon": "Box"
-            }
-          ]
-        },
-        {
-          "title": "API Reference",
-          "slug": "index",
-          "path": "/docs/api-reference/index",
-          "type": "page",
-          "order": 3,
-          "icon": "BookOpen"
         }
       ]
     },
@@ -195,48 +135,16 @@
       "collapsed": false,
       "children": [
         {
-          "title": "Creating Plugins for Pulsar",
-          "slug": "creating-plugins",
-          "path": "/docs/guides/creating-plugins",
-          "type": "page",
-          "order": 1,
-          "icon": "Puzzle"
-        },
-        {
-          "title": "Creating Materials and Shaders",
-          "slug": "creating-materials",
-          "path": "/docs/guides/creating-materials",
-          "type": "page",
-          "order": 2,
-          "icon": "Sparkles"
-        },
-        {
-          "title": "Physics Basics with Rapier3D",
-          "slug": "physics-basics",
-          "path": "/docs/guides/physics-basics",
-          "type": "page",
-          "order": 3,
-          "icon": "Code"
-        },
-        {
           "title": "Guides",
           "slug": "index",
           "path": "/docs/guides/index",
           "type": "page",
           "order": 4,
           "icon": "BookOpen"
-        },
-        {
-          "title": "Working with Assets",
-          "slug": "working-with-assets",
-          "path": "/docs/guides/working-with-assets",
-          "type": "page",
-          "order": 4,
-          "icon": "FileBox"
         }
       ]
     }
   ],
-  "lastGenerated": "2026-01-12T07:06:13.328Z",
+  "lastGenerated": "2026-01-13T00:05:56.620Z",
   "version": "1.0.0"
 }

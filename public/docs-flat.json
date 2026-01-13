@@ -54,7 +54,7 @@
     "category": "core-concepts"
   },
   {
-    "title": "Type System",
+    "title": "Type Database",
     "path": "/docs/core-concepts/type-system",
     "slug": "core-concepts/type-system",
     "category": "core-concepts"
@@ -66,69 +66,15 @@
     "category": "core-concepts"
   },
   {
-    "title": "Rendering Pipeline",
+    "title": "Rendering System",
     "path": "/docs/core-concepts/rendering-pipeline",
     "slug": "core-concepts/rendering-pipeline",
     "category": "core-concepts"
   },
   {
-    "title": "Entity Component System",
-    "path": "/docs/core-concepts/entity-component-system",
-    "slug": "core-concepts/entity-component-system",
-    "category": "core-concepts"
-  },
-  {
-    "title": "Engine",
-    "path": "/docs/api-reference/core/Engine",
-    "slug": "api-reference/api-reference/core/Engine",
-    "category": "api-reference/api-reference/core"
-  },
-  {
-    "title": "GameObject",
-    "path": "/docs/api-reference/core/GameObject",
-    "slug": "api-reference/api-reference/core/GameObject",
-    "category": "api-reference/api-reference/core"
-  },
-  {
-    "title": "Component",
-    "path": "/docs/api-reference/core/Component",
-    "slug": "api-reference/api-reference/core/Component",
-    "category": "api-reference/api-reference/core"
-  },
-  {
-    "title": "API Reference",
-    "path": "/docs/api-reference/index",
-    "slug": "api-reference/index",
-    "category": "api-reference"
-  },
-  {
-    "title": "Creating Plugins for Pulsar",
-    "path": "/docs/guides/creating-plugins",
-    "slug": "guides/creating-plugins",
-    "category": "guides"
-  },
-  {
-    "title": "Creating Materials and Shaders",
-    "path": "/docs/guides/creating-materials",
-    "slug": "guides/creating-materials",
-    "category": "guides"
-  },
-  {
-    "title": "Physics Basics with Rapier3D",
-    "path": "/docs/guides/physics-basics",
-    "slug": "guides/physics-basics",
-    "category": "guides"
-  },
-  {
     "title": "Guides",
     "path": "/docs/guides/index",
     "slug": "guides/index",
-    "category": "guides"
-  },
-  {
-    "title": "Working with Assets",
-    "path": "/docs/guides/working-with-assets",
-    "slug": "guides/working-with-assets",
     "category": "guides"
   }
 ]

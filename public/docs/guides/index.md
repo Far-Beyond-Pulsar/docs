@@ -23,15 +23,34 @@ Welcome to the Pulsar guides section. This isn't a reference manual or a feature
 
 Each guide focuses on a specific task or concept and walks you through it from start to finish. We assume you've read the [Getting Started](../getting-started/index) docs and understand the [Core Concepts](../core-concepts/index), but we'll reference them when needed.
 
-### Available Guides
+### Core Documentation
 
-**[Creating Plugins](./creating-plugins)** - Build a complete editor plugin from scratch. You'll create a custom file type, implement an editor for it, add statusbar integration, and learn the patterns that make plugins maintainable.
+**[Architecture](../core-concepts/architecture)** - Complete overview of how Pulsar is built (required reading)
 
-**[Creating Materials](./creating-materials)** - Write shaders and build a material system. This covers the rendering pipeline from a practical perspective: writing WGSL shaders, setting up material properties, and integrating with Pulsar's render graph.
+**[Plugin System](../core-concepts/plugin-system)** - Building editor plugins with dynamic libraries
 
-**[Physics Basics](./physics-basics)** - Add physics to your game. Covers collision shapes, rigid bodies, physics materials, raycasting, and the simulation loop. You'll build a simple physics demo from scratch.
+**[Rendering System](../core-concepts/rendering-pipeline)** - How Bevy's renderer integrates with Pulsar
 
-**[Working with Assets](./working-with-assets)** - Understand Pulsar's asset pipeline. How to import assets, reference them in code, handle loading, implement hot-reloading, and organize large asset collections.
+**[Type Database](../core-concepts/type-system)** - Type inspection and debugging tools
+
+**[UI Framework](../core-concepts/ui-framework)** - GPUI for building editor interfaces
+
+### Getting Started
+
+**[Installation](../getting-started/installation/windows)** - Set up your development environment
+
+**[Quick Start](../getting-started/quick-start)** - Tour of the editor interface
+
+**[First Project](../getting-started/first-project)** - Create and run your first Pulsar project
+
+### Guides (In Development)
+
+The following practical guides are currently being rewritten to match the actual Pulsar codebase:
+
+- **Creating Editor Plugins** - Build custom file type editors
+- **Physics Integration** - Using Rapier3D for game physics
+- **Material System** - Working with Bevy's PBR materials
+- **Asset Management** - Meshes, textures, and asset loading
 
 ## How to Use These Guides
 

@@ -1,621 +1,6 @@
 {
   "docs": [
     {
-      "id": "api-reference-core-Component",
-      "title": "Component",
-      "description": "Component trait and built-in components for the ECS architecture",
-      "url": "/docs/api-reference/core/Component",
-      "slug": "api-reference/core/Component",
-      "category": "api-reference/core",
-      "tags": [
-        "api",
-        "core",
-        "ecs",
-        "component",
-        "data"
-      ],
-      "headings": [
-        {
-          "level": 1,
-          "text": "Component",
-          "slug": "component"
-        },
-        {
-          "level": 2,
-          "text": "Module",
-          "slug": "module"
-        },
-        {
-          "level": 2,
-          "text": "Overview",
-          "slug": "overview"
-        },
-        {
-          "level": 2,
-          "text": "Component Trait",
-          "slug": "component-trait"
-        },
-        {
-          "level": 3,
-          "text": "Trait Definition",
-          "slug": "trait-definition"
-        },
-        {
-          "level": 2,
-          "text": "Built-in Components",
-          "slug": "built-in-components"
-        },
-        {
-          "level": 3,
-          "text": "Transform",
-          "slug": "transform"
-        },
-        {
-          "level": 3,
-          "text": "Mesh",
-          "slug": "mesh"
-        },
-        {
-          "level": 3,
-          "text": "Material",
-          "slug": "material"
-        },
-        {
-          "level": 3,
-          "text": "Camera",
-          "slug": "camera"
-        },
-        {
-          "level": 3,
-          "text": "Name",
-          "slug": "name"
-        },
-        {
-          "level": 3,
-          "text": "RigidBody",
-          "slug": "rigidbody"
-        },
-        {
-          "level": 3,
-          "text": "Collider",
-          "slug": "collider"
-        },
-        {
-          "level": 2,
-          "text": "Creating Custom Components",
-          "slug": "creating-custom-components"
-        },
-        {
-          "level": 3,
-          "text": "Basic Component",
-          "slug": "basic-component"
-        },
-        {
-          "level": 3,
-          "text": "Component with Default",
-          "slug": "component-with-default"
-        },
-        {
-          "level": 3,
-          "text": "Component with Validation",
-          "slug": "component-with-validation"
-        },
-        {
-          "level": 3,
-          "text": "Component with Relations",
-          "slug": "component-with-relations"
-        },
-        {
-          "level": 2,
-          "text": "Component Lifecycle Hooks",
-          "slug": "component-lifecycle-hooks"
-        },
-        {
-          "level": 3,
-          "text": "On Add",
-          "slug": "on-add"
-        },
-        {
-          "level": 3,
-          "text": "On Change",
-          "slug": "on-change"
-        },
-        {
-          "level": 3,
-          "text": "On Remove",
-          "slug": "on-remove"
-        },
-        {
-          "level": 2,
-          "text": "Component Storage",
-          "slug": "component-storage"
-        },
-        {
-          "level": 3,
-          "text": "Table Storage (Default)",
-          "slug": "table-storage-default"
-        },
-        {
-          "level": 3,
-          "text": "Sparse Set Storage",
-          "slug": "sparse-set-storage"
-        },
-        {
-          "level": 2,
-          "text": "Query Patterns",
-          "slug": "query-patterns"
-        },
-        {
-          "level": 3,
-          "text": "Basic Query",
-          "slug": "basic-query"
-        },
-        {
-          "level": 3,
-          "text": "Multiple Components",
-          "slug": "multiple-components"
-        },
-        {
-          "level": 3,
-          "text": "With Filters",
-          "slug": "with-filters"
-        },
-        {
-          "level": 3,
-          "text": "Changed Detection",
-          "slug": "changed-detection"
-        },
-        {
-          "level": 3,
-          "text": "Optional Components",
-          "slug": "optional-components"
-        },
-        {
-          "level": 2,
-          "text": "Complete Usage Example",
-          "slug": "complete-usage-example"
-        },
-        {
-          "level": 2,
-          "text": "Performance Considerations",
-          "slug": "performance-considerations"
-        },
-        {
-          "level": 2,
-          "text": "Common Patterns",
-          "slug": "common-patterns"
-        },
-        {
-          "level": 3,
-          "text": "Marker Components",
-          "slug": "marker-components"
-        },
-        {
-          "level": 3,
-          "text": "Component Groups",
-          "slug": "component-groups"
-        },
-        {
-          "level": 3,
-          "text": "Computed Components",
-          "slug": "computed-components"
-        },
-        {
-          "level": 2,
-          "text": "Anti-Patterns",
-          "slug": "anti-patterns"
-        },
-        {
-          "level": 2,
-          "text": "See Also",
-          "slug": "see-also"
-        },
-        {
-          "level": 2,
-          "text": "Version History",
-          "slug": "version-history"
-        }
-      ],
-      "excerpt": "Component trait and built-in components for the ECS architecture",
-      "readingTime": 3,
-      "lastUpdated": "2026-01-12",
-      "searchText": "component component trait and built-in components for the ecs architecture component module overview component trait trait definition built-in components transform mesh material camera name rigidbody collider creating custom components basic component component with default component with validation component with relations component lifecycle hooks on add on change on remove component storage table storage (default) sparse set storage query patterns basic query multiple components with filters changed detection optional components complete usage example performance considerations common patterns marker components component groups computed components anti-patterns see also version history api core ecs component data component\r\n\r\ncomponents are pure data containers that define the characteristics and state of gameobjects. in the ecs architecture, components hold data while systems provide behavior.\r\n\r\nmodule\r\noverview\r\n\r\na component is:\r\n- a type implementing the component trait\r\n- pure data with no behavior\r\n- attached to gameobjects (entities)\r\n- queried by systems for processing\r\n\r\ncomponents enable composition over inheritance, allowing flexible and reusable game object designs.\r\n\r\ncomponent trait\r\n\r\ntrait definition\r\nrequirements:\r\n- send - can be transferred between threads\r\n- sync - can be accessed from multiple threads\r\n- 'static - no non-static references\r\n\r\nexample:\r\nbuilt-in components\r\n\r\ntransform\r\n\r\nposition, rotation, and scale in 3d space.\r\nmethods:\r\nexample:\r\nmesh\r\n\r\nvisual geometry for rendering.\r\nconstructors:\r\nprimitives:\r\nexample:\r\nmaterial\r\n\r\nvisual appearance properties.\r\nconstructors:\r\nexample:\r\ncamera\r\n\r\nviewport and projection configuration.\r\nexample:\r\nname\r\n\r\nhuman-readabl"
-    },
-    {
-      "id": "api-reference-core-Engine",
-      "title": "Engine",
-      "description": "Main engine class for initialization and game loop management",
-      "url": "/docs/api-reference/core/Engine",
-      "slug": "api-reference/core/Engine",
-      "category": "api-reference/core",
-      "tags": [
-        "api",
-        "core",
-        "engine"
-      ],
-      "headings": [
-        {
-          "level": 1,
-          "text": "Engine",
-          "slug": "engine"
-        },
-        {
-          "level": 2,
-          "text": "Module",
-          "slug": "module"
-        },
-        {
-          "level": 2,
-          "text": "Overview",
-          "slug": "overview"
-        },
-        {
-          "level": 2,
-          "text": "Constructor",
-          "slug": "constructor"
-        },
-        {
-          "level": 3,
-          "text": "new()",
-          "slug": "new"
-        },
-        {
-          "level": 2,
-          "text": "Methods",
-          "slug": "methods"
-        },
-        {
-          "level": 3,
-          "text": "add_plugin",
-          "slug": "add_plugin"
-        },
-        {
-          "level": 3,
-          "text": "add_system",
-          "slug": "add_system"
-        },
-        {
-          "level": 3,
-          "text": "add_resource",
-          "slug": "add_resource"
-        },
-        {
-          "level": 3,
-          "text": "run",
-          "slug": "run"
-        },
-        {
-          "level": 3,
-          "text": "run_once",
-          "slug": "run_once"
-        },
-        {
-          "level": 2,
-          "text": "Complete Example",
-          "slug": "complete-example"
-        },
-        {
-          "level": 2,
-          "text": "Configuration",
-          "slug": "configuration"
-        },
-        {
-          "level": 2,
-          "text": "Performance Considerations",
-          "slug": "performance-considerations"
-        },
-        {
-          "level": 2,
-          "text": "Common Patterns",
-          "slug": "common-patterns"
-        },
-        {
-          "level": 3,
-          "text": "Plugin Bundle",
-          "slug": "plugin-bundle"
-        },
-        {
-          "level": 3,
-          "text": "Conditional Systems",
-          "slug": "conditional-systems"
-        },
-        {
-          "level": 2,
-          "text": "See Also",
-          "slug": "see-also"
-        },
-        {
-          "level": 2,
-          "text": "Version History",
-          "slug": "version-history"
-        }
-      ],
-      "excerpt": "Main engine class for initialization and game loop management",
-      "readingTime": 2,
-      "lastUpdated": "2026-01-11",
-      "searchText": "engine main engine class for initialization and game loop management engine module overview constructor new() methods add_plugin add_system add_resource run run_once complete example configuration performance considerations common patterns plugin bundle conditional systems see also version history api core engine engine\r\n\r\nthe engine class is the main entry point for the game engine. it manages initialization, the game loop, and core systems.\r\n\r\nmodule\r\noverview\r\n\r\nthe engine handles:\r\n- system initialization\r\n- plugin management\r\n- game loop execution\r\n- resource management\r\n- event dispatching\r\n\r\nconstructor\r\n\r\nnew()\r\n\r\ncreates a new engine instance with default configuration.\r\nexample:\r\nmethods\r\n\r\naddplugin\r\n\r\nadds a plugin to the engine.\r\nparameters:\r\n- plugin - a type implementing the plugin trait\r\n\r\nreturns: &mut self for method chaining\r\n\r\nexample:\r\naddsystem\r\n\r\nregisters a system to run every frame.\r\nparameters:\r\n- system - a function or type implementing system\r\n\r\nreturns: &mut self for method chaining\r\n\r\nexample:\r\naddresource\r\n\r\nadds a global resource accessible to all systems.\r\nparameters:\r\n- resource - a type implementing resource\r\n\r\nreturns: &mut self for method chaining\r\n\r\nexample:\r\nrun\r\n\r\nstarts the game loop. this method blocks until the application exits.\r\nexample:\r\nrunonce\r\n\r\n"
-    },
-    {
-      "id": "api-reference-core-GameObject",
-      "title": "GameObject",
-      "description": "Entity-based game object system for the ECS architecture",
-      "url": "/docs/api-reference/core/GameObject",
-      "slug": "api-reference/core/GameObject",
-      "category": "api-reference/core",
-      "tags": [
-        "api",
-        "core",
-        "ecs",
-        "entity",
-        "gameobject"
-      ],
-      "headings": [
-        {
-          "level": 1,
-          "text": "GameObject",
-          "slug": "gameobject"
-        },
-        {
-          "level": 2,
-          "text": "Module",
-          "slug": "module"
-        },
-        {
-          "level": 2,
-          "text": "Overview",
-          "slug": "overview"
-        },
-        {
-          "level": 2,
-          "text": "Creating GameObjects",
-          "slug": "creating-gameobjects"
-        },
-        {
-          "level": 3,
-          "text": "Commands::spawn",
-          "slug": "commandsspawn"
-        },
-        {
-          "level": 3,
-          "text": "Commands::spawn_empty",
-          "slug": "commandsspawn_empty"
-        },
-        {
-          "level": 2,
-          "text": "Component Manipulation",
-          "slug": "component-manipulation"
-        },
-        {
-          "level": 3,
-          "text": "insert",
-          "slug": "insert"
-        },
-        {
-          "level": 3,
-          "text": "insert_bundle",
-          "slug": "insert_bundle"
-        },
-        {
-          "level": 3,
-          "text": "remove",
-          "slug": "remove"
-        },
-        {
-          "level": 3,
-          "text": "get",
-          "slug": "get"
-        },
-        {
-          "level": 3,
-          "text": "get_mut",
-          "slug": "get_mut"
-        },
-        {
-          "level": 2,
-          "text": "Hierarchy Operations",
-          "slug": "hierarchy-operations"
-        },
-        {
-          "level": 3,
-          "text": "set_parent",
-          "slug": "set_parent"
-        },
-        {
-          "level": 3,
-          "text": "remove_parent",
-          "slug": "remove_parent"
-        },
-        {
-          "level": 3,
-          "text": "add_child",
-          "slug": "add_child"
-        },
-        {
-          "level": 3,
-          "text": "children",
-          "slug": "children"
-        },
-        {
-          "level": 2,
-          "text": "Lifecycle Management",
-          "slug": "lifecycle-management"
-        },
-        {
-          "level": 3,
-          "text": "despawn",
-          "slug": "despawn"
-        },
-        {
-          "level": 3,
-          "text": "despawn_recursive",
-          "slug": "despawn_recursive"
-        },
-        {
-          "level": 2,
-          "text": "Query Methods",
-          "slug": "query-methods"
-        },
-        {
-          "level": 3,
-          "text": "Querying GameObjects",
-          "slug": "querying-gameobjects"
-        },
-        {
-          "level": 3,
-          "text": "With Filters",
-          "slug": "with-filters"
-        },
-        {
-          "level": 3,
-          "text": "Changed Detection",
-          "slug": "changed-detection"
-        },
-        {
-          "level": 2,
-          "text": "Complete Usage Examples",
-          "slug": "complete-usage-examples"
-        },
-        {
-          "level": 3,
-          "text": "Creating a Player Character",
-          "slug": "creating-a-player-character"
-        },
-        {
-          "level": 3,
-          "text": "Dynamic Entity Creation",
-          "slug": "dynamic-entity-creation"
-        },
-        {
-          "level": 3,
-          "text": "Entity Pooling Pattern",
-          "slug": "entity-pooling-pattern"
-        },
-        {
-          "level": 2,
-          "text": "Common Patterns",
-          "slug": "common-patterns"
-        },
-        {
-          "level": 3,
-          "text": "Entity Builder Pattern",
-          "slug": "entity-builder-pattern"
-        },
-        {
-          "level": 2,
-          "text": "Anti-Patterns",
-          "slug": "anti-patterns"
-        },
-        {
-          "level": 2,
-          "text": "Performance Considerations",
-          "slug": "performance-considerations"
-        },
-        {
-          "level": 2,
-          "text": "See Also",
-          "slug": "see-also"
-        },
-        {
-          "level": 2,
-          "text": "Version History",
-          "slug": "version-history"
-        }
-      ],
-      "excerpt": "Entity-based game object system for the ECS architecture",
-      "readingTime": 3,
-      "lastUpdated": "2026-01-12",
-      "searchText": "gameobject entity-based game object system for the ecs architecture gameobject module overview creating gameobjects commands::spawn commands::spawn_empty component manipulation insert insert_bundle remove get get_mut hierarchy operations set_parent remove_parent add_child children lifecycle management despawn despawn_recursive query methods querying gameobjects with filters changed detection complete usage examples creating a player character dynamic entity creation entity pooling pattern common patterns entity builder pattern anti-patterns performance considerations see also version history api core ecs entity gameobject gameobject\r\n\r\nthe gameobject (also known as entity) represents an individual object in the game world. it's a lightweight identifier that serves as a container for components in the entity-component-system (ecs) architecture.\r\n\r\nmodule\r\noverview\r\n\r\na gameobject is:\r\n- a unique identifier (typically a u64 or entityid)\r\n- a container for components\r\n- part of a scene hierarchy\r\n- managed by the ecs world\r\n\r\ngameobjects themselves have no behavior - all functionality comes from attached components.\r\n\r\ncreating gameobjects\r\n\r\ncommands::spawn\r\n\r\nspawns a new gameobject with components.\r\nparameters:\r\n- bundle - a bundle of components to attach\r\n\r\nreturns: entitycommands for further configuration\r\n\r\nexample:\r\ncommands::spawnempty\r\n\r\nspawns a gameobject without any components.\r\nreturns: entitycommands for adding components later\r\n\r\nexample:\r\ncomponent manipulation\r\n\r\ninsert\r\n\r\nadds a component to a gameobject.\r\nparameters:\r\n- component - the component to add\r\n\r\nreturns: &mut self for method ch"
-    },
-    {
-      "id": "api-reference",
-      "title": "API Reference",
-      "description": "Complete API documentation for the game engine",
-      "url": "/docs/api-reference",
-      "slug": "api-reference",
-      "category": "api-reference",
-      "tags": [
-        "api",
-        "reference",
-        "documentation"
-      ],
-      "headings": [
-        {
-          "level": 1,
-          "text": "API Reference",
-          "slug": "api-reference"
-        },
-        {
-          "level": 2,
-          "text": "Core Modules",
-          "slug": "core-modules"
-        },
-        {
-          "level": 3,
-          "text": "Core",
-          "slug": "core"
-        },
-        {
-          "level": 2,
-          "text": "API by Category",
-          "slug": "api-by-category"
-        },
-        {
-          "level": 3,
-          "text": "Initialization",
-          "slug": "initialization"
-        },
-        {
-          "level": 3,
-          "text": "Entity Management",
-          "slug": "entity-management"
-        },
-        {
-          "level": 3,
-          "text": "Resources",
-          "slug": "resources"
-        },
-        {
-          "level": 2,
-          "text": "Quick Reference",
-          "slug": "quick-reference"
-        },
-        {
-          "level": 2,
-          "text": "Browse by Module",
-          "slug": "browse-by-module"
-        },
-        {
-          "level": 2,
-          "text": "Common Patterns",
-          "slug": "common-patterns"
-        },
-        {
-          "level": 3,
-          "text": "Creating a System",
-          "slug": "creating-a-system"
-        },
-        {
-          "level": 3,
-          "text": "Working with Components",
-          "slug": "working-with-components"
-        },
-        {
-          "level": 2,
-          "text": "API Conventions",
-          "slug": "api-conventions"
-        },
-        {
-          "level": 2,
-          "text": "Version Support",
-          "slug": "version-support"
-        }
-      ],
-      "excerpt": "Complete API documentation for the game engine",
-      "readingTime": 1,
-      "lastUpdated": "2026-01-11",
-      "searchText": "api reference complete api documentation for the game engine api reference core modules core api by category initialization entity management resources quick reference browse by module common patterns creating a system working with components api conventions version support api reference documentation api reference\r\n\r\ncomplete api documentation for all engine modules.\r\n\r\ncore modules\r\n\r\ncore\r\n\r\nthe core engine apis:\r\n\r\n- engine - main engine class for initialization\r\n- gameobject - base game object\r\n- component - component base class\r\n\r\napi by category\r\n\r\ninitialization\r\nentity management\r\nresources\r\nquick reference\r\n\r\n| type | description | module |\r\n|------|-------------|--------|\r\n| app | application builder | gameengine::app |\r\n| world | entity container | gameengine::ecs |\r\n| transform | position/rotation/scale | gameengine::transform |\r\n| sprite | 2d image | gameengine::sprite |\r\n| mesh | 3d mesh | gameengine::mesh |\r\n\r\nbrowse by module\r\n\r\n- core - engine core functionality\r\n- graphics - rendering and graphics\r\n- physics - physics simulation\r\n- audio - sound and music\r\n- input - keyboard, mouse, gamepad\r\n\r\ncommon patterns\r\n\r\ncreating a system\r\nworking with components\r\napi conventions\r\n\r\n::: info\r\nall engine apis follow rust naming conventions:\r\n- types use pascalcase\r\n- functi"
-    },
-    {
       "id": "core-concepts-architecture",
       "title": "Pulsar Architecture",
       "description": "Understanding how Pulsar Engine is built",
@@ -635,143 +20,118 @@
         },
         {
           "level": 2,
+          "text": "What Is Pulsar?",
+          "slug": "what-is-pulsar"
+        },
+        {
+          "level": 2,
           "text": "Design Philosophy",
           "slug": "design-philosophy"
         },
         {
           "level": 2,
-          "text": "System Layers",
-          "slug": "system-layers"
+          "text": "Core Technologies",
+          "slug": "core-technologies"
+        },
+        {
+          "level": 3,
+          "text": "GPUI - The UI Framework",
+          "slug": "gpui---the-ui-framework"
+        },
+        {
+          "level": 3,
+          "text": "Winit - Window Management",
+          "slug": "winit---window-management"
+        },
+        {
+          "level": 3,
+          "text": "Bevy Renderer - 3D Graphics",
+          "slug": "bevy-renderer---3d-graphics"
+        },
+        {
+          "level": 3,
+          "text": "Rapier3D - Physics",
+          "slug": "rapier3d---physics"
+        },
+        {
+          "level": 3,
+          "text": "Rust Analyzer - Code Intelligence",
+          "slug": "rust-analyzer---code-intelligence"
         },
         {
           "level": 2,
-          "text": "The UI Layer",
-          "slug": "the-ui-layer"
-        },
-        {
-          "level": 3,
-          "text": "Why GPUI?",
-          "slug": "why-gpui"
-        },
-        {
-          "level": 3,
-          "text": "Key Concepts",
-          "slug": "key-concepts"
-        },
-        {
-          "level": 3,
-          "text": "UI Crates",
-          "slug": "ui-crates"
+          "text": "System Architecture",
+          "slug": "system-architecture"
         },
         {
           "level": 2,
-          "text": "Editor Services",
-          "slug": "editor-services"
+          "text": "Major Components",
+          "slug": "major-components"
         },
         {
           "level": 3,
-          "text": "File Manager Service",
-          "slug": "file-manager-service"
+          "text": "The Launcher (ui_entry, ui_project_launcher)",
+          "slug": "the-launcher-ui_entry-ui_project_launcher"
         },
         {
           "level": 3,
-          "text": "Problems Service",
-          "slug": "problems-service"
+          "text": "The Editor Shell (ui_core)",
+          "slug": "the-editor-shell-ui_core"
         },
         {
           "level": 3,
-          "text": "Terminal Service",
-          "slug": "terminal-service"
+          "text": "File Manager (ui_file_manager)",
+          "slug": "file-manager-ui_file_manager"
+        },
+        {
+          "level": 3,
+          "text": "Problems Panel (ui_problems)",
+          "slug": "problems-panel-ui_problems"
+        },
+        {
+          "level": 3,
+          "text": "Terminal (ui_terminal)",
+          "slug": "terminal-ui_terminal"
+        },
+        {
+          "level": 3,
+          "text": "Type Debugger (ui_type_debugger)",
+          "slug": "type-debugger-ui_type_debugger"
+        },
+        {
+          "level": 3,
+          "text": "3D Viewport (ui_level_editor)",
+          "slug": "3d-viewport-ui_level_editor"
         },
         {
           "level": 2,
-          "text": "The Plugin System",
-          "slug": "the-plugin-system"
-        },
-        {
-          "level": 3,
-          "text": "Why Dynamic Libraries?",
-          "slug": "why-dynamic-libraries"
-        },
-        {
-          "level": 3,
-          "text": "Plugin Capabilities",
-          "slug": "plugin-capabilities"
-        },
-        {
-          "level": 3,
-          "text": "Plugin Architecture",
-          "slug": "plugin-architecture"
-        },
-        {
-          "level": 3,
-          "text": "Memory Safety",
-          "slug": "memory-safety"
+          "text": "Game Object System",
+          "slug": "game-object-system"
         },
         {
           "level": 2,
-          "text": "Backend Services",
-          "slug": "backend-services"
-        },
-        {
-          "level": 3,
-          "text": "Rust Analyzer Manager",
-          "slug": "rust-analyzer-manager"
-        },
-        {
-          "level": 3,
-          "text": "Type Database",
-          "slug": "type-database"
-        },
-        {
-          "level": 3,
-          "text": "File System Watchers",
-          "slug": "file-system-watchers"
+          "text": "Plugin System",
+          "slug": "plugin-system"
         },
         {
           "level": 2,
-          "text": "The Core Engine",
-          "slug": "the-core-engine"
+          "text": "Engine Backend (engine_backend)",
+          "slug": "engine-backend-engine_backend"
         },
         {
           "level": 3,
-          "text": "Rendering System",
-          "slug": "rendering-system"
+          "text": "Subsystems",
+          "slug": "subsystems"
         },
         {
           "level": 3,
-          "text": "Entity-Component-System (ECS)",
-          "slug": "entity-component-system-ecs"
-        },
-        {
-          "level": 3,
-          "text": "Physics",
-          "slug": "physics"
-        },
-        {
-          "level": 3,
-          "text": "Asset Pipeline",
-          "slug": "asset-pipeline"
+          "text": "Services",
+          "slug": "services"
         },
         {
           "level": 2,
-          "text": "Data Flow Examples",
-          "slug": "data-flow-examples"
-        },
-        {
-          "level": 3,
-          "text": "Opening a Project",
-          "slug": "opening-a-project"
-        },
-        {
-          "level": 3,
-          "text": "Editing a File",
-          "slug": "editing-a-file"
-        },
-        {
-          "level": 3,
-          "text": "Running a Build",
-          "slug": "running-a-build"
+          "text": "Engine State (engine_state)",
+          "slug": "engine-state-engine_state"
         },
         {
           "level": 2,
@@ -780,8 +140,18 @@
         },
         {
           "level": 2,
-          "text": "Configuration and Settings",
-          "slug": "configuration-and-settings"
+          "text": "Project Structure",
+          "slug": "project-structure"
+        },
+        {
+          "level": 2,
+          "text": "Data Flow Example: Opening a Project",
+          "slug": "data-flow-example-opening-a-project"
+        },
+        {
+          "level": 2,
+          "text": "Configuration",
+          "slug": "configuration"
         },
         {
           "level": 3,
@@ -795,11 +165,6 @@
         },
         {
           "level": 2,
-          "text": "Extension Points",
-          "slug": "extension-points"
-        },
-        {
-          "level": 2,
           "text": "Future Directions",
           "slug": "future-directions"
         },
@@ -810,216 +175,9 @@
         }
       ],
       "excerpt": "Understanding how Pulsar Engine is built",
-      "readingTime": 8,
+      "readingTime": 6,
       "lastUpdated": "2026-01-12",
-      "searchText": "pulsar architecture understanding how pulsar engine is built pulsar architecture design philosophy system layers the ui layer why gpui? key concepts ui crates editor services file manager service problems service terminal service the plugin system why dynamic libraries? plugin capabilities plugin architecture memory safety backend services rust analyzer manager type database file system watchers the core engine rendering system entity-component-system (ecs) physics asset pipeline data flow examples opening a project editing a file running a build threading model configuration and settings engine configuration project configuration extension points future directions wrapping up architecture design systems pulsar architecture\r\n\r\npulsar engine is built from the ground up with a focus on modularity, clarity, and long-term maintainability. this document explains how the major systems fit together and why they're designed the way they are.\r\n\r\ndesign philosophy\r\n\r\nbefore diving into the technical details, let's talk about the principles that guide pulsar's architecture:\r\n\r\neditor stability is paramount - the editor should never crash, even when your game code does. pulsar achieves this by running game code in separate processes and isolating plugin failures.\r\n\r\nmodular by default - systems have clear boundaries and communicate through well-defined interfaces. you can understand one part of pulsar without needing to understand all of it.\r\n\r\ntype safety everywhere - rust's type system enforces correctness at compile time. pulsar extends this with its own type database for game data.\r\n\r\nno magic - if something happens in pulsar, there's explicit code making it happen. no hidden conventions or im"
-    },
-    {
-      "id": "core-concepts-entity-component-system",
-      "title": "Entity Component System",
-      "description": "Understanding Pulsar's ECS architecture and why it matters",
-      "url": "/docs/core-concepts/entity-component-system",
-      "slug": "core-concepts/entity-component-system",
-      "category": "core-concepts",
-      "tags": [
-        "ecs",
-        "architecture",
-        "entities",
-        "components",
-        "systems",
-        "performance"
-      ],
-      "headings": [
-        {
-          "level": 1,
-          "text": "Entity Component System",
-          "slug": "entity-component-system"
-        },
-        {
-          "level": 2,
-          "text": "What Is ECS?",
-          "slug": "what-is-ecs"
-        },
-        {
-          "level": 2,
-          "text": "Why ECS Over Object-Oriented Design?",
-          "slug": "why-ecs-over-object-oriented-design"
-        },
-        {
-          "level": 3,
-          "text": "Performance: Data-Oriented Design",
-          "slug": "performance-data-oriented-design"
-        },
-        {
-          "level": 3,
-          "text": "Flexibility: Composition Over Inheritance",
-          "slug": "flexibility-composition-over-inheritance"
-        },
-        {
-          "level": 3,
-          "text": "Modularity: Systems Are Independent",
-          "slug": "modularity-systems-are-independent"
-        },
-        {
-          "level": 2,
-          "text": "Archetype-Based Storage",
-          "slug": "archetype-based-storage"
-        },
-        {
-          "level": 3,
-          "text": "What Is an Archetype?",
-          "slug": "what-is-an-archetype"
-        },
-        {
-          "level": 3,
-          "text": "How Archetypes Are Stored",
-          "slug": "how-archetypes-are-stored"
-        },
-        {
-          "level": 3,
-          "text": "Why Archetypes Are Fast",
-          "slug": "why-archetypes-are-fast"
-        },
-        {
-          "level": 3,
-          "text": "The Cost of Archetype Changes",
-          "slug": "the-cost-of-archetype-changes"
-        },
-        {
-          "level": 3,
-          "text": "Best Practices",
-          "slug": "best-practices"
-        },
-        {
-          "level": 2,
-          "text": "System Scheduling",
-          "slug": "system-scheduling"
-        },
-        {
-          "level": 3,
-          "text": "System Dependencies",
-          "slug": "system-dependencies"
-        },
-        {
-          "level": 3,
-          "text": "Parallel Execution",
-          "slug": "parallel-execution"
-        },
-        {
-          "level": 3,
-          "text": "Stages",
-          "slug": "stages"
-        },
-        {
-          "level": 2,
-          "text": "Queries and Iteration",
-          "slug": "queries-and-iteration"
-        },
-        {
-          "level": 3,
-          "text": "Basic Queries",
-          "slug": "basic-queries"
-        },
-        {
-          "level": 3,
-          "text": "Query Filters",
-          "slug": "query-filters"
-        },
-        {
-          "level": 3,
-          "text": "Optional Components",
-          "slug": "optional-components"
-        },
-        {
-          "level": 3,
-          "text": "Changed Detection",
-          "slug": "changed-detection"
-        },
-        {
-          "level": 2,
-          "text": "Real World Examples",
-          "slug": "real-world-examples"
-        },
-        {
-          "level": 3,
-          "text": "Movement System",
-          "slug": "movement-system"
-        },
-        {
-          "level": 3,
-          "text": "Damage System",
-          "slug": "damage-system"
-        },
-        {
-          "level": 3,
-          "text": "Cleanup System",
-          "slug": "cleanup-system"
-        },
-        {
-          "level": 3,
-          "text": "Spawning System",
-          "slug": "spawning-system"
-        },
-        {
-          "level": 3,
-          "text": "Rendering System",
-          "slug": "rendering-system"
-        },
-        {
-          "level": 2,
-          "text": "Integration with Other Systems",
-          "slug": "integration-with-other-systems"
-        },
-        {
-          "level": 3,
-          "text": "ECS and GPUI",
-          "slug": "ecs-and-gpui"
-        },
-        {
-          "level": 3,
-          "text": "ECS and Plugins",
-          "slug": "ecs-and-plugins"
-        },
-        {
-          "level": 3,
-          "text": "ECS and Serialization",
-          "slug": "ecs-and-serialization"
-        },
-        {
-          "level": 2,
-          "text": "Common Pitfalls",
-          "slug": "common-pitfalls"
-        },
-        {
-          "level": 3,
-          "text": "Anti-Pattern: God Entities",
-          "slug": "anti-pattern-god-entities"
-        },
-        {
-          "level": 3,
-          "text": "Anti-Pattern: Components as Messages",
-          "slug": "anti-pattern-components-as-messages"
-        },
-        {
-          "level": 3,
-          "text": "Anti-Pattern: Boilerplate in Systems",
-          "slug": "anti-pattern-boilerplate-in-systems"
-        },
-        {
-          "level": 2,
-          "text": "Performance Characteristics",
-          "slug": "performance-characteristics"
-        },
-        {
-          "level": 2,
-          "text": "Conclusion",
-          "slug": "conclusion"
-        }
-      ],
-      "excerpt": "Understanding Pulsar's ECS architecture and why it matters",
-      "readingTime": 7,
-      "lastUpdated": "2026-01-12",
-      "searchText": "entity component system understanding pulsar's ecs architecture and why it matters entity component system what is ecs? why ecs over object-oriented design? performance: data-oriented design flexibility: composition over inheritance modularity: systems are independent archetype-based storage what is an archetype? how archetypes are stored why archetypes are fast the cost of archetype changes best practices system scheduling system dependencies parallel execution stages queries and iteration basic queries query filters optional components changed detection real world examples movement system damage system cleanup system spawning system rendering system integration with other systems ecs and gpui ecs and plugins ecs and serialization common pitfalls anti-pattern: god entities anti-pattern: components as messages anti-pattern: boilerplate in systems performance characteristics conclusion ecs architecture entities components systems performance entity component system\r\n\r\npulsar uses an entity component system (ecs) architecture for managing game objects. if you've worked with unity or unreal, this might feel different—there are no base classes, no inheritance hierarchies, no objects with built-in transform or rendering capabilities. instead, everything is data and the functions that operate on that data.\r\n\r\nthis document explains what ecs is, why pulsar uses it, and how to think about building games with this architecture. i'll be honest about the tradeoffs, because ecs isn't magic—it's a tool with specific strengths and weaknesses.\r\n\r\nwhat is ecs?\r\n\r\nentity component system is an architectural pattern that separates data from behavior:\r\n\r\nentities are just ids. they have no data and no behavior. an entity is like a social security number—it uniquely identifies something, but tells you nothing about what that something is.\r\n\r\ncomponents are pure data. they have no logic, just fields. a position component might have x, y, z co"
+      "searchText": "pulsar architecture understanding how pulsar engine is built pulsar architecture what is pulsar? design philosophy core technologies gpui - the ui framework winit - window management bevy renderer - 3d graphics rapier3d - physics rust analyzer - code intelligence system architecture major components the launcher (ui_entry, ui_project_launcher) the editor shell (ui_core) file manager (ui_file_manager) problems panel (ui_problems) terminal (ui_terminal) type debugger (ui_type_debugger) 3d viewport (ui_level_editor) game object system plugin system engine backend (engine_backend) subsystems services engine state (engine_state) threading model project structure data flow example: opening a project configuration engine configuration project configuration future directions wrapping up architecture design systems pulsar architecture\n\npulsar is a game editor and engine built in rust with a focus on modularity, editor stability, and modern development workflows. this document explains how the major systems fit together.\n\nwhat is pulsar?\n\npulsar is primarily a game editor - think of it like unity's editor or unreal's editor, but built from the ground up in rust. it's not a runtime engine like bevy where you write code and run it separately. instead, pulsar provides:\n\n- a launcher for managing and creating projects\n- file management and asset browsers\n- code editing with rust analyzer integration\n- a 3d scene viewport with real-time rendering\n- plugin system for custom editors and tools\n- integrated terminal and problem diagnostics\n- type inspection and debugging tools\n\ndesign philosophy\n\neditor stability is paramount - the editor should never crash, even when your game code does. pulsar runs the editor ui separately from game logic to achieve this.\n\nrust all the way down - projects are rust worksp"
     },
     {
       "id": "core-concepts",
@@ -1119,7 +277,7 @@
       "excerpt": "Understanding the fundamental concepts behind Pulsar Engine",
       "readingTime": 6,
       "lastUpdated": "2026-01-12",
-      "searchText": "core concepts understanding the fundamental concepts behind pulsar engine core concepts what you'll learn why these concepts matter starting points a note on learning curves philosophy behind the concepts no magic modularity through boundaries type safety everywhere explicit over implicit performance by design, not by accident how systems interact common questions where to go from here contributing to these docs experimental notice core concepts fundamentals overview core concepts\r\n\r\nwelcome to the heart of pulsar engine. if you're going to build something with pulsar—or just understand how it works—you need to grasp these fundamental concepts. this isn't a feature list or a marketing pitch. these are the ideas that shape every line of code in the engine.\r\n\r\nwhat you'll learn\r\n\r\nthis section covers the architectural decisions and systems that make pulsar what it is. each concept builds on the others, so while you can jump around, reading in order will give you the clearest picture.\r\n\r\nwe'll explore:\r\n\r\n- architecture - how pulsar is structured and why\r\n- plugin system - extending the editor with dynamic libraries\r\n- type system - strong typing for game data\r\n- ui framework - gpui and how the editor interface works\r\n- rendering pipeline - from scene to pixels\r\n- entity-component-system - game object architecture\r\n\r\nwhy these concepts matter\r\n\r\ngame engines are complex beasts. they're not just single programs—they're platforms for building interactiv"
+      "searchText": "core concepts understanding the fundamental concepts behind pulsar engine core concepts what you'll learn why these concepts matter starting points a note on learning curves philosophy behind the concepts no magic modularity through boundaries type safety everywhere explicit over implicit performance by design, not by accident how systems interact common questions where to go from here contributing to these docs experimental notice core concepts fundamentals overview core concepts\n\nwelcome to the heart of pulsar engine. if you're going to build something with pulsar—or just understand how it works—you need to grasp these fundamental concepts. this isn't a feature list or a marketing pitch. these are the ideas that shape every line of code in the engine.\n\nwhat you'll learn\n\nthis section covers the architectural decisions and systems that make pulsar what it is. each concept builds on the others, so while you can jump around, reading in order will give you the clearest picture.\n\nwe'll explore:\n\n- architecture - how pulsar is structured and why\n- plugin system - extending the editor with dynamic libraries\n- type system - strong typing for game data\n- ui framework - gpui and how the editor interface works\n- rendering pipeline - from scene to pixels\n- entity-component-system - game object architecture\n\nwhy these concepts matter\n\ngame engines are complex beasts. they're not just single programs—they're platforms for building interactive experiences. unde"
     },
     {
       "id": "core-concepts-plugin-system",
@@ -1319,377 +477,76 @@
       "excerpt": "Understanding Pulsar's dynamic plugin architecture",
       "readingTime": 9,
       "lastUpdated": "2026-01-12",
-      "searchText": "plugin system understanding pulsar's dynamic plugin architecture plugin system why dynamic libraries? the performance argument the safety argument the power argument how plugins work the loading process the plugin interface memory management across the ffi boundary file type registration standalone files folder-based files categories and organization editor implementation the editorinstance trait basic editor structure rendering with gpui panel integration statusbar buttons lifecycle hooks error handling version compatibility performance considerations security considerations example plugins common patterns configuration files background processing shared resources debugging plugins logging panics and crashes debugger attachment publishing plugins limitations and future work wrapping up plugins architecture extensibility dlls plugin system\r\n\r\npulsar's plugin system is one of its most distinctive features. unlike engines that use scripting languages or interpreted code for extensions, pulsar plugins are compiled rust dynamic libraries loaded at runtime. this gives you native performance, full type safety, and complete access to the editor api—while maintaining the flexibility of a plugin architecture.\r\n\r\nwhy dynamic libraries?\r\n\r\nlet's start with the question you're probably asking: why use dlls (dynamic link libraries) for plugins instead of something simpler like scripts or configuration files?\r\n\r\nthe performance argument\r\n\r\nplugins run at native speed. there's no interpreter, no virtual machine, no jit warmup time. when your plugin needs to process thousands of files or render a complex editor panel, it does so with zero overhead.\r\n\r\nthis matters when you're building professional tools. a material editor that lags when scrolling through properties isn't usable. a custom file format that takes seconds to l"
+      "searchText": "plugin system understanding pulsar's dynamic plugin architecture plugin system why dynamic libraries? the performance argument the safety argument the power argument how plugins work the loading process the plugin interface memory management across the ffi boundary file type registration standalone files folder-based files categories and organization editor implementation the editorinstance trait basic editor structure rendering with gpui panel integration statusbar buttons lifecycle hooks error handling version compatibility performance considerations security considerations example plugins common patterns configuration files background processing shared resources debugging plugins logging panics and crashes debugger attachment publishing plugins limitations and future work wrapping up plugins architecture extensibility dlls plugin system\n\npulsar's plugin system is one of its most distinctive features. unlike engines that use scripting languages or interpreted code for extensions, pulsar plugins are compiled rust dynamic libraries loaded at runtime. this gives you native performance, full type safety, and complete access to the editor api—while maintaining the flexibility of a plugin architecture.\n\nwhy dynamic libraries?\n\nlet's start with the question you're probably asking: why use dlls (dynamic link libraries) for plugins instead of something simpler like scripts or configuration files?\n\nthe performance argument\n\nplugins run at native speed. there's no interpreter, no virtual machine, no jit warmup time. when your plugin needs to process thousands of files or render a complex editor panel, it does so with zero overhead.\n\nthis matters when you're building professional tools. a material editor that lags when scrolling through properties isn't usable. a custom file format that takes seconds to load becomes "
     },
     {
       "id": "core-concepts-rendering-pipeline",
-      "title": "Rendering Pipeline",
-      "description": "Understanding Pulsar's GPU-driven rendering architecture",
+      "title": "Rendering System",
+      "description": "How Pulsar renders 3D scenes",
       "url": "/docs/core-concepts/rendering-pipeline",
       "slug": "core-concepts/rendering-pipeline",
       "category": "core-concepts",
       "tags": [
         "rendering",
-        "gpu",
         "graphics",
-        "shaders",
-        "pipeline"
+        "bevy",
+        "3d"
       ],
       "headings": [
         {
           "level": 1,
-          "text": "Rendering Pipeline",
-          "slug": "rendering-pipeline"
+          "text": "Rendering System",
+          "slug": "rendering-system"
         },
         {
           "level": 2,
-          "text": "Design Goals",
-          "slug": "design-goals"
+          "text": "Overview",
+          "slug": "overview"
         },
         {
           "level": 2,
-          "text": "Architecture Overview",
-          "slug": "architecture-overview"
+          "text": "Why Bevy's Renderer?",
+          "slug": "why-bevys-renderer"
         },
         {
           "level": 2,
-          "text": "GPU-Driven Rendering",
-          "slug": "gpu-driven-rendering"
+          "text": "Architecture",
+          "slug": "architecture"
         },
         {
           "level": 3,
-          "text": "What Does \"GPU-Driven\" Mean?",
-          "slug": "what-does-gpu-driven-mean"
-        },
-        {
-          "level": 3,
-          "text": "The Entity Buffer",
-          "slug": "the-entity-buffer"
+          "text": "BevyRenderer",
+          "slug": "bevyrenderer"
         },
         {
           "level": 2,
-          "text": "Deferred vs Forward Rendering",
-          "slug": "deferred-vs-forward-rendering"
-        },
-        {
-          "level": 3,
-          "text": "Deferred Rendering",
-          "slug": "deferred-rendering"
-        },
-        {
-          "level": 3,
-          "text": "Why Deferred Rendering?",
-          "slug": "why-deferred-rendering"
-        },
-        {
-          "level": 3,
-          "text": "Forward Rendering",
-          "slug": "forward-rendering"
-        },
-        {
-          "level": 3,
-          "text": "When to Use Each",
-          "slug": "when-to-use-each"
+          "text": "Rendering GameObjects",
+          "slug": "rendering-gameobjects"
         },
         {
           "level": 2,
-          "text": "Material System",
-          "slug": "material-system"
-        },
-        {
-          "level": 3,
-          "text": "Material Definition",
-          "slug": "material-definition"
-        },
-        {
-          "level": 3,
-          "text": "Material Batching",
-          "slug": "material-batching"
-        },
-        {
-          "level": 3,
-          "text": "Shader Compilation",
-          "slug": "shader-compilation"
+          "text": "Materials",
+          "slug": "materials"
         },
         {
           "level": 2,
-          "text": "Shader Pipeline",
-          "slug": "shader-pipeline"
-        },
-        {
-          "level": 3,
-          "text": "Vertex Shaders",
-          "slug": "vertex-shaders"
-        },
-        {
-          "level": 3,
-          "text": "Fragment Shaders",
-          "slug": "fragment-shaders"
-        },
-        {
-          "level": 3,
-          "text": "Compute Shaders",
-          "slug": "compute-shaders"
+          "text": "Lighting",
+          "slug": "lighting"
         },
         {
           "level": 2,
-          "text": "Render Graph",
-          "slug": "render-graph"
+          "text": "Camera System",
+          "slug": "camera-system"
         },
         {
           "level": 2,
-          "text": "Hot Reloading",
-          "slug": "hot-reloading"
-        },
-        {
-          "level": 3,
-          "text": "Shader Hot Reloading",
-          "slug": "shader-hot-reloading"
-        },
-        {
-          "level": 3,
-          "text": "Material Hot Reloading",
-          "slug": "material-hot-reloading"
+          "text": "Render Thread",
+          "slug": "render-thread"
         },
         {
           "level": 2,
-          "text": "Performance Optimization",
-          "slug": "performance-optimization"
-        },
-        {
-          "level": 3,
-          "text": "Culling",
-          "slug": "culling"
-        },
-        {
-          "level": 3,
-          "text": "Level of Detail (LOD)",
-          "slug": "level-of-detail-lod"
-        },
-        {
-          "level": 3,
-          "text": "Instancing",
-          "slug": "instancing"
-        },
-        {
-          "level": 2,
-          "text": "Conclusion",
-          "slug": "conclusion"
-        }
-      ],
-      "excerpt": "Understanding Pulsar's GPU-driven rendering architecture",
-      "readingTime": 6,
-      "lastUpdated": "2026-01-12",
-      "searchText": "rendering pipeline understanding pulsar's gpu-driven rendering architecture rendering pipeline design goals architecture overview gpu-driven rendering what does \"gpu-driven\" mean? the entity buffer deferred vs forward rendering deferred rendering why deferred rendering? forward rendering when to use each material system material definition material batching shader compilation shader pipeline vertex shaders fragment shaders compute shaders render graph hot reloading shader hot reloading material hot reloading performance optimization culling level of detail (lod) instancing conclusion rendering gpu graphics shaders pipeline rendering pipeline\r\n\r\npulsar's rendering pipeline is designed for one thing: getting pixels on screen fast. not just \"fast enough\"—fast enough to run a game editor at 120+ fps with real-time previews, complex materials, thousands of entities visible, and gpu-intensive effects active. this document explains how we achieve that, and why the architecture is built the way it is.\r\n\r\nlet me be upfront about something: parts of this system are still being implemented. what i'm documenting here is the current architecture and our target design. some features are fully working, others are in progress. i'll be clear about what's what.\r\n\r\ndesign goals\r\n\r\nbefore we dive into technical details, let's talk about what the rendering system needs to do:\r\n\r\nreal-time performance - the editor needs to run smoothly while you're working. moving entities, tweaking materials, adjusting lighting—all of this should feel instant. we target 60 fps minimum on modest hardware, with headroom for 120+ fps on high-en"
-    },
-    {
-      "id": "core-concepts-type-system",
-      "title": "Type System",
-      "description": "Pulsar's custom type system for strongly-typed game data",
-      "url": "/docs/core-concepts/type-system",
-      "slug": "core-concepts/type-system",
-      "category": "core-concepts",
-      "tags": [
-        "types",
-        "data",
-        "validation",
-        "type-system"
-      ],
-      "headings": [
-        {
-          "level": 1,
-          "text": "Type System",
-          "slug": "type-system"
-        },
-        {
-          "level": 2,
-          "text": "Why a Type System?",
-          "slug": "why-a-type-system"
-        },
-        {
-          "level": 3,
-          "text": "The Problem with Untyped Data",
-          "slug": "the-problem-with-untyped-data"
-        },
-        {
-          "level": 3,
-          "text": "The Typed Data Solution",
-          "slug": "the-typed-data-solution"
-        },
-        {
-          "level": 2,
-          "text": "Core Concepts",
-          "slug": "core-concepts"
-        },
-        {
-          "level": 3,
-          "text": "Types as Metadata",
-          "slug": "types-as-metadata"
-        },
-        {
-          "level": 3,
-          "text": "Data Files Reference Types",
-          "slug": "data-files-reference-types"
-        },
-        {
-          "level": 3,
-          "text": "The Type Database",
-          "slug": "the-type-database"
-        },
-        {
-          "level": 2,
-          "text": "How Types Are Discovered",
-          "slug": "how-types-are-discovered"
-        },
-        {
-          "level": 3,
-          "text": "Automatic Extraction",
-          "slug": "automatic-extraction"
-        },
-        {
-          "level": 3,
-          "text": "Rust Analyzer Integration",
-          "slug": "rust-analyzer-integration"
-        },
-        {
-          "level": 3,
-          "text": "Manual Registration",
-          "slug": "manual-registration"
-        },
-        {
-          "level": 2,
-          "text": "Working with Types",
-          "slug": "working-with-types"
-        },
-        {
-          "level": 3,
-          "text": "Querying the Type Database",
-          "slug": "querying-the-type-database"
-        },
-        {
-          "level": 3,
-          "text": "Type Information Structure",
-          "slug": "type-information-structure"
-        },
-        {
-          "level": 2,
-          "text": "Using Types in Data Files",
-          "slug": "using-types-in-data-files"
-        },
-        {
-          "level": 3,
-          "text": "JSON Format",
-          "slug": "json-format"
-        },
-        {
-          "level": 3,
-          "text": "Nested Types",
-          "slug": "nested-types"
-        },
-        {
-          "level": 3,
-          "text": "Optional Fields",
-          "slug": "optional-fields"
-        },
-        {
-          "level": 3,
-          "text": "Enums in Data",
-          "slug": "enums-in-data"
-        },
-        {
-          "level": 2,
-          "text": "Editor Integration",
-          "slug": "editor-integration"
-        },
-        {
-          "level": 3,
-          "text": "Real-Time Validation",
-          "slug": "real-time-validation"
-        },
-        {
-          "level": 3,
-          "text": "Autocomplete",
-          "slug": "autocomplete"
-        },
-        {
-          "level": 3,
-          "text": "Type-Aware Go-To-Definition",
-          "slug": "type-aware-go-to-definition"
-        },
-        {
-          "level": 3,
-          "text": "Type Inspector",
-          "slug": "type-inspector"
-        },
-        {
-          "level": 2,
-          "text": "Built-in Types",
-          "slug": "built-in-types"
-        },
-        {
-          "level": 3,
-          "text": "Primitives",
-          "slug": "primitives"
-        },
-        {
-          "level": 3,
-          "text": "Collections",
-          "slug": "collections"
-        },
-        {
-          "level": 3,
-          "text": "Math Types",
-          "slug": "math-types"
-        },
-        {
-          "level": 3,
-          "text": "Engine Types",
-          "slug": "engine-types"
-        },
-        {
-          "level": 2,
-          "text": "Advanced Features",
-          "slug": "advanced-features"
-        },
-        {
-          "level": 3,
-          "text": "Generic Types",
-          "slug": "generic-types"
-        },
-        {
-          "level": 3,
-          "text": "Trait Bounds",
-          "slug": "trait-bounds"
-        },
-        {
-          "level": 3,
-          "text": "Derive Macros",
-          "slug": "derive-macros"
-        },
-        {
-          "level": 3,
-          "text": "Type Versioning",
-          "slug": "type-versioning"
-        },
-        {
-          "level": 2,
-          "text": "Validation",
-          "slug": "validation"
-        },
-        {
-          "level": 3,
-          "text": "Structural Validation",
-          "slug": "structural-validation"
-        },
-        {
-          "level": 3,
-          "text": "Semantic Validation",
-          "slug": "semantic-validation"
-        },
-        {
-          "level": 3,
-          "text": "Reference Validation",
-          "slug": "reference-validation"
+          "text": "Zero-Copy Rendering",
+          "slug": "zero-copy-rendering"
         },
         {
           "level": 2,
@@ -1697,69 +554,9 @@
           "slug": "performance"
         },
         {
-          "level": 3,
-          "text": "Query Performance",
-          "slug": "query-performance"
-        },
-        {
-          "level": 3,
-          "text": "Memory Usage",
-          "slug": "memory-usage"
-        },
-        {
-          "level": 3,
-          "text": "Optimization Tips",
-          "slug": "optimization-tips"
-        },
-        {
           "level": 2,
-          "text": "Common Patterns",
-          "slug": "common-patterns"
-        },
-        {
-          "level": 3,
-          "text": "Component Types",
-          "slug": "component-types"
-        },
-        {
-          "level": 3,
-          "text": "Builder Pattern",
-          "slug": "builder-pattern"
-        },
-        {
-          "level": 3,
-          "text": "Newtype Pattern",
-          "slug": "newtype-pattern"
-        },
-        {
-          "level": 2,
-          "text": "Error Handling",
-          "slug": "error-handling"
-        },
-        {
-          "level": 3,
-          "text": "Error Recovery",
-          "slug": "error-recovery"
-        },
-        {
-          "level": 2,
-          "text": "Integration with Other Systems",
-          "slug": "integration-with-other-systems"
-        },
-        {
-          "level": 3,
-          "text": "Asset System",
-          "slug": "asset-system"
-        },
-        {
-          "level": 3,
-          "text": "ECS",
-          "slug": "ecs"
-        },
-        {
-          "level": 3,
-          "text": "Serialization",
-          "slug": "serialization"
+          "text": "Integration with GPUI",
+          "slug": "integration-with-gpui"
         },
         {
           "level": 2,
@@ -1768,73 +565,8 @@
         },
         {
           "level": 2,
-          "text": "Debugging",
-          "slug": "debugging"
-        },
-        {
-          "level": 3,
-          "text": "Type Debugger UI",
-          "slug": "type-debugger-ui"
-        },
-        {
-          "level": 3,
-          "text": "Console Commands",
-          "slug": "console-commands"
-        },
-        {
-          "level": 1,
-          "text": "Print type information",
-          "slug": "print-type-information"
-        },
-        {
-          "level": 1,
-          "text": "List all types",
-          "slug": "list-all-types"
-        },
-        {
-          "level": 1,
-          "text": "Search types",
-          "slug": "search-types"
-        },
-        {
-          "level": 1,
-          "text": "Validate a data file",
-          "slug": "validate-a-data-file"
-        },
-        {
-          "level": 3,
-          "text": "Logging",
-          "slug": "logging"
-        },
-        {
-          "level": 2,
-          "text": "Best Practices",
-          "slug": "best-practices"
-        },
-        {
-          "level": 3,
-          "text": "Naming Conventions",
-          "slug": "naming-conventions"
-        },
-        {
-          "level": 3,
-          "text": "Organization",
-          "slug": "organization"
-        },
-        {
-          "level": 3,
-          "text": "Documentation",
-          "slug": "documentation"
-        },
-        {
-          "level": 3,
-          "text": "Avoid Complex Nesting",
-          "slug": "avoid-complex-nesting"
-        },
-        {
-          "level": 2,
-          "text": "Future Directions",
-          "slug": "future-directions"
+          "text": "Future Plans",
+          "slug": "future-plans"
         },
         {
           "level": 2,
@@ -1842,10 +574,115 @@
           "slug": "wrapping-up"
         }
       ],
-      "excerpt": "Pulsar's custom type system for strongly-typed game data",
-      "readingTime": 9,
+      "excerpt": "How Pulsar renders 3D scenes",
+      "readingTime": 4,
       "lastUpdated": "2026-01-12",
-      "searchText": "type system pulsar's custom type system for strongly-typed game data type system why a type system? the problem with untyped data the typed data solution core concepts types as metadata data files reference types the type database how types are discovered automatic extraction rust analyzer integration manual registration working with types querying the type database type information structure using types in data files json format nested types optional fields enums in data editor integration real-time validation autocomplete type-aware go-to-definition type inspector built-in types primitives collections math types engine types advanced features generic types trait bounds derive macros type versioning validation structural validation semantic validation reference validation performance query performance memory usage optimization tips common patterns component types builder pattern newtype pattern error handling error recovery integration with other systems asset system ecs serialization limitations debugging type debugger ui console commands print type information list all types search types validate a data file logging best practices naming conventions organization documentation avoid complex nesting future directions wrapping up types data validation type-system type system\r\n\r\nmost game engines treat data files as opaque blobs—json or yaml that gets parsed at runtime, with errors discovered only when that specific code path runs. pulsar takes a different approach: every piece of game data has a type, and those types are known at edit time. this gives you compile-time-like safety for your data files.\r\n\r\nwhy a type system?\r\n\r\nyou might wonder why pulsar needs its own type system when rust already has one. the short answer: rust's type system works at compile time for code. pulsar's type system extends that safety to data files that your game loads at runtime.\r\n\r\nthe problem with untyped data\r\n\r\ntraditional workflow:\r\n1. write code that expects certain data structure\r\n2. create json file with that structure\r\n3. run game\r\n4. game crashes because field name was misspelled\r\n5. fix spelling\r\n6. run game again\r\n7. game crashes because field type was wrong\r\n8. fix type\r\n9. repeat until it works\r\n\r\nthis is slow, frustrating, and error-prone. worse, some"
+      "searchText": "rendering system how pulsar renders 3d scenes rendering system overview why bevy's renderer? architecture bevyrenderer rendering gameobjects materials lighting camera system render thread zero-copy rendering performance integration with gpui limitations future plans wrapping up rendering graphics bevy 3d rendering system\n\npulsar's 3d viewport uses bevy's rendering modules to display game scenes in real-time. this document explains how the rendering system works and how it integrates with the editor.\n\noverview\n\npulsar doesn't implement its own custom rendering pipeline. instead, it uses bevy's proven rendering modules:\n\n- bevyrender - core rendering infrastructure\n- bevypbr - physically based rendering (pbr) materials\n- bevycorepipeline - rendering pipeline stages\n- bevyasset - asset loading and management\n\nthis leverages bevy's mature, well-tested rendering code while keeping pulsar focused on the editor experience.\n\nwhy bevy's renderer?\n\nproven technology - bevy's renderer powers many shipped games and has been battle-tested.\n\npbr materials - modern physically-based rendering with metallic/roughness workflows out of the box.\n\ncross-platform - works on windows, linux (when supported), and macos (when supported) via wgpu.\n\nactive development - benefits from bevy community improvements a"
+    },
+    {
+      "id": "core-concepts-type-system",
+      "title": "Type Database",
+      "description": "Pulsar's type registry for inspecting project types",
+      "url": "/docs/core-concepts/type-system",
+      "slug": "core-concepts/type-system",
+      "category": "core-concepts",
+      "tags": [
+        "types",
+        "database",
+        "inspection",
+        "type-debugger"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Type Database",
+          "slug": "type-database"
+        },
+        {
+          "level": 2,
+          "text": "What Is the Type Database?",
+          "slug": "what-is-the-type-database"
+        },
+        {
+          "level": 2,
+          "text": "Core Concepts",
+          "slug": "core-concepts"
+        },
+        {
+          "level": 3,
+          "text": "TypeInfo",
+          "slug": "typeinfo"
+        },
+        {
+          "level": 3,
+          "text": "TypeKind",
+          "slug": "typekind"
+        },
+        {
+          "level": 2,
+          "text": "Using the Type Database",
+          "slug": "using-the-type-database"
+        },
+        {
+          "level": 3,
+          "text": "Registering Types",
+          "slug": "registering-types"
+        },
+        {
+          "level": 3,
+          "text": "Looking Up Types",
+          "slug": "looking-up-types"
+        },
+        {
+          "level": 3,
+          "text": "Searching Types",
+          "slug": "searching-types"
+        },
+        {
+          "level": 3,
+          "text": "Removing Types",
+          "slug": "removing-types"
+        },
+        {
+          "level": 2,
+          "text": "Type Debugger UI",
+          "slug": "type-debugger-ui"
+        },
+        {
+          "level": 2,
+          "text": "Integration with Rust Analyzer",
+          "slug": "integration-with-rust-analyzer"
+        },
+        {
+          "level": 2,
+          "text": "Performance",
+          "slug": "performance"
+        },
+        {
+          "level": 2,
+          "text": "Use Cases",
+          "slug": "use-cases"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        },
+        {
+          "level": 2,
+          "text": "Example: Custom Plugin Using Type Database",
+          "slug": "example-custom-plugin-using-type-database"
+        },
+        {
+          "level": 2,
+          "text": "Wrapping Up",
+          "slug": "wrapping-up"
+        }
+      ],
+      "excerpt": "Pulsar's type registry for inspecting project types",
+      "readingTime": 3,
+      "lastUpdated": "2026-01-12",
+      "searchText": "type database pulsar's type registry for inspecting project types type database what is the type database? core concepts typeinfo typekind using the type database registering types looking up types searching types removing types type debugger ui integration with rust analyzer performance use cases limitations example: custom plugin using type database wrapping up types database inspection type-debugger type database\n\npulsar includes a type database (type_db crate) - an in-memory registry for storing and querying rust types from your project. this powers the type debugger ui panel, which lets you browse and inspect all the structs, enums, traits, and type aliases in your codebase.\n\nwhat is the type database?\n\nthe type database is a thread-safe, in-memory store that holds metadata about rust types. it's populated by analyzing your project's code (via rust analyzer integration) and provides fast lookup and search capabilities.\n\nthink of it as a runtime index of your project's type definitions, accessible to editor tooling.\n\ncore concepts\n\ntypeinfo\n\neach registered type is represented as typeinfo:\n\ntypekind\n\ntypes are categorized by kind:\n\nusing the type database\n\nregistering types\n\ntypes are registered with the database:\n\nlooking up types\n\nmultiple lookup methods are provided:\n\nsearching types\n\nthe database supports fuzzy searching:\n\nremoving types\n\ntype debugger ui\n\nthe type database p"
     },
     {
       "id": "core-concepts-ui-framework",
@@ -2016,7 +853,7 @@
       "excerpt": "Deep dive into Pulsar's GPU-accelerated UI framework",
       "readingTime": 8,
       "lastUpdated": "2026-01-12",
-      "searchText": "ui framework (gpui) deep dive into pulsar's gpu-accelerated ui framework ui framework (gpui) why gpui exists core concepts entities views contexts the render loop layout system box model flexbox layout absolute positioning real example: editor panel layout styling system colors typography visual effects event system mouse events keyboard events click events custom events integration with the editor editor panels context menus tooltips performance considerations minimize re-renders batch updates virtualization conclusion ui gpui rendering views components ui framework (gpui)\r\n\r\ngpui is pulsar's custom ui framework, and it's unlike anything you've probably worked with before. it's not react, it's not immediate mode, and it's definitely not a traditional retained-mode gui toolkit. instead, gpui is a hybrid approach that combines the best ideas from modern ui frameworks with the performance requirements of a professional game engine editor.\r\n\r\nlet me explain why we built it this way, how it works, and—most importantly—how you actually use it to build editor interfaces.\r\n\r\nwhy gpui exists\r\n\r\nyou might be wondering: why build a custom ui framework when mature options like egui, iced, or even web technologies exist? the answer comes down to our specific requirements:\r\n\r\ngpu acceleration isn't optional - editor uis need to render smoothly at 60+ fps while updating constantly. project trees with thousands of files, code editors with syntax highlighting, property panels with live updates—all of this needs to be fast. gpui renders everything usin"
+      "searchText": "ui framework (gpui) deep dive into pulsar's gpu-accelerated ui framework ui framework (gpui) why gpui exists core concepts entities views contexts the render loop layout system box model flexbox layout absolute positioning real example: editor panel layout styling system colors typography visual effects event system mouse events keyboard events click events custom events integration with the editor editor panels context menus tooltips performance considerations minimize re-renders batch updates virtualization conclusion ui gpui rendering views components ui framework (gpui)\n\ngpui is pulsar's custom ui framework, and it's unlike anything you've probably worked with before. it's not react, it's not immediate mode, and it's definitely not a traditional retained-mode gui toolkit. instead, gpui is a hybrid approach that combines the best ideas from modern ui frameworks with the performance requirements of a professional game engine editor.\n\nlet me explain why we built it this way, how it works, and—most importantly—how you actually use it to build editor interfaces.\n\nwhy gpui exists\n\nyou might be wondering: why build a custom ui framework when mature options like egui, iced, or even web technologies exist? the answer comes down to our specific requirements:\n\ngpu acceleration isn't optional - editor uis need to render smoothly at 60+ fps while updating constantly. project trees with thousands of files, code editors with syntax highlighting, property panels with live updates—all of this needs to be fast. gpui renders everything using the gpu,"
     },
     {
       "id": "getting-started-first-project",
@@ -2070,7 +907,7 @@
       "excerpt": "Create and understand your first Pulsar project",
       "readingTime": 2,
       "lastUpdated": "2026-01-12",
-      "searchText": "your first project create and understand your first pulsar project obtain an engine binary launch the binary navigate to templates select blank project the editor the file drawer that’s all for now! tutorial project beginner obtain an engine binary\r\n\r\nyou can obtain an engine binary by cloning the repository and building a stable commit locally:\r\nlaunch the binary\r\n\r\nlaunching the binary will populate:\r\nwith the default engine themes and configuration, then bring you directly to the pulsar launcher.\r[!note]\ryour engine launcher may start in light mode by default. don’t panic!\rto avoid attracting bugs, press ctrl + , to open the settings window. from there, you can change the theme at the top to default dark (or any other theme you prefer).\rbe sure to click save, then re-launch the engine to ensure all windows update correctly.\r[!warning]\rbuttons and features outside the scope of this guide may not work yet. many parts of the engine are still very much a wip.\r\n\r\n\r\nnavigate to templates\r\n\r\nfrom the launcher, navigate to the templates section.\r\n\r\n\r\nselect blank project\r\n\r\nchoose blank project. the engine will prompt you to select a directory where the template will be cloned.\r\n\r\nonce cloning completes, you’ll"
+      "searchText": "your first project create and understand your first pulsar project obtain an engine binary launch the binary navigate to templates select blank project the editor the file drawer that’s all for now! tutorial project beginner obtain an engine binary\n\nyou can obtain an engine binary by cloning the repository and building a stable commit locally or by going to the releases page:\n\nlaunch the binary\n\nlaunching the binary will populate:\n\nwith the default engine themes and configuration, then bring you directly to the pulsar launcher.\n[!note]\nyour engine launcher may start in light mode by default. don’t panic!\nto avoid attracting bugs, press ctrl + , to open the settings window. from there, you can change the theme at the top to default dark (or any other theme you prefer).\nbe sure to click save, then re-launch the engine to ensure all windows update correctly.\n[!warning]\nbuttons and features outside the scope of this guide may not work yet. many parts of the engine are still very much a wip.\n\nnavigate to templates\n\nfrom the launcher, navigate to the templates section.\n\nselect blank project\n\nchoose blank project. the engine will prompt you to select a directory where the template will be cloned.\n\nonce cloning co"
     },
     {
       "id": "getting-started",
@@ -2154,7 +991,7 @@
       "excerpt": "Your introduction to the Pulsar game engine",
       "readingTime": 4,
       "lastUpdated": "2026-01-12",
-      "searchText": "getting started with pulsar your introduction to the pulsar game engine getting started with pulsar what is pulsar? current status: early days what makes pulsar different? the ui is gpu-accelerated from the start plugins are dynamic libraries the type system is inspectable backend services run separately platform support what you'll need quick links community next steps introduction getting-started overview getting started with pulsar\r\n\r\nwelcome to pulsar engine! if you're here, you're probably curious about building games with a modern, rust-based engine that challenges the status quo of how game engines should work.\r\n\r\nwhat is pulsar?\r\n\r\npulsar is an experimental game engine that takes a fresh look at game development tools from the ground up. instead of copying what existing engines do, pulsar asks \"what if we built this differently?\" at every level—from the editor interface to the plugin system to how the engine manages your project files.\r\n\r\nthink of pulsar as a game engine built by developers who got tired of fighting their tools. we're focusing on:\r\n\r\nclear, intentional design - every system is built with a specific purpose and clear boundaries. no \"it evolved that way\" explanations here.\r\n\r\neditor-first stability - the editor should never crash, even when your game code does. pulsar treats the editor as a first-class citizen, not an afterthought.\r\n\r\nrust everywhere - the entire en"
+      "searchText": "getting started with pulsar your introduction to the pulsar game engine getting started with pulsar what is pulsar? current status: early days what makes pulsar different? the ui is gpu-accelerated from the start plugins are dynamic libraries the type system is inspectable backend services run separately platform support what you'll need quick links community next steps introduction getting-started overview getting started with pulsar\n\nwelcome to pulsar engine! if you're here, you're probably curious about building games with a modern, rust-based engine that challenges the status quo of how game engines should work.\n\nwhat is pulsar?\n\npulsar is an experimental game engine that takes a fresh look at game development tools from the ground up. instead of copying what existing engines do, pulsar asks \"what if we built this differently?\" at every level—from the editor interface to the plugin system to how the engine manages your project files.\n\nthink of pulsar as a game engine built by developers who got tired of fighting their tools. we're focusing on:\n\nclear, intentional design - every system is built with a specific purpose and clear boundaries. no \"it evolved that way\" explanations here.\n\neditor-first stability - the editor should never crash, even when your game code does. pulsar treats the editor as a first-class citizen, not an afterthought.\n\nrust everywhere - the entire engine, from the"
     },
     {
       "id": "getting-started-installation-linux",
@@ -2348,7 +1185,7 @@
       "excerpt": "Install Pulsar Engine on Linux",
       "readingTime": 2,
       "lastUpdated": "2026-01-12",
-      "searchText": "linux installation install pulsar engine on linux installing pulsar on linux prerequisites install rust install rustup reload your shell verify installation install development tools install vulkan ubuntu/debian fedora arch getting pulsar building pulsar running pulsar known linux-specific issues wayland vs x11 force x11 for current session hidpi scaling set scale factor (adjust value as needed) missing libraries gpu driver issues install proprietary drivers mesa should work out of the box if not, install: optional: add to path add to ~/.bashrc or ~/.zshrc reload shell keeping updated troubleshooting \"error: linker cc not found\" slow compilation permission errors should show your username, not root graphics initialization failed next steps installation linux setup installing pulsar on linux\r\n\r\nthis guide covers setting up pulsar engine on linux distributions. while windows is currently the primary development platform, you can still build and run pulsar on linux with some additional setup.\r\n\r\n::: warning\r\nplatform support notice\r\n\r\nlinux support is temporarily limited while core architectural work is ongoing. some features may not work as expected. check the github discussions for current status.\r\n:::\r\n\r\nprerequisites\r\n\r\ninstall rust\r\n\r\npulsar requires rust 1.70 or newer:\r\ninstall development tools\r\n\r\nyou'll need build essentials and some additional libraries:\r\n\r\nubuntu/debian:\r\nfedora:\r\narch:\r\ninstall vulkan\r\n\r\npulsar uses vulkan for rendering:\r\nverify vulkan works:\r\nyou should see your gpu listed.\r\n\r\ngetting pulsar\r\n\r\nclone the repository:\r\nbuilding pulsar\r\n\r\nbuild with cargo:\r\nthe first build will take 10-20 minutes as dependencies compile.\r\n\r\n::: info\r\ndebug vs release\r\n\r\nuse --release for normal use. omit it for faster compile times during "
+      "searchText": "linux installation install pulsar engine on linux installing pulsar on linux prerequisites install rust install rustup reload your shell verify installation install development tools install vulkan ubuntu/debian fedora arch getting pulsar building pulsar running pulsar known linux-specific issues wayland vs x11 force x11 for current session hidpi scaling set scale factor (adjust value as needed) missing libraries gpu driver issues install proprietary drivers mesa should work out of the box if not, install: optional: add to path add to ~/.bashrc or ~/.zshrc reload shell keeping updated troubleshooting \"error: linker cc not found\" slow compilation permission errors should show your username, not root graphics initialization failed next steps installation linux setup installing pulsar on linux\n\nthis guide covers setting up pulsar engine on linux distributions. while windows is currently the primary development platform, you can still build and run pulsar on linux with some additional setup.\n\n::: warning\nplatform support notice\n\nlinux support is temporarily limited while core architectural work is ongoing. some features may not work as expected. check the github discussions for current status.\n:::\n\nprerequisites\n\ninstall rust\n\npulsar requires rust 1.70 or newer:\n\ninstall development tools\n\nyou'll need build essentials and some additional libraries:\n\nubuntu/debian:\n\nfedora:\n\narch:\n\ninstall vulkan\n\npulsar uses vulkan for rendering:\n\nverify vulkan works:\n\nyou should see your gpu listed.\n\ngetting pulsar\n\nclone the repository:\n\nbuilding pulsar\n\nbuild with cargo:\n\nthe first build will take 10-20 minutes as dependencies compile.\n\n::: info\ndebug vs release\n\nuse --release for normal use. omit it for faster compile times during development, but expect slower "
     },
     {
       "id": "getting-started-installation-macos",
@@ -2612,7 +1449,7 @@
       "excerpt": "Install Pulsar Engine on macOS",
       "readingTime": 3,
       "lastUpdated": "2026-01-12",
-      "searchText": "macos installation install pulsar engine on macos installing pulsar on macos prerequisites install xcode command line tools install rust follow the prompts (defaults are fine) reload your shell verify install homebrew (optional but recommended) install additional dependencies getting pulsar building pulsar build targets check your architecture apple silicon (m1, m2, etc) target: aarch64-apple-darwin (default) intel macs target: x86_64-apple-darwin (default) running pulsar known macos-specific issues gatekeeper warnings allow pulsar to run retina display scaling force scale factor metal validation errors file system permissions library not found errors check what's missing install via homebrew if needed optional: add to path add to ~/.zshrc (or ~/.bash_profile for bash) reload keeping updated performance tips faster builds check core count build with all cores (default behavior) optimize for your cpu debug vs release fast compiles, slow runtime slower compiles, fast runtime troubleshooting \"error: linker cc not found\" out of memory during build limit parallel jobs \"framework not found\" errors slow performance graphics issues apple silicon notes next steps installation macos setup installing pulsar on macos\r\n\r\nthis guide walks you through setting up pulsar engine on macos. while windows is the primary development platform, macos support is being restored as architectural work stabilizes.\r\n\r\n::: warning\r\nplatform support notice\r\n\r\nmacos support is temporarily limited during core architectural changes. some features may not work as expected. track restoration progress in the github discussions.\r\n:::\r\n\r\nprerequisites\r\n\r\ninstall xcode command line tools\r\n\r\npulsar requires the xcode command line tools for compilation:\r\nclick \"install\" in the dialog that appears. this provides the c/c++ compilers and other build tools rust needs.\r\n\r\ninstall rust\r\n\r\nuse rustup to install rust:\r\ninstall homebrew (optional but recommended)\r\n\r\nhomebrew makes it easy to install additional dependencies:\r\ninstall additional dependencies\r\n\r\nusing homebrew:\r\ngetting pulsar\r\n\r\nclone the repository:\r\nbuilding pulsar\r\n\r\nbuild with cargo:\r\n::: info\r\nfirst build takes time\r\n\r\nthe first compilation "
+      "searchText": "macos installation install pulsar engine on macos installing pulsar on macos prerequisites install xcode command line tools install rust follow the prompts (defaults are fine) reload your shell verify install homebrew (optional but recommended) install additional dependencies getting pulsar building pulsar build targets check your architecture apple silicon (m1, m2, etc) target: aarch64-apple-darwin (default) intel macs target: x86_64-apple-darwin (default) running pulsar known macos-specific issues gatekeeper warnings allow pulsar to run retina display scaling force scale factor metal validation errors file system permissions library not found errors check what's missing install via homebrew if needed optional: add to path add to ~/.zshrc (or ~/.bash_profile for bash) reload keeping updated performance tips faster builds check core count build with all cores (default behavior) optimize for your cpu debug vs release fast compiles, slow runtime slower compiles, fast runtime troubleshooting \"error: linker cc not found\" out of memory during build limit parallel jobs \"framework not found\" errors slow performance graphics issues apple silicon notes next steps installation macos setup installing pulsar on macos\n\nthis guide walks you through setting up pulsar engine on macos. while windows is the primary development platform, macos support is being restored as architectural work stabilizes.\n\n::: warning\nplatform support notice\n\nmacos support is temporarily limited during core architectural changes. some features may not work as expected. track restoration progress in the github discussions.\n:::\n\nprerequisites\n\ninstall xcode command line tools\n\npulsar requires the xcode command line tools for compilation:\n\nclick \"install\" in the dialog that appears. this provides the c/c++ compilers and other build tools rust needs.\n\ninstall rust\n\nuse rustup to install rust:\n\ninstall homebrew (optional but recommended)\n\nhomebrew makes it easy to install additional dependencies:\n\ninstall additional dependencies\n\nusing homebrew:\n\ngetting pulsar\n\nclone the repository:\n\nbuilding pulsar\n\nbuild with cargo:\n\n::: info\nfirst build takes time\n\nthe first compilation will take 10-20 minutes as ca"
     },
     {
       "id": "getting-started-installation-windows",
@@ -2751,7 +1588,7 @@
       "excerpt": "Complete installation guide for Windows 10 and 11",
       "readingTime": 7,
       "lastUpdated": "2026-01-12",
-      "searchText": "windows installation complete installation guide for windows 10 and 11 windows installation prerequisites installation methods method 1: using the installer (recommended) method 2: building from source setting up visual studio integration graphics api setup directx 11 (default) directx 12 (recommended) common installation issues issue: \"vcruntime140.dll was not found\" issue: \"the code execution cannot proceed because msvcp140.dll was not found\" issue: installer fails with \"access denied\" issue: command pulsar not recognized issue: build fails with cmake errors issue: \"cannot open include file: 'pulsar/core.h'\" post-installation steps updating pulsar if installed via installer: if built from source: uninstallation if installed via installer: if built from source: next steps installation windows setup windows installation\r\n\r\nwelcome to the pulsar engine installation guide for windows! this guide will walk you through everything you need to get up and running with pulsar on windows 10 or windows 11.\r\n\r\nprerequisites\r\n\r\nbefore installing pulsar engine, make sure your system meets these requirements:\r\n\r\n- operating system: windows 10 (version 1909 or later) or windows 11\r\n- ram: 8gb minimum, 16gb recommended for larger projects\r\n- disk space: 2gb for the engine and tools, plus space for your projects\r\n- graphics: directx 11 compatible gpu (directx 12 recommended)\r\n- visual studio: 2019 or later (community edition works fine)\r\n\r\ninstallation methods\r\n\r\nyou have two ways to install pulsar engine on windows: using the installer or building from source. we'll cover both methods.\r\n\r\nmethod 1: using the installer (recommended)\r\n\r\nthe installer is the fastest way to get started and includes everything you need:\r\n\r\n1. download the installer\r\n   - visit the pulsar engine downloads page\r\n   - do"
+      "searchText": "windows installation complete installation guide for windows 10 and 11 windows installation prerequisites installation methods method 1: using the installer (recommended) method 2: building from source setting up visual studio integration graphics api setup directx 11 (default) directx 12 (recommended) common installation issues issue: \"vcruntime140.dll was not found\" issue: \"the code execution cannot proceed because msvcp140.dll was not found\" issue: installer fails with \"access denied\" issue: command pulsar not recognized issue: build fails with cmake errors issue: \"cannot open include file: 'pulsar/core.h'\" post-installation steps updating pulsar if installed via installer: if built from source: uninstallation if installed via installer: if built from source: next steps installation windows setup windows installation\n\nwelcome to the pulsar engine installation guide for windows! this guide will walk you through everything you need to get up and running with pulsar on windows 10 or windows 11.\n\nprerequisites\n\nbefore installing pulsar engine, make sure your system meets these requirements:\n\n- operating system: windows 10 (version 1909 or later) or windows 11\n- ram: 8gb minimum, 16gb recommended for larger projects\n- disk space: 2gb for the engine and tools, plus space for your projects\n- graphics: directx 11 compatible gpu (directx 12 recommended)\n- visual studio: 2019 or later (community edition works fine)\n\ninstallation methods\n\nyou have two ways to install pulsar engine on windows: using the installer or building from source. we'll cover both methods.\n\nmethod 1: using the installer (recommended)\n\nthe installer is the fastest way to get started and includes everything you need:\n\n1. download the installer\n   - visit the pulsar engine downloads page\n   - download the latest window"
     },
     {
       "id": "getting-started-quick-start",
@@ -2900,505 +1737,7 @@
       "excerpt": "Get the Pulsar editor running and explore your first project",
       "readingTime": 6,
       "lastUpdated": "2026-01-12",
-      "searchText": "quick start guide get the pulsar editor running and explore your first project quick start guide running pulsar for the first time the launcher creating your first project the editor interface the main viewport the file manager the problems panel the terminal understanding pulsar projects project.toml plugins your project uses go here the cargo workspace the game crate running your game from the editor from the terminal working with assets using assets in code exploring the type debugger where to go from here common questions why isn't there a visual scene editor yet? can i use pulsar for 2d games? what if i find a bug? can i contribute to pulsar? tutorial quickstart beginner quick start guide\r\n\r\nlet's get pulsar running and take a tour of the editor. this guide assumes you've already installed rust and cloned the pulsar repository.\r\n\r\nrunning pulsar for the first time\r\n\r\nopen your terminal in the pulsar directory and run:\r\n::: info\r\nthe first build will take a while as cargo compiles all dependencies. subsequent runs will be much faster.\r\n:::\r\n\r\nif you're missing any required dependencies, pulsar will detect this and guide you through installation before launching the editor.\r\n\r\nthe launcher\r\n\r\nwhen pulsar starts, you'll see the launcher screen. this is your project hub where you can:\r\n\r\n- open existing projects\r\n- create new projects\r\n- configure engine settings\r\n- view recent projects\r\n\r\ncreating your first project\r\n\r\n1. click \"new project\"\r\n2. choose a name for your project (e.g., \"my-first-game\")\r\n3. select a location on your file system\r\n4. choose a template (start with \"empty project\" for now)\r\n5. click \"create\"\r\n\r\npulsar will generate the project st"
-    },
-    {
-      "id": "guides-creating-materials",
-      "title": "Creating Materials and Shaders",
-      "description": "Complete shader writing tutorial covering WGSL syntax, material properties, PBR rendering, texture sampling, lighting, and hot-reload workflow",
-      "url": "/docs/guides/creating-materials",
-      "slug": "guides/creating-materials",
-      "category": "guides",
-      "tags": [
-        "materials",
-        "shaders",
-        "wgsl",
-        "rendering",
-        "pbr",
-        "graphics"
-      ],
-      "headings": [
-        {
-          "level": 1,
-          "text": "Creating Materials and Shaders",
-          "slug": "creating-materials-and-shaders"
-        },
-        {
-          "level": 2,
-          "text": "What You'll Learn",
-          "slug": "what-youll-learn"
-        },
-        {
-          "level": 2,
-          "text": "Prerequisites",
-          "slug": "prerequisites"
-        },
-        {
-          "level": 2,
-          "text": "Part 1: WGSL Fundamentals",
-          "slug": "part-1-wgsl-fundamentals"
-        },
-        {
-          "level": 3,
-          "text": "Shader Structure",
-          "slug": "shader-structure"
-        },
-        {
-          "level": 3,
-          "text": "WGSL Data Types",
-          "slug": "wgsl-data-types"
-        },
-        {
-          "level": 3,
-          "text": "Built-in Functions",
-          "slug": "built-in-functions"
-        },
-        {
-          "level": 2,
-          "text": "Part 2: Material System Integration",
-          "slug": "part-2-material-system-integration"
-        },
-        {
-          "level": 3,
-          "text": "Creating a Material Definition",
-          "slug": "creating-a-material-definition"
-        },
-        {
-          "level": 3,
-          "text": "Shader for Custom Material",
-          "slug": "shader-for-custom-material"
-        },
-        {
-          "level": 2,
-          "text": "Part 3: Texture Sampling",
-          "slug": "part-3-texture-sampling"
-        },
-        {
-          "level": 3,
-          "text": "Basic Texture Sampling",
-          "slug": "basic-texture-sampling"
-        },
-        {
-          "level": 3,
-          "text": "Advanced Texture Techniques",
-          "slug": "advanced-texture-techniques"
-        },
-        {
-          "level": 3,
-          "text": "Normal Mapping",
-          "slug": "normal-mapping"
-        },
-        {
-          "level": 2,
-          "text": "Part 4: Physically-Based Rendering (PBR)",
-          "slug": "part-4-physically-based-rendering-pbr"
-        },
-        {
-          "level": 3,
-          "text": "PBR Theory",
-          "slug": "pbr-theory"
-        },
-        {
-          "level": 3,
-          "text": "Complete PBR Shader",
-          "slug": "complete-pbr-shader"
-        },
-        {
-          "level": 2,
-          "text": "Part 5: Advanced Lighting",
-          "slug": "part-5-advanced-lighting"
-        },
-        {
-          "level": 3,
-          "text": "Directional Lights",
-          "slug": "directional-lights"
-        },
-        {
-          "level": 3,
-          "text": "Spotlights",
-          "slug": "spotlights"
-        },
-        {
-          "level": 3,
-          "text": "Image-Based Lighting (IBL)",
-          "slug": "image-based-lighting-ibl"
-        },
-        {
-          "level": 2,
-          "text": "Part 6: Hot-Reload System",
-          "slug": "part-6-hot-reload-system"
-        },
-        {
-          "level": 3,
-          "text": "Setting Up Hot-Reload",
-          "slug": "setting-up-hot-reload"
-        },
-        {
-          "level": 3,
-          "text": "Shader Error Reporting",
-          "slug": "shader-error-reporting"
-        },
-        {
-          "level": 2,
-          "text": "Part 7: Performance Optimization",
-          "slug": "part-7-performance-optimization"
-        },
-        {
-          "level": 3,
-          "text": "Shader Optimization Tips",
-          "slug": "shader-optimization-tips"
-        },
-        {
-          "level": 3,
-          "text": "Instance Optimization",
-          "slug": "instance-optimization"
-        },
-        {
-          "level": 3,
-          "text": "LOD System Integration",
-          "slug": "lod-system-integration"
-        },
-        {
-          "level": 2,
-          "text": "Part 8: Complete Material Example",
-          "slug": "part-8-complete-material-example"
-        },
-        {
-          "level": 3,
-          "text": "Toon Shader Material",
-          "slug": "toon-shader-material"
-        },
-        {
-          "level": 2,
-          "text": "Part 9: Debugging Materials",
-          "slug": "part-9-debugging-materials"
-        },
-        {
-          "level": 3,
-          "text": "Visual Debugging",
-          "slug": "visual-debugging"
-        },
-        {
-          "level": 3,
-          "text": "Performance Profiling",
-          "slug": "performance-profiling"
-        },
-        {
-          "level": 2,
-          "text": "Common Issues and Solutions",
-          "slug": "common-issues-and-solutions"
-        },
-        {
-          "level": 3,
-          "text": "Issue: Shader Compilation Fails",
-          "slug": "issue-shader-compilation-fails"
-        },
-        {
-          "level": 3,
-          "text": "Issue: Lighting Looks Wrong",
-          "slug": "issue-lighting-looks-wrong"
-        },
-        {
-          "level": 3,
-          "text": "Issue: Textures Not Sampling",
-          "slug": "issue-textures-not-sampling"
-        },
-        {
-          "level": 2,
-          "text": "Conclusion",
-          "slug": "conclusion"
-        },
-        {
-          "level": 3,
-          "text": "Next Steps",
-          "slug": "next-steps"
-        },
-        {
-          "level": 3,
-          "text": "Resources",
-          "slug": "resources"
-        }
-      ],
-      "excerpt": "Complete shader writing tutorial covering WGSL syntax, material properties, PBR rendering, texture sampling, lighting, and hot-reload workflow",
-      "readingTime": 3,
-      "lastUpdated": "2026-01-12",
-      "searchText": "creating materials and shaders complete shader writing tutorial covering wgsl syntax, material properties, pbr rendering, texture sampling, lighting, and hot-reload workflow creating materials and shaders what you'll learn prerequisites part 1: wgsl fundamentals shader structure wgsl data types built-in functions part 2: material system integration creating a material definition shader for custom material part 3: texture sampling basic texture sampling advanced texture techniques normal mapping part 4: physically-based rendering (pbr) pbr theory complete pbr shader part 5: advanced lighting directional lights spotlights image-based lighting (ibl) part 6: hot-reload system setting up hot-reload shader error reporting part 7: performance optimization shader optimization tips instance optimization lod system integration part 8: complete material example toon shader material part 9: debugging materials visual debugging performance profiling common issues and solutions issue: shader compilation fails issue: lighting looks wrong issue: textures not sampling conclusion next steps resources materials shaders wgsl rendering pbr graphics creating materials and shaders\r\n\r\nthis comprehensive guide teaches you how to create custom materials and shaders for pulsar using wgsl (webgpu shading language). you'll learn everything from basic shader structure to advanced pbr materials with hot-reloading support.\r\n\r\nwhat you'll learn\r\n\r\nby the end of this tutorial, you'll understand:\r\n- wgsl syntax and shader structure\r\n- material property systems\r\n- texture sampling and filtering\r\n- physically-based rendering (pbr)\r\n- lighting calculations\r\n- hot-reload workflow for rapid iteration\r\n- performance optimization techniques\r\n\r\nprerequisites\r\n\r\n- basic understanding of 3d graphics concepts\r\n- familiarity with vectors and matrices\r\n- knowledge of pulsar's asset system\r\n- wgsl basics (we'll cover this)\r\n\r\npart 1: wgsl fundamentals\r\n\r\nshader structure\r\n\r\nwgsl shaders consist of entry points (vertex, fragment, compute) and supporting functions. here's the basic structure:\r\nwgsl data types\r\nbuilt-in functions\r\npart 2: material system integ"
-    },
-    {
-      "id": "guides-creating-plugins",
-      "title": "Creating Plugins for Pulsar",
-      "description": "Complete step-by-step tutorial for building custom plugins - from cargo new to finished editor with GPUI rendering, file type registration, and error handling",
-      "url": "/docs/guides/creating-plugins",
-      "slug": "guides/creating-plugins",
-      "category": "guides",
-      "tags": [
-        "plugins",
-        "tutorial",
-        "rust",
-        "gpui",
-        "editor"
-      ],
-      "headings": [
-        {
-          "level": 1,
-          "text": "Creating Plugins for Pulsar",
-          "slug": "creating-plugins-for-pulsar"
-        },
-        {
-          "level": 2,
-          "text": "What You'll Build",
-          "slug": "what-youll-build"
-        },
-        {
-          "level": 2,
-          "text": "Prerequisites",
-          "slug": "prerequisites"
-        },
-        {
-          "level": 2,
-          "text": "Step 1: Project Setup",
-          "slug": "step-1-project-setup"
-        },
-        {
-          "level": 3,
-          "text": "Creating the Plugin",
-          "slug": "creating-the-plugin"
-        },
-        {
-          "level": 3,
-          "text": "Configuring Cargo.toml",
-          "slug": "configuring-cargotoml"
-        },
-        {
-          "level": 2,
-          "text": "Step 2: Plugin Structure",
-          "slug": "step-2-plugin-structure"
-        },
-        {
-          "level": 3,
-          "text": "Define the Plugin Manifest",
-          "slug": "define-the-plugin-manifest"
-        },
-        {
-          "level": 1,
-          "text": "Default settings",
-          "slug": "default-settings"
-        },
-        {
-          "level": 3,
-          "text": "Core Plugin Structure",
-          "slug": "core-plugin-structure"
-        },
-        {
-          "level": 2,
-          "text": "Step 3: Implementing the Plugin Trait",
-          "slug": "step-3-implementing-the-plugin-trait"
-        },
-        {
-          "level": 3,
-          "text": "Plugin Initialization",
-          "slug": "plugin-initialization"
-        },
-        {
-          "level": 2,
-          "text": "Step 4: Building the Editor",
-          "slug": "step-4-building-the-editor"
-        },
-        {
-          "level": 3,
-          "text": "Editor State Management",
-          "slug": "editor-state-management"
-        },
-        {
-          "level": 3,
-          "text": "Implementing the Editor Trait",
-          "slug": "implementing-the-editor-trait"
-        },
-        {
-          "level": 2,
-          "text": "Step 5: GPUI Rendering",
-          "slug": "step-5-gpui-rendering"
-        },
-        {
-          "level": 3,
-          "text": "Creating the Editor View",
-          "slug": "creating-the-editor-view"
-        },
-        {
-          "level": 2,
-          "text": "Step 6: Statusbar Integration",
-          "slug": "step-6-statusbar-integration"
-        },
-        {
-          "level": 3,
-          "text": "Creating a Statusbar Item",
-          "slug": "creating-a-statusbar-item"
-        },
-        {
-          "level": 2,
-          "text": "Step 7: Editor Factory",
-          "slug": "step-7-editor-factory"
-        },
-        {
-          "level": 3,
-          "text": "Implementing the Factory Pattern",
-          "slug": "implementing-the-factory-pattern"
-        },
-        {
-          "level": 2,
-          "text": "Step 8: Error Handling",
-          "slug": "step-8-error-handling"
-        },
-        {
-          "level": 3,
-          "text": "Robust Error Management",
-          "slug": "robust-error-management"
-        },
-        {
-          "level": 2,
-          "text": "Step 9: Plugin Export",
-          "slug": "step-9-plugin-export"
-        },
-        {
-          "level": 3,
-          "text": "Exporting for Pulsar",
-          "slug": "exporting-for-pulsar"
-        },
-        {
-          "level": 2,
-          "text": "Step 10: Building and Testing",
-          "slug": "step-10-building-and-testing"
-        },
-        {
-          "level": 3,
-          "text": "Building the Plugin",
-          "slug": "building-the-plugin"
-        },
-        {
-          "level": 1,
-          "text": "Development build",
-          "slug": "development-build"
-        },
-        {
-          "level": 1,
-          "text": "Release build for production",
-          "slug": "release-build-for-production"
-        },
-        {
-          "level": 1,
-          "text": "The plugin will be at:",
-          "slug": "the-plugin-will-be-at"
-        },
-        {
-          "level": 1,
-          "text": "target/debug/libpulsar_json_editor.so (Linux)",
-          "slug": "targetdebuglibpulsar_json_editorso-linux"
-        },
-        {
-          "level": 1,
-          "text": "target/debug/libpulsar_json_editor.dylib (macOS)",
-          "slug": "targetdebuglibpulsar_json_editordylib-macos"
-        },
-        {
-          "level": 1,
-          "text": "target/debug/pulsar_json_editor.dll (Windows)",
-          "slug": "targetdebugpulsar_json_editordll-windows"
-        },
-        {
-          "level": 3,
-          "text": "Installing Locally",
-          "slug": "installing-locally"
-        },
-        {
-          "level": 1,
-          "text": "Copy to Pulsar plugins directory",
-          "slug": "copy-to-pulsar-plugins-directory"
-        },
-        {
-          "level": 1,
-          "text": "Or use Pulsar's plugin manager",
-          "slug": "or-use-pulsars-plugin-manager"
-        },
-        {
-          "level": 3,
-          "text": "Testing the Plugin",
-          "slug": "testing-the-plugin"
-        },
-        {
-          "level": 2,
-          "text": "Common Mistakes and Debugging",
-          "slug": "common-mistakes-and-debugging"
-        },
-        {
-          "level": 3,
-          "text": "Issue: Plugin Not Loading",
-          "slug": "issue-plugin-not-loading"
-        },
-        {
-          "level": 3,
-          "text": "Issue: Crashes on Load",
-          "slug": "issue-crashes-on-load"
-        },
-        {
-          "level": 3,
-          "text": "Issue: GPUI Rendering Problems",
-          "slug": "issue-gpui-rendering-problems"
-        },
-        {
-          "level": 3,
-          "text": "Issue: Buffer Not Updating",
-          "slug": "issue-buffer-not-updating"
-        },
-        {
-          "level": 2,
-          "text": "Advanced Features",
-          "slug": "advanced-features"
-        },
-        {
-          "level": 3,
-          "text": "Adding Configuration UI",
-          "slug": "adding-configuration-ui"
-        },
-        {
-          "level": 3,
-          "text": "Implementing Undo/Redo",
-          "slug": "implementing-undoredo"
-        },
-        {
-          "level": 2,
-          "text": "Performance Optimization",
-          "slug": "performance-optimization"
-        },
-        {
-          "level": 3,
-          "text": "Lazy Rendering",
-          "slug": "lazy-rendering"
-        },
-        {
-          "level": 3,
-          "text": "Debounced Validation",
-          "slug": "debounced-validation"
-        },
-        {
-          "level": 2,
-          "text": "Conclusion",
-          "slug": "conclusion"
-        },
-        {
-          "level": 3,
-          "text": "Next Steps",
-          "slug": "next-steps"
-        },
-        {
-          "level": 3,
-          "text": "Resources",
-          "slug": "resources"
-        }
-      ],
-      "excerpt": "Complete step-by-step tutorial for building custom plugins - from cargo new to finished editor with GPUI rendering, file type registration, and error handling",
-      "readingTime": 4,
-      "lastUpdated": "2026-01-12",
-      "searchText": "creating plugins for pulsar complete step-by-step tutorial for building custom plugins - from cargo new to finished editor with gpui rendering, file type registration, and error handling creating plugins for pulsar what you'll build prerequisites step 1: project setup creating the plugin configuring cargo.toml step 2: plugin structure define the plugin manifest default settings core plugin structure step 3: implementing the plugin trait plugin initialization step 4: building the editor editor state management implementing the editor trait step 5: gpui rendering creating the editor view step 6: statusbar integration creating a statusbar item step 7: editor factory implementing the factory pattern step 8: error handling robust error management step 9: plugin export exporting for pulsar step 10: building and testing building the plugin development build release build for production the plugin will be at: target/debug/libpulsar_json_editor.so (linux) target/debug/libpulsar_json_editor.dylib (macos) target/debug/pulsar_json_editor.dll (windows) installing locally copy to pulsar plugins directory or use pulsar's plugin manager testing the plugin common mistakes and debugging issue: plugin not loading issue: crashes on load issue: gpui rendering problems issue: buffer not updating advanced features adding configuration ui implementing undo/redo performance optimization lazy rendering debounced validation conclusion next steps resources plugins tutorial rust gpui editor creating plugins for pulsar\r\n\r\nthis comprehensive guide walks you through creating a complete plugin for pulsar, from initial setup to a fully functional json editor with syntax highlighting, validation, and integration with the pulsar ecosystem.\r\n\r\nwhat you'll build\r\n\r\nby the end of this tutorial, you'll have created a json editor plugin that:\r\n- registers the .json file type\r\n- provides syntax highlighting and validation\r\n- includes a custom statusbar button\r\n- implements save/load functionality\r\n- handles errors gracefully\r\n- integrates with pulsar's gpui rendering system\r\n\r\nprerequisites\r\n\r\nbefore starting, ensure you have:\r\n- rust 1.70 or later installed\r\n- pulsar development environment set up\r\n- basic understanding of rust and async programming\r\n- familiarity with json format\r\n\r\nstep 1: project setup\r\n\r\ncreating the plugin\r\n\r\nstart by creating a new rust library project:\r\nconfiguring cargo.toml\r\n\r\nupdate your cargo.toml to include pulsar dependencies:\r\nimportant notes:\r\n- crate-"
+      "searchText": "quick start guide get the pulsar editor running and explore your first project quick start guide running pulsar for the first time the launcher creating your first project the editor interface the main viewport the file manager the problems panel the terminal understanding pulsar projects project.toml plugins your project uses go here the cargo workspace the game crate running your game from the editor from the terminal working with assets using assets in code exploring the type debugger where to go from here common questions why isn't there a visual scene editor yet? can i use pulsar for 2d games? what if i find a bug? can i contribute to pulsar? tutorial quickstart beginner quick start guide\n\nlet's get pulsar running and take a tour of the editor. this guide assumes you've already installed rust and cloned the pulsar repository.\n\nrunning pulsar for the first time\n\nopen your terminal in the pulsar directory and run:\n\n::: info\nthe first build will take a while as cargo compiles all dependencies. subsequent runs will be much faster.\n:::\n\nif you're missing any required dependencies, pulsar will detect this and guide you through installation before launching the editor.\n\nthe launcher\n\nwhen pulsar starts, you'll see the launcher screen. this is your project hub where you can:\n\n- open existing projects\n- create new projects\n- configure engine settings\n- view recent projects\n\ncreating your first project\n\n1. click \"new project\"\n2. choose a name for your project (e.g., \"my-first-game\")\n3. select a location on your file system\n4. choose a template (start with \"empty project\" for now)\n5. click \"create\"\n\npulsar will generate the project structure and open the editor.\n"
     },
     {
       "id": "guides",
@@ -3426,8 +1765,18 @@
         },
         {
           "level": 3,
-          "text": "Available Guides",
-          "slug": "available-guides"
+          "text": "Core Documentation",
+          "slug": "core-documentation"
+        },
+        {
+          "level": 3,
+          "text": "Getting Started",
+          "slug": "getting-started"
+        },
+        {
+          "level": 3,
+          "text": "Guides (In Development)",
+          "slug": "guides-in-development"
         },
         {
           "level": 2,
@@ -3528,448 +1877,58 @@
       "excerpt": "Step-by-step tutorials for building with Pulsar Engine",
       "readingTime": 7,
       "lastUpdated": "2026-01-12",
-      "searchText": "guides step-by-step tutorials for building with pulsar engine guides what you'll find here available guides how to use these guides if you're learning pulsar if you're experienced with game engines if you're coming from another engine learning philosophy what you need guide structure code style getting help beyond the guides contributing guides guide roadmap real-world examples experimental features assumed knowledge your first guide learning path suggestions philosophy: learning by doing staying updated guides tutorials how-to learning guides\r\n\r\nwelcome to the pulsar guides section. this isn't a reference manual or a feature list—these are practical, step-by-step tutorials that teach you how to actually build things with pulsar.\r\n\r\nwhat you'll find here\r\n\r\neach guide focuses on a specific task or concept and walks you through it from start to finish. we assume you've read the getting started docs and understand the core concepts, but we'll reference them when needed.\r\n\r\navailable guides\r\n\r\ncreating plugins - build a complete editor plugin from scratch. you'll create a custom file type, implement an editor for it, add statusbar integration, and learn the patterns that make plugins maintainable.\r\n\r\ncreating materials - write shaders and build a material system. this covers the rendering pipeline from a practical perspective: writing wgsl shaders, setting up material properties, and integrating with pulsar's render graph.\r\n\r\nphysics basics - add physics to your game. covers collision shapes, rigid bodies, physics materi"
-    },
-    {
-      "id": "guides-physics-basics",
-      "title": "Physics Basics with Rapier3D",
-      "description": "Complete physics integration guide covering Rapier3D rigid bodies, colliders, raycasting, character controllers, physics debugging, and performance optimization",
-      "url": "/docs/guides/physics-basics",
-      "slug": "guides/physics-basics",
-      "category": "guides",
-      "tags": [
-        "physics",
-        "rapier3d",
-        "rigid-bodies",
-        "colliders",
-        "character-controller",
-        "simulation"
-      ],
-      "headings": [
-        {
-          "level": 1,
-          "text": "Physics Basics with Rapier3D",
-          "slug": "physics-basics-with-rapier3d"
-        },
-        {
-          "level": 2,
-          "text": "What You'll Learn",
-          "slug": "what-youll-learn"
-        },
-        {
-          "level": 2,
-          "text": "Prerequisites",
-          "slug": "prerequisites"
-        },
-        {
-          "level": 2,
-          "text": "Part 1: Physics System Setup",
-          "slug": "part-1-physics-system-setup"
-        },
-        {
-          "level": 3,
-          "text": "Adding Rapier3D Dependencies",
-          "slug": "adding-rapier3d-dependencies"
-        },
-        {
-          "level": 3,
-          "text": "Physics World Initialization",
-          "slug": "physics-world-initialization"
-        },
-        {
-          "level": 3,
-          "text": "Integrating with Pulsar ECS",
-          "slug": "integrating-with-pulsar-ecs"
-        },
-        {
-          "level": 2,
-          "text": "Part 2: Rigid Body Types",
-          "slug": "part-2-rigid-body-types"
-        },
-        {
-          "level": 3,
-          "text": "Dynamic Bodies",
-          "slug": "dynamic-bodies"
-        },
-        {
-          "level": 3,
-          "text": "Static Bodies",
-          "slug": "static-bodies"
-        },
-        {
-          "level": 3,
-          "text": "Kinematic Bodies",
-          "slug": "kinematic-bodies"
-        },
-        {
-          "level": 2,
-          "text": "Part 3: Collider Shapes",
-          "slug": "part-3-collider-shapes"
-        },
-        {
-          "level": 3,
-          "text": "Basic Shapes",
-          "slug": "basic-shapes"
-        },
-        {
-          "level": 3,
-          "text": "Compound Shapes",
-          "slug": "compound-shapes"
-        },
-        {
-          "level": 3,
-          "text": "Mesh Colliders",
-          "slug": "mesh-colliders"
-        },
-        {
-          "level": 2,
-          "text": "Part 4: Physics Materials",
-          "slug": "part-4-physics-materials"
-        },
-        {
-          "level": 3,
-          "text": "Friction and Restitution",
-          "slug": "friction-and-restitution"
-        },
-        {
-          "level": 3,
-          "text": "Damping",
-          "slug": "damping"
-        },
-        {
-          "level": 2,
-          "text": "Part 5: Forces and Impulses",
-          "slug": "part-5-forces-and-impulses"
-        },
-        {
-          "level": 3,
-          "text": "Applying Forces",
-          "slug": "applying-forces"
-        },
-        {
-          "level": 3,
-          "text": "Applying Impulses",
-          "slug": "applying-impulses"
-        },
-        {
-          "level": 2,
-          "text": "Part 6: Raycasting and Queries",
-          "slug": "part-6-raycasting-and-queries"
-        },
-        {
-          "level": 3,
-          "text": "Basic Raycasting",
-          "slug": "basic-raycasting"
-        },
-        {
-          "level": 3,
-          "text": "Shape Casting",
-          "slug": "shape-casting"
-        },
-        {
-          "level": 3,
-          "text": "Overlap Queries",
-          "slug": "overlap-queries"
-        },
-        {
-          "level": 2,
-          "text": "Part 7: Character Controller",
-          "slug": "part-7-character-controller"
-        },
-        {
-          "level": 3,
-          "text": "Kinematic Character Controller",
-          "slug": "kinematic-character-controller"
-        },
-        {
-          "level": 3,
-          "text": "Advanced Character Controller with Slopes",
-          "slug": "advanced-character-controller-with-slopes"
-        },
-        {
-          "level": 2,
-          "text": "Part 8: Physics Debugging",
-          "slug": "part-8-physics-debugging"
-        },
-        {
-          "level": 3,
-          "text": "Visual Debugging System",
-          "slug": "visual-debugging-system"
-        },
-        {
-          "level": 3,
-          "text": "Physics Statistics",
-          "slug": "physics-statistics"
-        },
-        {
-          "level": 2,
-          "text": "Part 9: Performance Optimization",
-          "slug": "part-9-performance-optimization"
-        },
-        {
-          "level": 3,
-          "text": "Sleeping and Activation",
-          "slug": "sleeping-and-activation"
-        },
-        {
-          "level": 3,
-          "text": "Collision Filtering",
-          "slug": "collision-filtering"
-        },
-        {
-          "level": 3,
-          "text": "Spatial Partitioning",
-          "slug": "spatial-partitioning"
-        },
-        {
-          "level": 3,
-          "text": "Fixed Timestep",
-          "slug": "fixed-timestep"
-        },
-        {
-          "level": 2,
-          "text": "Conclusion",
-          "slug": "conclusion"
-        },
-        {
-          "level": 3,
-          "text": "Next Steps",
-          "slug": "next-steps"
-        },
-        {
-          "level": 3,
-          "text": "Resources",
-          "slug": "resources"
-        }
-      ],
-      "excerpt": "Complete physics integration guide covering Rapier3D rigid bodies, colliders, raycasting, character controllers, physics debugging, and performance optimization",
-      "readingTime": 2,
-      "lastUpdated": "2026-01-12",
-      "searchText": "physics basics with rapier3d complete physics integration guide covering rapier3d rigid bodies, colliders, raycasting, character controllers, physics debugging, and performance optimization physics basics with rapier3d what you'll learn prerequisites part 1: physics system setup adding rapier3d dependencies physics world initialization integrating with pulsar ecs part 2: rigid body types dynamic bodies static bodies kinematic bodies part 3: collider shapes basic shapes compound shapes mesh colliders part 4: physics materials friction and restitution damping part 5: forces and impulses applying forces applying impulses part 6: raycasting and queries basic raycasting shape casting overlap queries part 7: character controller kinematic character controller advanced character controller with slopes part 8: physics debugging visual debugging system physics statistics part 9: performance optimization sleeping and activation collision filtering spatial partitioning fixed timestep conclusion next steps resources physics rapier3d rigid-bodies colliders character-controller simulation physics basics with rapier3d\r\n\r\nthis comprehensive guide teaches you how to integrate and use rapier3d physics engine in pulsar. you'll learn everything from basic rigid body setup to advanced character controllers, raycasting, and performance optimization.\r\n\r\nwhat you'll learn\r\n\r\nby the end of this tutorial, you'll understand:\r\n- rapier3d integration architecture\r\n- rigid body types and properties\r\n- collider shapes and physics materials\r\n- raycasting and spatial queries\r\n- character controller implementation\r\n- physics debugging and visualization\r\n- performance optimization strategies\r\n\r\nprerequisites\r\n\r\n- basic understanding of physics concepts (mass, velocity, forces)\r\n- familiarity with pulsar's ecs system\r\n- knowledge of 3d mathematics (vectors, rotations)\r\n- rust programming experience\r\n\r\npart 1: physics system setup\r\n\r\nadding rapier3d dependencies\r\n\r\nupdate your cargo.toml:\r\nphysics world initialization\r\n\r\ncreate the main physics system:\r\nintegrating with pulsar ecs\r\npart 2: ri"
-    },
-    {
-      "id": "guides-working-with-assets",
-      "title": "Working with Assets",
-      "description": "Complete asset pipeline guide covering importing meshes, textures, and audio, AssetHandle system, hot-reloading, organization strategies, and custom asset types",
-      "url": "/docs/guides/working-with-assets",
-      "slug": "guides/working-with-assets",
-      "category": "guides",
-      "tags": [
-        "assets",
-        "pipeline",
-        "import",
-        "hot-reload",
-        "textures",
-        "meshes",
-        "audio"
-      ],
-      "headings": [
-        {
-          "level": 1,
-          "text": "Working with Assets",
-          "slug": "working-with-assets"
-        },
-        {
-          "level": 2,
-          "text": "What You'll Learn",
-          "slug": "what-youll-learn"
-        },
-        {
-          "level": 2,
-          "text": "Prerequisites",
-          "slug": "prerequisites"
-        },
-        {
-          "level": 2,
-          "text": "Part 1: Asset Pipeline Overview",
-          "slug": "part-1-asset-pipeline-overview"
-        },
-        {
-          "level": 3,
-          "text": "Architecture",
-          "slug": "architecture"
-        },
-        {
-          "level": 3,
-          "text": "Asset Handle System",
-          "slug": "asset-handle-system"
-        },
-        {
-          "level": 3,
-          "text": "Asset Loading",
-          "slug": "asset-loading"
-        },
-        {
-          "level": 2,
-          "text": "Part 2: Importing Meshes",
-          "slug": "part-2-importing-meshes"
-        },
-        {
-          "level": 3,
-          "text": "Mesh Data Structure",
-          "slug": "mesh-data-structure"
-        },
-        {
-          "level": 3,
-          "text": "GLTF Import",
-          "slug": "gltf-import"
-        },
-        {
-          "level": 2,
-          "text": "Part 3: Importing Textures",
-          "slug": "part-3-importing-textures"
-        },
-        {
-          "level": 3,
-          "text": "Texture Data Structure",
-          "slug": "texture-data-structure"
-        },
-        {
-          "level": 2,
-          "text": "Part 4: Importing Audio",
-          "slug": "part-4-importing-audio"
-        },
-        {
-          "level": 3,
-          "text": "Audio System",
-          "slug": "audio-system"
-        },
-        {
-          "level": 2,
-          "text": "Part 5: Hot-Reloading System",
-          "slug": "part-5-hot-reloading-system"
-        },
-        {
-          "level": 3,
-          "text": "File Watcher",
-          "slug": "file-watcher"
-        },
-        {
-          "level": 2,
-          "text": "Part 6: Asset Organization",
-          "slug": "part-6-asset-organization"
-        },
-        {
-          "level": 3,
-          "text": "Directory Structure",
-          "slug": "directory-structure"
-        },
-        {
-          "level": 3,
-          "text": "Asset Database",
-          "slug": "asset-database"
-        },
-        {
-          "level": 2,
-          "text": "Part 7: Custom Asset Types",
-          "slug": "part-7-custom-asset-types"
-        },
-        {
-          "level": 3,
-          "text": "Creating a Custom Asset",
-          "slug": "creating-a-custom-asset"
-        },
-        {
-          "level": 2,
-          "text": "Conclusion",
-          "slug": "conclusion"
-        },
-        {
-          "level": 3,
-          "text": "Next Steps",
-          "slug": "next-steps"
-        },
-        {
-          "level": 3,
-          "text": "Resources",
-          "slug": "resources"
-        }
-      ],
-      "excerpt": "Complete asset pipeline guide covering importing meshes, textures, and audio, AssetHandle system, hot-reloading, organization strategies, and custom asset types",
-      "readingTime": 2,
-      "lastUpdated": "2026-01-12",
-      "searchText": "working with assets complete asset pipeline guide covering importing meshes, textures, and audio, assethandle system, hot-reloading, organization strategies, and custom asset types working with assets what you'll learn prerequisites part 1: asset pipeline overview architecture asset handle system asset loading part 2: importing meshes mesh data structure gltf import part 3: importing textures texture data structure part 4: importing audio audio system part 5: hot-reloading system file watcher part 6: asset organization directory structure asset database part 7: custom asset types creating a custom asset conclusion next steps resources assets pipeline import hot-reload textures meshes audio working with assets\r\n\r\nthis comprehensive guide teaches you everything about pulsar's asset pipeline. you'll learn how to import and manage meshes, textures, audio files, implement hot-reloading, organize assets effectively, and create custom asset types.\r\n\r\nwhat you'll learn\r\n\r\nby the end of this tutorial, you'll understand:\r\n- asset pipeline architecture\r\n- importing various asset types (meshes, textures, audio)\r\n- assethandle system and lifetime management\r\n- hot-reloading implementation\r\n- asset organization best practices\r\n- custom asset type creation\r\n- performance optimization strategies\r\n\r\nprerequisites\r\n\r\n- understanding of rust ownership and lifetimes\r\n- basic knowledge of file i/o\r\n- familiarity with common asset formats\r\n- experience with pulsar's ecs system\r\n\r\npart 1: asset pipeline overview\r\n\r\narchitecture\r\n\r\npulsar's asset pipeline consists of several layers:\r\nasset handle system\r\nasset loading\r\npart 2: importing meshes\r\n\r\nmesh data structure\r\ngltf import\r\npart 3: import"
+      "searchText": "guides step-by-step tutorials for building with pulsar engine guides what you'll find here core documentation getting started guides (in development) how to use these guides if you're learning pulsar if you're experienced with game engines if you're coming from another engine learning philosophy what you need guide structure code style getting help beyond the guides contributing guides guide roadmap real-world examples experimental features assumed knowledge your first guide learning path suggestions philosophy: learning by doing staying updated guides tutorials how-to learning guides\n\nwelcome to the pulsar guides section. this isn't a reference manual or a feature list—these are practical, step-by-step tutorials that teach you how to actually build things with pulsar.\n\nwhat you'll find here\n\neach guide focuses on a specific task or concept and walks you through it from start to finish. we assume you've read the getting started docs and understand the core concepts, but we'll reference them when needed.\n\ncore documentation\n\narchitecture - complete overview of how pulsar is built (required reading)\n\nplugin system - building editor plugins with dynamic libraries\n\nrendering system - how bevy's renderer integrates with pulsar\n\ntype database - type inspection and debugging tools\n\nui framework - gpui for building editor interfaces\n\ngetting started\n\ninstallation - set up your development environment\n\nquick start - tour of the editor interface\n\nfirst project - create and run your first pulsar project\n\nguides (in development)\n\nthe following practical guides are curren"
     }
   ],
   "metadata": {
-    "totalDocs": 22,
-    "totalWords": 18365,
+    "totalDocs": 13,
+    "totalWords": 12111,
     "categories": [
-      "api-reference",
-      "api-reference/core",
       "core-concepts",
       "getting-started",
       "getting-started/installation",
       "guides"
     ],
     "tags": [
-      "api",
+      "3d",
       "architecture",
-      "assets",
-      "audio",
       "beginner",
-      "character-controller",
-      "colliders",
-      "component",
+      "bevy",
       "components",
       "concepts",
       "core",
-      "data",
+      "database",
       "design",
       "dlls",
-      "documentation",
-      "ecs",
-      "editor",
-      "engine",
-      "entities",
-      "entity",
       "extensibility",
       "fundamentals",
-      "gameobject",
       "getting-started",
-      "gpu",
       "gpui",
       "graphics",
       "guides",
-      "hot-reload",
       "how-to",
-      "import",
+      "inspection",
       "installation",
       "introduction",
       "learning",
       "linux",
       "macos",
-      "materials",
-      "meshes",
       "overview",
-      "pbr",
-      "performance",
-      "physics",
-      "pipeline",
       "plugins",
       "project",
       "quickstart",
-      "rapier3d",
-      "reference",
       "rendering",
-      "rigid-bodies",
-      "rust",
       "setup",
-      "shaders",
-      "simulation",
       "systems",
-      "textures",
       "tutorial",
       "tutorials",
-      "type-system",
+      "type-debugger",
       "types",
       "ui",
-      "validation",
       "views",
-      "wgsl",
       "windows"
     ],
-    "lastGenerated": "2026-01-12T05:34:10.640Z",
+    "lastGenerated": "2026-01-13T00:05:57.017Z",
     "version": "1.0.0"
   }
 }

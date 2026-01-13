@@ -19,7 +19,7 @@ icon: LayoutTemplate
 
 # UI Framework (GPUI)
 
-GPUI is Pulsar's custom UI framework, and it's unlike anything you've probably worked with before. It's not React, it's not immediate mode, and it's definitely not a traditional retained-mode GUI toolkit. Instead, GPUI is a hybrid approach that combines the best ideas from modern UI frameworks with the performance requirements of a professional game engine editor.
+GPUI is Zed's custom UI framework, and it's unlike anything you've probably worked with before. It's not React, it's not immediate mode, and it's definitely not a traditional retained-mode GUI toolkit. Instead, GPUI is a hybrid approach that combines the best ideas from modern UI frameworks with the performance requirements of a professional game engine editor.
 
 Let me explain why we built it this way, how it works, and—most importantly—how you actually use it to build editor interfaces.
 

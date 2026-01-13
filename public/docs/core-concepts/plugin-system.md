@@ -54,7 +54,37 @@ Let's demystify the technical details. Understanding how plugins load and execut
 
 ### The Loading Process
 
-When Pulsar starts, the plugin manager:
+When Pulsar starts, the plugin manager follows this sequence:
+
+```mermaid
+sequenceDiagram
+    participant PM as Plugin Manager
+    participant DLL as Plugin DLL
+    participant Plugin as EditorPlugin
+    participant Editor as Pulsar Editor
+
+    PM->>PM: Scan %AppData%/Pulsar/plugins/editor/
+    PM->>DLL: LoadLibrary/dlopen
+    PM->>DLL: Find _plugin_create symbol
+    DLL->>PM: Return trait object
+    PM->>Plugin: Validate version & ABI hash
+    alt Validation passes
+        PM->>Plugin: Call file_types()
+        Plugin-->>PM: Return file type definitions
+        PM->>Plugin: Call editors()
+        Plugin-->>PM: Return editor metadata
+        PM->>Plugin: Call on_load()
+        Plugin-->>PM: Initialize resources
+        PM->>Editor: Register plugin capabilities
+        Editor-->>Editor: Plugin ready
+    else Validation fails
+        PM->>DLL: Unload plugin
+        PM->>Editor: Log error
+        Note over PM,Editor: Editor continues running
+    end
+```
+
+**Step-by-step:**
 
 1. **Scans the plugin directory** - Looks in `%AppData%/Pulsar/plugins/editor/` for DLL files
 2. **Loads each DLL** - Uses platform-specific APIs (`LoadLibrary` on Windows, `dlopen` on Unix)

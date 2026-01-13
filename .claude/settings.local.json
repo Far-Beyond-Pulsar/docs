@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(rm:*)",
-      "Bash(npm run generate:docs:*)"
+      "Bash(npm run generate:docs:*)",
+      "Bash(dir \"C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\Pulsar-Native\" /b)"
     ],
     "deny": []
   }
