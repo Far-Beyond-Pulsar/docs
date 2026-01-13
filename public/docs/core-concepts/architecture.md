@@ -21,7 +21,7 @@ Pulsar is a **game editor and engine** built in Rust with a focus on modularity,
 ## What Is Pulsar?
 
 > [!NOTE]
-> Pulsar resembles a **game editor** in this early stage, it has less runtime that most engines as we are primarily focused on UX. Think Unity Editor or Unreal Editor, built from scratch in Rust. This is in the process of changine so you will see us refer to it as an engine too.
+> Pulsar resembles a **game editor** in this early stage, it has less runtime that most engines as we are primarily focused on UX. Think Unity Editor or Unreal Editor, built from scratch in Rust. This is in the process of changing so you will see us refer to it as an engine too.
 
 - A launcher for managing and creating projects
 - File management and asset browsers
