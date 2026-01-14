@@ -527,7 +527,7 @@ Plugins have full system access. They can:
 Only load plugins from sources you trust. Pulsar doesn't sandbox plugins (yet).
 
 > [!NOTE]
-> Future plans include WebAssembly plugins, permission systems, and code signing for verified plugins.
+> For performance reasons we have no intention of sandboxing or permission checking plugins. Please note that you are loading third party plugins at your own risk. They will be able to do anything the engine can.
 
 ## Example Plugins
 
