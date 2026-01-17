@@ -175,9 +175,9 @@
         }
       ],
       "excerpt": "Understanding how Pulsar Engine is built",
-      "readingTime": 6,
+      "readingTime": 7,
       "lastUpdated": "2026-01-12",
-      "searchText": "pulsar architecture understanding how pulsar engine is built pulsar architecture what is pulsar? design philosophy core technologies gpui - the ui framework winit - window management bevy renderer - 3d graphics rapier3d - physics rust analyzer - code intelligence system architecture major components the launcher (ui_entry, ui_project_launcher) the editor shell (ui_core) file manager (ui_file_manager) problems panel (ui_problems) terminal (ui_terminal) type debugger (ui_type_debugger) 3d viewport (ui_level_editor) game object system plugin system engine backend (engine_backend) subsystems services engine state (engine_state) threading model project structure data flow example: opening a project configuration engine configuration project configuration future directions wrapping up architecture design systems pulsar architecture\n\npulsar is a game editor and engine built in rust with a focus on modularity, editor stability, and modern development workflows. this document explains how the major systems fit together.\n\nwhat is pulsar?\n\npulsar is primarily a game editor - think of it like unity's editor or unreal's editor, but built from the ground up in rust. it's not a runtime engine like bevy where you write code and run it separately. instead, pulsar provides:\n\n- a launcher for managing and creating projects\n- file management and asset browsers\n- code editing with rust analyzer integration\n- a 3d scene viewport with real-time rendering\n- plugin system for custom editors and tools\n- integrated terminal and problem diagnostics\n- type inspection and debugging tools\n\ndesign philosophy\n\neditor stability is paramount - the editor should never crash, even when your game code does. pulsar runs the editor ui separately from game logic to achieve this.\n\nrust all the way down - projects are rust worksp"
+      "searchText": "pulsar architecture understanding how pulsar engine is built pulsar architecture what is pulsar? design philosophy core technologies gpui - the ui framework winit - window management bevy renderer - 3d graphics rapier3d - physics rust analyzer - code intelligence system architecture major components the launcher (ui_entry, ui_project_launcher) the editor shell (ui_core) file manager (ui_file_manager) problems panel (ui_problems) terminal (ui_terminal) type debugger (ui_type_debugger) 3d viewport (ui_level_editor) game object system plugin system engine backend (engine_backend) subsystems services engine state (engine_state) threading model project structure data flow example: opening a project configuration engine configuration project configuration future directions wrapping up architecture design systems pulsar architecture\n\npulsar is a game editor and engine built in rust with a focus on modularity, editor stability, and modern development workflows. this document explains how the major systems fit together.\n\nwhat is pulsar?\n[!note]\npulsar resembles a game editor in this early stage, it has less runtime that most engines as we are primarily focused on ux. think unity editor or unreal editor, built from scratch in rust. this is in the process of changing so you will see us refer to it as an engine too.\n\n- a launcher for managing and creating projects\n- file management and asset browsers\n- code editing with rust analyzer integration\n- a 3d scene viewport with real-time rendering\n- plugin system for custom editors and tools\n- integrated terminal and problem diagnostics\n- type inspection and debugging tools\n\ndesign philosophy\n\neditor stability is paramount - the editor should never crash, even when your game code does. pulsar runs the editor ui separately from game logic to achieve this.\n"
     },
     {
       "id": "core-concepts",
@@ -278,6 +278,262 @@
       "readingTime": 6,
       "lastUpdated": "2026-01-12",
       "searchText": "core concepts understanding the fundamental concepts behind pulsar engine core concepts what you'll learn why these concepts matter starting points a note on learning curves philosophy behind the concepts no magic modularity through boundaries type safety everywhere explicit over implicit performance by design, not by accident how systems interact common questions where to go from here contributing to these docs experimental notice core concepts fundamentals overview core concepts\n\nwelcome to the heart of pulsar engine. if you're going to build something with pulsar—or just understand how it works—you need to grasp these fundamental concepts. this isn't a feature list or a marketing pitch. these are the ideas that shape every line of code in the engine.\n\nwhat you'll learn\n\nthis section covers the architectural decisions and systems that make pulsar what it is. each concept builds on the others, so while you can jump around, reading in order will give you the clearest picture.\n\nwe'll explore:\n\n- architecture - how pulsar is structured and why\n- plugin system - extending the editor with dynamic libraries\n- type system - strong typing for game data\n- ui framework - gpui and how the editor interface works\n- rendering pipeline - from scene to pixels\n- entity-component-system - game object architecture\n\nwhy these concepts matter\n\ngame engines are complex beasts. they're not just single programs—they're platforms for building interactive experiences. unde"
+    },
+    {
+      "id": "core-concepts-palette-system",
+      "title": "Palette System",
+      "description": "Dynamic, extensible command palette architecture for search and discovery",
+      "url": "/docs/core-concepts/palette-system",
+      "slug": "core-concepts/palette-system",
+      "category": "core-concepts",
+      "tags": [
+        "ui",
+        "command-palette",
+        "search",
+        "extensibility",
+        "architecture"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Palette System",
+          "slug": "palette-system"
+        },
+        {
+          "level": 2,
+          "text": "Why Dynamic Palettes?",
+          "slug": "why-dynamic-palettes"
+        },
+        {
+          "level": 2,
+          "text": "Architecture Overview",
+          "slug": "architecture-overview"
+        },
+        {
+          "level": 3,
+          "text": "Layer 1: PaletteManager (Global Registry)",
+          "slug": "layer-1-palettemanager-global-registry"
+        },
+        {
+          "level": 3,
+          "text": "Layer 2: Palette (Data Container)",
+          "slug": "layer-2-palette-data-container"
+        },
+        {
+          "level": 3,
+          "text": "Layer 3: PaletteViewDelegate (Adapter)",
+          "slug": "layer-3-paletteviewdelegate-adapter"
+        },
+        {
+          "level": 3,
+          "text": "Layer 4: GenericPalette (UI Component)",
+          "slug": "layer-4-genericpalette-ui-component"
+        },
+        {
+          "level": 2,
+          "text": "Core Traits and Types",
+          "slug": "core-traits-and-types"
+        },
+        {
+          "level": 3,
+          "text": "PaletteId",
+          "slug": "paletteid"
+        },
+        {
+          "level": 3,
+          "text": "ItemId",
+          "slug": "itemid"
+        },
+        {
+          "level": 3,
+          "text": "PaletteItem Trait",
+          "slug": "paletteitem-trait"
+        },
+        {
+          "level": 3,
+          "text": "PaletteDelegate Trait",
+          "slug": "palettedelegate-trait"
+        },
+        {
+          "level": 3,
+          "text": "PaletteItemData",
+          "slug": "paletteitemdata"
+        },
+        {
+          "level": 2,
+          "text": "Basic Usage",
+          "slug": "basic-usage"
+        },
+        {
+          "level": 3,
+          "text": "Step 1: Initialize the Manager",
+          "slug": "step-1-initialize-the-manager"
+        },
+        {
+          "level": 3,
+          "text": "Step 2: Register a Palette",
+          "slug": "step-2-register-a-palette"
+        },
+        {
+          "level": 3,
+          "text": "Step 3: Add Items",
+          "slug": "step-3-add-items"
+        },
+        {
+          "level": 3,
+          "text": "Step 4: Show the Palette",
+          "slug": "step-4-show-the-palette"
+        },
+        {
+          "level": 3,
+          "text": "Step 5: Handle Selection",
+          "slug": "step-5-handle-selection"
+        },
+        {
+          "level": 2,
+          "text": "Advanced Usage",
+          "slug": "advanced-usage"
+        },
+        {
+          "level": 3,
+          "text": "Rebinding Callbacks",
+          "slug": "rebinding-callbacks"
+        },
+        {
+          "level": 3,
+          "text": "Dynamic Items",
+          "slug": "dynamic-items"
+        },
+        {
+          "level": 3,
+          "text": "Custom Delegates",
+          "slug": "custom-delegates"
+        },
+        {
+          "level": 3,
+          "text": "Multiple Palettes",
+          "slug": "multiple-palettes"
+        },
+        {
+          "level": 3,
+          "text": "Swapping Delegates",
+          "slug": "swapping-delegates"
+        },
+        {
+          "level": 2,
+          "text": "Best Practices",
+          "slug": "best-practices"
+        },
+        {
+          "level": 3,
+          "text": "Categorize Thoughtfully",
+          "slug": "categorize-thoughtfully"
+        },
+        {
+          "level": 3,
+          "text": "Keywords Matter",
+          "slug": "keywords-matter"
+        },
+        {
+          "level": 3,
+          "text": "Use Descriptive Names",
+          "slug": "use-descriptive-names"
+        },
+        {
+          "level": 3,
+          "text": "Clean Up on Unload",
+          "slug": "clean-up-on-unload"
+        },
+        {
+          "level": 3,
+          "text": "Cache Delegates When Possible",
+          "slug": "cache-delegates-when-possible"
+        },
+        {
+          "level": 3,
+          "text": "Consider Accessibility",
+          "slug": "consider-accessibility"
+        },
+        {
+          "level": 2,
+          "text": "Integration with Plugins",
+          "slug": "integration-with-plugins"
+        },
+        {
+          "level": 3,
+          "text": "EditorPlugin Integration",
+          "slug": "editorplugin-integration"
+        },
+        {
+          "level": 3,
+          "text": "Adding Global Commands",
+          "slug": "adding-global-commands"
+        },
+        {
+          "level": 3,
+          "text": "Context-Specific Palettes",
+          "slug": "context-specific-palettes"
+        },
+        {
+          "level": 2,
+          "text": "Performance Considerations",
+          "slug": "performance-considerations"
+        },
+        {
+          "level": 3,
+          "text": "Filtering Performance",
+          "slug": "filtering-performance"
+        },
+        {
+          "level": 3,
+          "text": "Memory Usage",
+          "slug": "memory-usage"
+        },
+        {
+          "level": 3,
+          "text": "Rendering Performance",
+          "slug": "rendering-performance"
+        },
+        {
+          "level": 2,
+          "text": "Troubleshooting",
+          "slug": "troubleshooting"
+        },
+        {
+          "level": 3,
+          "text": "\"Palette not found\" when retrieving by ID",
+          "slug": "palette-not-found-when-retrieving-by-id"
+        },
+        {
+          "level": 3,
+          "text": "Items not showing in palette",
+          "slug": "items-not-showing-in-palette"
+        },
+        {
+          "level": 3,
+          "text": "Callbacks not firing",
+          "slug": "callbacks-not-firing"
+        },
+        {
+          "level": 3,
+          "text": "Memory leak from closures",
+          "slug": "memory-leak-from-closures"
+        },
+        {
+          "level": 2,
+          "text": "Future Directions",
+          "slug": "future-directions"
+        },
+        {
+          "level": 2,
+          "text": "Summary",
+          "slug": "summary"
+        }
+      ],
+      "excerpt": "Dynamic, extensible command palette architecture for search and discovery",
+      "readingTime": 14,
+      "lastUpdated": "2026-01-17",
+      "searchText": "palette system dynamic, extensible command palette architecture for search and discovery palette system why dynamic palettes? architecture overview layer 1: palettemanager (global registry) layer 2: palette (data container) layer 3: paletteviewdelegate (adapter) layer 4: genericpalette (ui component) core traits and types paletteid itemid paletteitem trait palettedelegate trait paletteitemdata basic usage step 1: initialize the manager step 2: register a palette step 3: add items step 4: show the palette step 5: handle selection advanced usage rebinding callbacks dynamic items custom delegates multiple palettes swapping delegates best practices categorize thoughtfully keywords matter use descriptive names clean up on unload cache delegates when possible consider accessibility integration with plugins editorplugin integration adding global commands context-specific palettes performance considerations filtering performance memory usage rendering performance troubleshooting \"palette not found\" when retrieving by id items not showing in palette callbacks not firing memory leak from closures future directions summary ui command-palette search extensibility architecture palette system\r\n\r\nthe palette system is pulsar's solution to the \"how do i find anything?\" problem that plagues complex editors. think of it as the editor's universal search and command interface—press a hotkey, type what you want, and the palette shows you relevant actions, files, settings, or anything else a plugin might expose.\r\n\r\nbut here's what makes it interesting: the palette system isn't a monolithic component. it's a dynamic, multi-layered architecture that lets plugins register their own searchable content with full ui customization. want to add a material browser? a scene object picker? a build configuration selector? the palette system provides the infrastructure.\r\n\r\nthis document explains how it all works, from the architecture to practical usage patterns for both engine users and plugin developers.\r\n\r\nwhy dynamic palettes?\r\n\r\nbefore diving into the technical details, let's understand the design requirements that shaped this system.\r\n\r\nextensibility without fragmentation -"
     },
     {
       "id": "core-concepts-plugin-system",
@@ -477,7 +733,7 @@
       "excerpt": "Understanding Pulsar's dynamic plugin architecture",
       "readingTime": 9,
       "lastUpdated": "2026-01-12",
-      "searchText": "plugin system understanding pulsar's dynamic plugin architecture plugin system why dynamic libraries? the performance argument the safety argument the power argument how plugins work the loading process the plugin interface memory management across the ffi boundary file type registration standalone files folder-based files categories and organization editor implementation the editorinstance trait basic editor structure rendering with gpui panel integration statusbar buttons lifecycle hooks error handling version compatibility performance considerations security considerations example plugins common patterns configuration files background processing shared resources debugging plugins logging panics and crashes debugger attachment publishing plugins limitations and future work wrapping up plugins architecture extensibility dlls plugin system\n\npulsar's plugin system is one of its most distinctive features. unlike engines that use scripting languages or interpreted code for extensions, pulsar plugins are compiled rust dynamic libraries loaded at runtime. this gives you native performance, full type safety, and complete access to the editor api—while maintaining the flexibility of a plugin architecture.\n\nwhy dynamic libraries?\n\nlet's start with the question you're probably asking: why use dlls (dynamic link libraries) for plugins instead of something simpler like scripts or configuration files?\n\nthe performance argument\n\nplugins run at native speed. there's no interpreter, no virtual machine, no jit warmup time. when your plugin needs to process thousands of files or render a complex editor panel, it does so with zero overhead.\n\nthis matters when you're building professional tools. a material editor that lags when scrolling through properties isn't usable. a custom file format that takes seconds to load becomes "
+      "searchText": "plugin system understanding pulsar's dynamic plugin architecture plugin system why dynamic libraries? the performance argument the safety argument the power argument how plugins work the loading process the plugin interface memory management across the ffi boundary file type registration standalone files folder-based files categories and organization editor implementation the editorinstance trait basic editor structure rendering with gpui panel integration statusbar buttons lifecycle hooks error handling version compatibility performance considerations security considerations example plugins common patterns configuration files background processing shared resources debugging plugins logging panics and crashes debugger attachment publishing plugins limitations and future work wrapping up plugins architecture extensibility dlls plugin system\n[!note]\npulsar plugins are compiled rust dlls, not scripts. this gives you native performance and full api access.\n\npulsar's plugin system is one of its most distinctive features. unlike engines that use scripting languages or interpreted code for extensions, pulsar plugins are compiled rust dynamic libraries loaded at runtime. this gives you native performance, full type safety, and complete access to the editor api—while maintaining the flexibility of a plugin architecture.\n\nwhy dynamic libraries?\n\nlet's start with the question you're probably asking: why use dlls (dynamic link libraries) for plugins instead of something simpler like scripts or configuration files?\n\nthe performance argument\n\nplugins run at native speed. there's no interpreter, no virtual machine, no jit warmup time. when your plugin needs to process thousands of files or render a complex editor panel, it does so with zero overhead.\n\nthis matters when you're building professional tools. a material editor"
     },
     {
       "id": "core-concepts-rendering-pipeline",
@@ -555,6 +811,41 @@
         },
         {
           "level": 2,
+          "text": "The Compositor",
+          "slug": "the-compositor"
+        },
+        {
+          "level": 3,
+          "text": "Composition Process",
+          "slug": "composition-process"
+        },
+        {
+          "level": 3,
+          "text": "Zero-Copy GPU Texture Sharing",
+          "slug": "zero-copy-gpu-texture-sharing"
+        },
+        {
+          "level": 3,
+          "text": "Rendering Pipeline",
+          "slug": "rendering-pipeline"
+        },
+        {
+          "level": 3,
+          "text": "Performance Characteristics",
+          "slug": "performance-characteristics"
+        },
+        {
+          "level": 3,
+          "text": "Device Error Recovery",
+          "slug": "device-error-recovery"
+        },
+        {
+          "level": 3,
+          "text": "Platform Support",
+          "slug": "platform-support"
+        },
+        {
+          "level": 2,
           "text": "Integration with GPUI",
           "slug": "integration-with-gpui"
         },
@@ -575,9 +866,9 @@
         }
       ],
       "excerpt": "How Pulsar renders 3D scenes",
-      "readingTime": 4,
+      "readingTime": 6,
       "lastUpdated": "2026-01-12",
-      "searchText": "rendering system how pulsar renders 3d scenes rendering system overview why bevy's renderer? architecture bevyrenderer rendering gameobjects materials lighting camera system render thread zero-copy rendering performance integration with gpui limitations future plans wrapping up rendering graphics bevy 3d rendering system\n\npulsar's 3d viewport uses bevy's rendering modules to display game scenes in real-time. this document explains how the rendering system works and how it integrates with the editor.\n\noverview\n\npulsar doesn't implement its own custom rendering pipeline. instead, it uses bevy's proven rendering modules:\n\n- bevyrender - core rendering infrastructure\n- bevypbr - physically based rendering (pbr) materials\n- bevycorepipeline - rendering pipeline stages\n- bevyasset - asset loading and management\n\nthis leverages bevy's mature, well-tested rendering code while keeping pulsar focused on the editor experience.\n\nwhy bevy's renderer?\n\nproven technology - bevy's renderer powers many shipped games and has been battle-tested.\n\npbr materials - modern physically-based rendering with metallic/roughness workflows out of the box.\n\ncross-platform - works on windows, linux (when supported), and macos (when supported) via wgpu.\n\nactive development - benefits from bevy community improvements a"
+      "searchText": "rendering system how pulsar renders 3d scenes rendering system overview why bevy's renderer? architecture bevyrenderer rendering gameobjects materials lighting camera system render thread zero-copy rendering performance the compositor composition process zero-copy gpu texture sharing rendering pipeline performance characteristics device error recovery platform support integration with gpui limitations future plans wrapping up rendering graphics bevy 3d rendering system\n\npulsar's 3d viewport uses bevy's rendering modules to display game scenes in real-time. this document explains how the rendering system works and how it integrates with the editor.\n\noverview\n\npulsar doesn't implement its own custom rendering pipeline. instead, it uses bevy's proven rendering modules:\n\n- bevyrender - core rendering infrastructure\n- bevypbr - physically based rendering (pbr) materials\n- bevycorepipeline - rendering pipeline stages\n- bevyasset - asset loading and management\n\nthis leverages bevy's mature, well-tested rendering code while keeping pulsar focused on the editor experience.\n\nwhy bevy's renderer?\n\nproven technology - bevy's renderer powers many shipped games and has been battle-tested.\n\npbr materials - modern physically-based rendering with metallic/roughness workflows out of the box.\n\ncross-platform - works on windows, linux (when supported), and macos (when supported) via wgpu.\n\nactive development - benefits from bevy community improvements a"
     },
     {
       "id": "core-concepts-type-system",
@@ -680,9 +971,9 @@
         }
       ],
       "excerpt": "Pulsar's type registry for inspecting project types",
-      "readingTime": 3,
+      "readingTime": 4,
       "lastUpdated": "2026-01-12",
-      "searchText": "type database pulsar's type registry for inspecting project types type database what is the type database? core concepts typeinfo typekind using the type database registering types looking up types searching types removing types type debugger ui integration with rust analyzer performance use cases limitations example: custom plugin using type database wrapping up types database inspection type-debugger type database\n\npulsar includes a type database (type_db crate) - an in-memory registry for storing and querying rust types from your project. this powers the type debugger ui panel, which lets you browse and inspect all the structs, enums, traits, and type aliases in your codebase.\n\nwhat is the type database?\n\nthe type database is a thread-safe, in-memory store that holds metadata about rust types. it's populated by analyzing your project's code (via rust analyzer integration) and provides fast lookup and search capabilities.\n\nthink of it as a runtime index of your project's type definitions, accessible to editor tooling.\n\ncore concepts\n\ntypeinfo\n\neach registered type is represented as typeinfo:\n\ntypekind\n\ntypes are categorized by kind:\n\nusing the type database\n\nregistering types\n\ntypes are registered with the database:\n\nlooking up types\n\nmultiple lookup methods are provided:\n\nsearching types\n\nthe database supports fuzzy searching:\n\nremoving types\n\ntype debugger ui\n\nthe type database p"
+      "searchText": "type database pulsar's type registry for inspecting project types type database what is the type database? core concepts typeinfo typekind using the type database registering types looking up types searching types removing types type debugger ui integration with rust analyzer performance use cases limitations example: custom plugin using type database wrapping up types database inspection type-debugger type database\n[!note]\nthe type database is a registry for type metadata, not a validation system. it powers the type debugger ui panel.\n\npulsar includes a type database (type_db crate) - an in-memory registry for storing and querying rust types from your project. this powers the type debugger ui panel, which lets you browse and inspect all the structs, enums, traits, and type aliases in your codebase.\n\nwhat is the type database?\n\nthe type database is a thread-safe, in-memory store that holds metadata about rust types. it's populated by analyzing your project's code (via rust analyzer integration) and provides fast lookup and search capabilities.\n\nthink of it as a runtime index of your project's type definitions, accessible to editor tooling.\n\ncore concepts\n\ntypeinfo\n\neach registered type is represented as typeinfo:\n\ntypekind\n\ntypes are categorized by kind:\n\nusing the type database\n\nregistering types\n\ntypes are registered with the database:\n\nlooking up types\n\nmultiple lookup methods are"
     },
     {
       "id": "core-concepts-ui-framework",
@@ -853,7 +1144,7 @@
       "excerpt": "Deep dive into Pulsar's GPU-accelerated UI framework",
       "readingTime": 8,
       "lastUpdated": "2026-01-12",
-      "searchText": "ui framework (gpui) deep dive into pulsar's gpu-accelerated ui framework ui framework (gpui) why gpui exists core concepts entities views contexts the render loop layout system box model flexbox layout absolute positioning real example: editor panel layout styling system colors typography visual effects event system mouse events keyboard events click events custom events integration with the editor editor panels context menus tooltips performance considerations minimize re-renders batch updates virtualization conclusion ui gpui rendering views components ui framework (gpui)\n\ngpui is pulsar's custom ui framework, and it's unlike anything you've probably worked with before. it's not react, it's not immediate mode, and it's definitely not a traditional retained-mode gui toolkit. instead, gpui is a hybrid approach that combines the best ideas from modern ui frameworks with the performance requirements of a professional game engine editor.\n\nlet me explain why we built it this way, how it works, and—most importantly—how you actually use it to build editor interfaces.\n\nwhy gpui exists\n\nyou might be wondering: why build a custom ui framework when mature options like egui, iced, or even web technologies exist? the answer comes down to our specific requirements:\n\ngpu acceleration isn't optional - editor uis need to render smoothly at 60+ fps while updating constantly. project trees with thousands of files, code editors with syntax highlighting, property panels with live updates—all of this needs to be fast. gpui renders everything using the gpu,"
+      "searchText": "ui framework (gpui) deep dive into pulsar's gpu-accelerated ui framework ui framework (gpui) why gpui exists core concepts entities views contexts the render loop layout system box model flexbox layout absolute positioning real example: editor panel layout styling system colors typography visual effects event system mouse events keyboard events click events custom events integration with the editor editor panels context menus tooltips performance considerations minimize re-renders batch updates virtualization conclusion ui gpui rendering views components ui framework (gpui)\n\ngpui is zed's custom ui framework, and it's unlike anything you've probably worked with before. it's not react, it's not immediate mode, and it's definitely not a traditional retained-mode gui toolkit. instead, gpui is a hybrid approach that combines the best ideas from modern ui frameworks with the performance requirements of a professional game engine editor.\n\nlet me explain why we built it this way, how it works, and—most importantly—how you actually use it to build editor interfaces.\n\nwhy gpui exists\n\nyou might be wondering: why build a custom ui framework when mature options like egui, iced, or even web technologies exist? the answer comes down to our specific requirements:\n\ngpu acceleration isn't optional - editor uis need to render smoothly at 60+ fps while updating constantly. project trees with thousands of files, code editors with syntax highlighting, property panels with live updates—all of this needs to be fast. gpui renders everything using the gpu, wh"
     },
     {
       "id": "getting-started-first-project",
@@ -1881,8 +2172,8 @@
     }
   ],
   "metadata": {
-    "totalDocs": 13,
-    "totalWords": 12111,
+    "totalDocs": 14,
+    "totalWords": 15333,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -1894,6 +2185,7 @@
       "architecture",
       "beginner",
       "bevy",
+      "command-palette",
       "components",
       "concepts",
       "core",
@@ -1918,6 +2210,7 @@
       "project",
       "quickstart",
       "rendering",
+      "search",
       "setup",
       "systems",
       "tutorial",
@@ -1928,7 +2221,7 @@
       "views",
       "windows"
     ],
-    "lastGenerated": "2026-01-13T00:05:57.017Z",
+    "lastGenerated": "2026-01-17T19:17:44.064Z",
     "version": "1.0.0"
   }
 }

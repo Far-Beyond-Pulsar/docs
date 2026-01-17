@@ -72,6 +72,12 @@
     "category": "core-concepts"
   },
   {
+    "title": "Palette System",
+    "path": "/docs/core-concepts/palette-system",
+    "slug": "core-concepts/palette-system",
+    "category": "core-concepts"
+  },
+  {
     "title": "Guides",
     "path": "/docs/guides/index",
     "slug": "guides/index",

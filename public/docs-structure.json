@@ -123,6 +123,14 @@
           "type": "page",
           "order": 4,
           "icon": "Palette"
+        },
+        {
+          "title": "Palette System",
+          "slug": "palette-system",
+          "path": "/docs/core-concepts/palette-system",
+          "type": "page",
+          "order": 5,
+          "icon": "Search"
         }
       ]
     },
@@ -145,6 +153,6 @@
       ]
     }
   ],
-  "lastGenerated": "2026-01-13T00:05:56.620Z",
+  "lastGenerated": "2026-01-17T19:17:43.665Z",
   "version": "1.0.0"
 }
