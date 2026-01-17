@@ -219,6 +219,46 @@
           "type": "page",
           "order": 17,
           "icon": "Box"
+        },
+        {
+          "title": "Blueprint Graph System",
+          "slug": "blueprint-graph-system",
+          "path": "/docs/core-concepts/blueprint-graph-system",
+          "type": "page",
+          "order": 18,
+          "icon": "GitBranch"
+        },
+        {
+          "title": "History System",
+          "slug": "history-system",
+          "path": "/docs/core-concepts/history-system",
+          "type": "page",
+          "order": 19,
+          "icon": "History"
+        },
+        {
+          "title": "Engine State Management",
+          "slug": "engine-state",
+          "path": "/docs/core-concepts/engine-state",
+          "type": "page",
+          "order": 20,
+          "icon": "Database"
+        },
+        {
+          "title": "Asset Loading System",
+          "slug": "asset-loading",
+          "path": "/docs/core-concepts/asset-loading",
+          "type": "page",
+          "order": 21,
+          "icon": "Image"
+        },
+        {
+          "title": "Code Editor Component",
+          "slug": "code-editor",
+          "path": "/docs/core-concepts/code-editor",
+          "type": "page",
+          "order": 22,
+          "icon": "FileCode"
         }
       ]
     },
@@ -241,6 +281,6 @@
       ]
     }
   ],
-  "lastGenerated": "2026-01-17T20:05:17.490Z",
+  "lastGenerated": "2026-01-17T20:09:30.227Z",
   "version": "1.0.0"
 }

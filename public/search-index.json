@@ -180,6 +180,142 @@
       "searchText": "pulsar architecture understanding how pulsar engine is built pulsar architecture what is pulsar? design philosophy core technologies gpui - the ui framework winit - window management bevy renderer - 3d graphics rapier3d - physics rust analyzer - code intelligence system architecture major components the launcher (ui_entry, ui_project_launcher) the editor shell (ui_core) file manager (ui_file_manager) problems panel (ui_problems) terminal (ui_terminal) type debugger (ui_type_debugger) 3d viewport (ui_level_editor) game object system plugin system engine backend (engine_backend) subsystems services engine state (engine_state) threading model project structure data flow example: opening a project configuration engine configuration project configuration future directions wrapping up architecture design systems pulsar architecture\n\npulsar is a game editor and engine built in rust with a focus on modularity, editor stability, and modern development workflows. this document explains how the major systems fit together.\n\nwhat is pulsar?\n[!note]\npulsar resembles a game editor in this early stage, it has less runtime that most engines as we are primarily focused on ux. think unity editor or unreal editor, built from scratch in rust. this is in the process of changing so you will see us refer to it as an engine too.\n\n- a launcher for managing and creating projects\n- file management and asset browsers\n- code editing with rust analyzer integration\n- a 3d scene viewport with real-time rendering\n- plugin system for custom editors and tools\n- integrated terminal and problem diagnostics\n- type inspection and debugging tools\n\ndesign philosophy\n\neditor stability is paramount - the editor should never crash, even when your game code does. pulsar runs the editor ui separately from game logic to achieve this.\n"
     },
     {
+      "id": "core-concepts-asset-loading",
+      "title": "Asset Loading System",
+      "description": "Embedded asset management with rust-embed",
+      "url": "/docs/core-concepts/asset-loading",
+      "slug": "core-concepts/asset-loading",
+      "category": "core-concepts",
+      "tags": [
+        "assets",
+        "embedding",
+        "fonts",
+        "icons",
+        "images"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Asset Loading System",
+          "slug": "asset-loading-system"
+        },
+        {
+          "level": 2,
+          "text": "What It Provides",
+          "slug": "what-it-provides"
+        },
+        {
+          "level": 2,
+          "text": "Assets Structure",
+          "slug": "assets-structure"
+        },
+        {
+          "level": 2,
+          "text": "Directory Structure",
+          "slug": "directory-structure"
+        },
+        {
+          "level": 2,
+          "text": "Loading Assets",
+          "slug": "loading-assets"
+        },
+        {
+          "level": 2,
+          "text": "Listing Assets",
+          "slug": "listing-assets"
+        },
+        {
+          "level": 2,
+          "text": "GPUI Integration",
+          "slug": "gpui-integration"
+        },
+        {
+          "level": 2,
+          "text": "Using with GPUI",
+          "slug": "using-with-gpui"
+        },
+        {
+          "level": 2,
+          "text": "Icon Loading",
+          "slug": "icon-loading"
+        },
+        {
+          "level": 2,
+          "text": "Font Loading",
+          "slug": "font-loading"
+        },
+        {
+          "level": 2,
+          "text": "Image Loading",
+          "slug": "image-loading"
+        },
+        {
+          "level": 2,
+          "text": "Compile-Time Embedding",
+          "slug": "compile-time-embedding"
+        },
+        {
+          "level": 2,
+          "text": "Benefits",
+          "slug": "benefits"
+        },
+        {
+          "level": 2,
+          "text": "Trade-offs",
+          "slug": "trade-offs"
+        },
+        {
+          "level": 2,
+          "text": "Asset Variants",
+          "slug": "asset-variants"
+        },
+        {
+          "level": 2,
+          "text": "Dynamic Assets",
+          "slug": "dynamic-assets"
+        },
+        {
+          "level": 2,
+          "text": "Asset Preprocessing",
+          "slug": "asset-preprocessing"
+        },
+        {
+          "level": 1,
+          "text": "Optimize SVGs",
+          "slug": "optimize-svgs"
+        },
+        {
+          "level": 1,
+          "text": "Optimize PNGs",
+          "slug": "optimize-pngs"
+        },
+        {
+          "level": 1,
+          "text": "Subset fonts",
+          "slug": "subset-fonts"
+        },
+        {
+          "level": 2,
+          "text": "Example: Icon System",
+          "slug": "example-icon-system"
+        },
+        {
+          "level": 2,
+          "text": "Example: Font Family",
+          "slug": "example-font-family"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "Embedded asset management with rust-embed",
+      "readingTime": 2,
+      "lastUpdated": "2026-01-17",
+      "searchText": "asset loading system embedded asset management with rust-embed asset loading system what it provides assets structure directory structure loading assets listing assets gpui integration using with gpui icon loading font loading image loading compile-time embedding benefits trade-offs asset variants dynamic assets asset preprocessing optimize svgs optimize pngs subset fonts example: icon system example: font family limitations assets embedding fonts icons images asset loading system\r\n\r\nthe asset loading system embeds resources (icons, fonts, images) into the binary at compile time using rust-embed. this simplifies distribution and ensures assets are always available. the implementation is in crates/ui/src/assets.rs.\r\n\r\nwhat it provides\r\n\r\nthe asset loading system provides:\r\n- compile-time asset embedding\r\n- runtime asset loading\r\n- gpui assetsource integration\r\n- support for icons, fonts, and images\r\n- asset listing and enumeration\r\n\r\nassets structure\r\n\r\nthe embedded assets container:\r\nthis embeds all svg icons, ttf fonts, and png images from the assets/ directory.\r\n\r\ndirectory structure\r\n\r\nassets are organized by type:\r\nloading assets\r\n\r\nload an asset by path:\r\nthe data is borrowed from the embedded binary (no allocation).\r\n\r\nlisting assets\r\n\r\nlist all assets:\r\nfilter by prefix:\r\nlist fonts:\r\ngpui integration\r\n\r\nthe assets type implements assetsource:\r\nthis allows gpui to load assets transparently.\r\n\r\nusing with gpui\r\n\r\nregister with gpui:\r\nl"
+    },
+    {
       "id": "core-concepts-bevy-viewport",
       "title": "Bevy Viewport Integration",
       "description": "Zero-copy GPU rendering with Bevy engine",
@@ -326,6 +462,146 @@
       "searchText": "bevy viewport integration zero-copy gpu rendering with bevy engine bevy viewport integration architecture zero-copy rendering bevyviewport component viewport state texture initialization double buffering gpu canvas source texture handles render loop gpu renderer native texture handle object fit resizing performance metrics bgra8 format fallback rendering continuous rendering focus handling platform differences windows (directx) macos (metal) linux (vulkan) synchronization limitations rendering bevy gpu viewport zero-copy [!warning]\rthe rending system is currently tied heavily to bevy's renderer and ecs. while we may be remaining tied to bevyecs, the rendering engine will be made modular in the fiture. at such time this page will be moved to a new \"render engines\" section\r\n\r\nbevy viewport integration\r\n\r\npulsar integrates bevy (a rust game engine) for 3d rendering using zero-copy gpu texture sharing. the bevy renderer runs in a background thread and shares textures with gpui for display. the implementation is in crates/ui/src/bevyviewport.rs and crates/enginebackend/src/services/gpurenderer.rs.\r\n\r\narchitecture\r\n\r\nthe viewport system has several layers:\r\n\r\n- bevyviewport - gpui component that displays the render\r\n- bevyviewportstate - shared state for texture handles\r\n- gpurenderer - wrapper around bevy renderer\r\n- bevyrenderer - actual bevy ecs and rendering pipeline\r\n- gpu texture sharing - platform-specific shared memory\r\n\r\nzero-copy rendering\r\n\r\nthe key innovation is zero-copy gpu texture sharing:\r\nth"
     },
     {
+      "id": "core-concepts-blueprint-graph-system",
+      "title": "Blueprint Graph System",
+      "description": "Visual scripting graph editor and file format",
+      "url": "/docs/core-concepts/blueprint-graph-system",
+      "slug": "core-concepts/blueprint-graph-system",
+      "category": "core-concepts",
+      "tags": [
+        "blueprints",
+        "visual-scripting",
+        "graphs",
+        "nodes"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Blueprint Graph System",
+          "slug": "blueprint-graph-system"
+        },
+        {
+          "level": 2,
+          "text": "Blueprint Asset Format",
+          "slug": "blueprint-asset-format"
+        },
+        {
+          "level": 2,
+          "text": "Graph Description",
+          "slug": "graph-description"
+        },
+        {
+          "level": 2,
+          "text": "Node Instance",
+          "slug": "node-instance"
+        },
+        {
+          "level": 2,
+          "text": "Pin Instance",
+          "slug": "pin-instance"
+        },
+        {
+          "level": 2,
+          "text": "Connections",
+          "slug": "connections"
+        },
+        {
+          "level": 2,
+          "text": "Type System",
+          "slug": "type-system"
+        },
+        {
+          "level": 2,
+          "text": "Type Parsing",
+          "slug": "type-parsing"
+        },
+        {
+          "level": 2,
+          "text": "Wildcard Types",
+          "slug": "wildcard-types"
+        },
+        {
+          "level": 2,
+          "text": "Pin Colors",
+          "slug": "pin-colors"
+        },
+        {
+          "level": 2,
+          "text": "Pin Icons",
+          "slug": "pin-icons"
+        },
+        {
+          "level": 2,
+          "text": "Pin Style",
+          "slug": "pin-style"
+        },
+        {
+          "level": 2,
+          "text": "Class Variables",
+          "slug": "class-variables"
+        },
+        {
+          "level": 2,
+          "text": "Local Macros",
+          "slug": "local-macros"
+        },
+        {
+          "level": 2,
+          "text": "Blueprint Comments",
+          "slug": "blueprint-comments"
+        },
+        {
+          "level": 2,
+          "text": "Blueprint Metadata",
+          "slug": "blueprint-metadata"
+        },
+        {
+          "level": 2,
+          "text": "Editor State",
+          "slug": "editor-state"
+        },
+        {
+          "level": 2,
+          "text": "Creating a Blueprint",
+          "slug": "creating-a-blueprint"
+        },
+        {
+          "level": 2,
+          "text": "Adding Nodes",
+          "slug": "adding-nodes"
+        },
+        {
+          "level": 2,
+          "text": "Connecting Nodes",
+          "slug": "connecting-nodes"
+        },
+        {
+          "level": 2,
+          "text": "Serialization",
+          "slug": "serialization"
+        },
+        {
+          "level": 2,
+          "text": "Deserialization",
+          "slug": "deserialization"
+        },
+        {
+          "level": 2,
+          "text": "Type Compatibility",
+          "slug": "type-compatibility"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "Visual scripting graph editor and file format",
+      "readingTime": 3,
+      "lastUpdated": "2026-01-17",
+      "searchText": "blueprint graph system visual scripting graph editor and file format blueprint graph system blueprint asset format graph description node instance pin instance connections type system type parsing wildcard types pin colors pin icons pin style class variables local macros blueprint comments blueprint metadata editor state creating a blueprint adding nodes connecting nodes serialization deserialization type compatibility limitations blueprints visual-scripting graphs nodes blueprint graph system\r\n\r\nthe blueprint graph system provides the data structures and type system for visual scripting. it defines the file format, graph structure, connections, and type inference. the implementation is in crates/ui/src/graph/.\r\n\r\nblueprint asset format\r\n\r\nthe top-level file format for .bpgraph files:\r\nthis contains everything about a blueprint - graphs, variables, metadata, and editor state.\r\n\r\ngraph description\r\n\r\na graph is a collection of nodes and connections:\r\nnodes are stored in a hashmap by id. connections link node pins together.\r\n\r\nnode instance\r\n\r\na node in a graph:\r\neach node has a type (like \"add\", \"branch\", \"print\"), inputs, outputs, and position.\r\n\r\npin instance\r\n\r\na pin on a node:\r\npins can be data pins (typed values) or execution pins (control flow).\r\n\r\nconnections\r\n\r\na connection links two pins:\r\nthis represents an edge in the graph - data flows from frompin to to_pin.\r\n\r\ntype system\r\n\r\nthe blueprint type system parses rust types:\r\ntypes are parsed fr"
+    },
+    {
       "id": "core-concepts-blueprint-system",
       "title": "Blueprint Node System",
       "description": "Visual programming node registry and runtime",
@@ -444,6 +720,126 @@
       "readingTime": 4,
       "lastUpdated": "2026-01-17",
       "searchText": "blueprint node system visual programming node registry and runtime blueprint node system what it provides node types defining nodes pure functions functions with side effects control flow events node registry querying nodes type constructors import tracking documentation node colors adding custom nodes code generation standard library organization execution model limitations future enhancements blueprints visual-programming nodes scripting blueprint node system\r\n\r\npulsar includes a visual programming system called blueprints. the standard library (pulsarstd) provides built-in nodes for common operations. custom nodes can be added by creating rust functions with the #[blueprint] attribute. the implementation is in crates/pulsarstd/.\r\n\r\nwhat it provides\r\n\r\nthe blueprint system provides:\r\n- automatic node registration at compile time using linkme\r\n- node metadata extraction from rust functions\r\n- runtime node registry for querying available nodes\r\n- support for pure functions, side effects, control flow, and events\r\n- type constructor registry for generic types\r\n- category-based node organization\r\n\r\nnode types\r\n\r\nblueprints support four node types via the nodetypes enum:\r\nthese determine how the node appears in the visual editor and how code generation works.\r\n\r\ndefining nodes\r\n\r\nnodes are defined as regular rust functions with the #[blueprint] attribute:\r\nthe macro extracts metadata from the function signature and stores i"
+    },
+    {
+      "id": "core-concepts-code-editor",
+      "title": "Code Editor Component",
+      "description": "Virtualized code editor with syntax highlighting",
+      "url": "/docs/core-concepts/code-editor",
+      "slug": "core-concepts/code-editor",
+      "category": "core-concepts",
+      "tags": [
+        "editor",
+        "code",
+        "virtualized",
+        "text"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Code Editor Component",
+          "slug": "code-editor-component"
+        },
+        {
+          "level": 2,
+          "text": "What It Provides",
+          "slug": "what-it-provides"
+        },
+        {
+          "level": 2,
+          "text": "CodeEditor Structure",
+          "slug": "codeeditor-structure"
+        },
+        {
+          "level": 2,
+          "text": "Editor Configuration",
+          "slug": "editor-configuration"
+        },
+        {
+          "level": 2,
+          "text": "Creating an Editor",
+          "slug": "creating-an-editor"
+        },
+        {
+          "level": 2,
+          "text": "Virtual Scrolling",
+          "slug": "virtual-scrolling"
+        },
+        {
+          "level": 2,
+          "text": "Rope Data Structure",
+          "slug": "rope-data-structure"
+        },
+        {
+          "level": 2,
+          "text": "Line Numbers",
+          "slug": "line-numbers"
+        },
+        {
+          "level": 2,
+          "text": "Content Rendering",
+          "slug": "content-rendering"
+        },
+        {
+          "level": 2,
+          "text": "Minimap",
+          "slug": "minimap"
+        },
+        {
+          "level": 2,
+          "text": "Density Visualization",
+          "slug": "density-visualization"
+        },
+        {
+          "level": 2,
+          "text": "Saving Files",
+          "slug": "saving-files"
+        },
+        {
+          "level": 2,
+          "text": "File Modification",
+          "slug": "file-modification"
+        },
+        {
+          "level": 2,
+          "text": "Editor Events",
+          "slug": "editor-events"
+        },
+        {
+          "level": 2,
+          "text": "Editor Statistics",
+          "slug": "editor-statistics"
+        },
+        {
+          "level": 2,
+          "text": "Status Bar",
+          "slug": "status-bar"
+        },
+        {
+          "level": 2,
+          "text": "Cursor Position",
+          "slug": "cursor-position"
+        },
+        {
+          "level": 2,
+          "text": "Scrolling",
+          "slug": "scrolling"
+        },
+        {
+          "level": 2,
+          "text": "Performance",
+          "slug": "performance"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "Virtualized code editor with syntax highlighting",
+      "readingTime": 2,
+      "lastUpdated": "2026-01-17",
+      "searchText": "code editor component virtualized code editor with syntax highlighting code editor component what it provides codeeditor structure editor configuration creating an editor virtual scrolling rope data structure line numbers content rendering minimap density visualization saving files file modification editor events editor statistics status bar cursor position scrolling performance limitations editor code virtualized text code editor component\r\n\r\nthe code editor is a studio-quality text editor with virtual scrolling for handling massive files. it provides syntax highlighting, line numbers, minimap, and performance optimizations. the implementation is in crates/ui/src/code_editor.rs.\r\n\r\nwhat it provides\r\n\r\nthe code editor provides:\r\n- virtual scrolling (only renders visible lines)\r\n- line numbers with gutter\r\n- optional minimap for navigation\r\n- undo/redo with history\r\n- file loading and saving\r\n- configurable tab size\r\n- performance statistics\r\n\r\ncodeeditor structure\r\n\r\nthe main editor component:\r\nuses rope from the ropey crate for efficient text storage.\r\n\r\neditor configuration\r\n\r\nconfigure the editor:\r\ndefault configuration:\r\ncreating an editor\r\n\r\ncreate a new editor:\r\nload a file:\r\nset text directly:\r\nvirtual scrolling\r\n\r\nthe editor only renders visible lines for performance:\r\nthis limits rendering to ~200 lines regardless of file size.\r\n\r\nrope data structure\r\n\r\ntext is stored as a rope:\r\nrope provid"
     },
     {
       "id": "core-concepts-diagnostics-system",
@@ -672,6 +1068,116 @@
       "searchText": "engine filesystem asset management and type indexing system engine filesystem what it does enginefs type database integration asset operations creating a type alias updating a type alias deleting a type alias moving/renaming file watchers asset templates project structure type information extraction usage example asset operations example scan vs watch limitations filesystem assets indexing types engine filesystem\r\n\r\nthe engine filesystem (enginefs) provides centralized asset management and automatic indexing for pulsar projects. it handles file operations and maintains the type database for quick lookups. the implementation is in crates/enginefs/.\r\n\r\nwhat it does\r\n\r\nthe filesystem layer provides:\r\n- automatic scanning and indexing of project assets\r\n- file watchers that update indexes in real-time\r\n- type database integration for fast asset lookups\r\n- asset creation/update/delete operations\r\n- template-based asset creation\r\n\r\nenginefs\r\n\r\nthe main type is enginefs in lib.rs:\r\ncreating an enginefs instance scans the project directory and populates the type database:\r\nthe initial scan walks the project directory, finds all asset files, and registers them in the type database. it skips hidden files (starting with .) and the target directory.\r\n\r\ntype database integration\r\n\r\nthe filesystem integrates tightly with the type database. when files are created, modified, or deleted, the t"
     },
     {
+      "id": "core-concepts-engine-state",
+      "title": "Engine State Management",
+      "description": "Centralized global state for the engine",
+      "url": "/docs/core-concepts/engine-state",
+      "slug": "core-concepts/engine-state",
+      "category": "core-concepts",
+      "tags": [
+        "state",
+        "global",
+        "management",
+        "coordination"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Engine State Management",
+          "slug": "engine-state-management"
+        },
+        {
+          "level": 2,
+          "text": "What It Provides",
+          "slug": "what-it-provides"
+        },
+        {
+          "level": 2,
+          "text": "EngineState Structure",
+          "slug": "enginestate-structure"
+        },
+        {
+          "level": 2,
+          "text": "Creating Engine State",
+          "slug": "creating-engine-state"
+        },
+        {
+          "level": 2,
+          "text": "Global Instance",
+          "slug": "global-instance"
+        },
+        {
+          "level": 2,
+          "text": "Metadata Storage",
+          "slug": "metadata-storage"
+        },
+        {
+          "level": 2,
+          "text": "Metadata Object",
+          "slug": "metadata-object"
+        },
+        {
+          "level": 2,
+          "text": "Renderer Registry",
+          "slug": "renderer-registry"
+        },
+        {
+          "level": 2,
+          "text": "Window Communication",
+          "slug": "window-communication"
+        },
+        {
+          "level": 2,
+          "text": "Window Counting",
+          "slug": "window-counting"
+        },
+        {
+          "level": 2,
+          "text": "Discord Rich Presence",
+          "slug": "discord-rich-presence"
+        },
+        {
+          "level": 2,
+          "text": "Type Database Access",
+          "slug": "type-database-access"
+        },
+        {
+          "level": 2,
+          "text": "Thread Safety",
+          "slug": "thread-safety"
+        },
+        {
+          "level": 2,
+          "text": "Cloning",
+          "slug": "cloning"
+        },
+        {
+          "level": 2,
+          "text": "Example: Project Manager",
+          "slug": "example-project-manager"
+        },
+        {
+          "level": 2,
+          "text": "Example: GPU Renderer Lifecycle",
+          "slug": "example-gpu-renderer-lifecycle"
+        },
+        {
+          "level": 2,
+          "text": "Example: Session Persistence",
+          "slug": "example-session-persistence"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "Centralized global state for the engine",
+      "readingTime": 2,
+      "lastUpdated": "2026-01-17",
+      "searchText": "engine state management centralized global state for the engine engine state management what it provides enginestate structure creating engine state global instance metadata storage metadata object renderer registry window communication window counting discord rich presence type database access thread safety cloning example: project manager example: gpu renderer lifecycle example: session persistence limitations state global management coordination engine state management\r\n\r\nthe engine state provides centralized, thread-safe storage for global engine data. it manages metadata, gpu renderers, window communication, and shared resources. the implementation is in crates/engine_state/.\r\n\r\nwhat it provides\r\n\r\nthe engine state provides:\r\n- key-value metadata storage\r\n- gpu renderer registry (per-window)\r\n- window request channel\r\n- discord rich presence integration\r\n- type database access\r\n- window counting\r\n\r\nenginestate structure\r\n\r\nthe main state container:\r\nuses arc> for thread-safe shared access.\r\n\r\ncreating engine state\r\n\r\ncreate a new instance:\r\nwith window sender:\r\nglobal instance\r\n\r\nset as global singleton:\r\naccess globally:\r\nthis allows accessing state from anywhere without passing references.\r\n\r\nmetadata storage\r\n\r\nstore arbitrary key-value pairs:\r\nretrieve metadata:\r\nmetadata is thread-safe and can store any string data.\r\n\r\nmetadata object\r\n\r\ndirect metadata access:\r\nrenderer registry\r\n\r\ntrack gpu renderers per window:\r\nregi"
+    },
+    {
       "id": "core-concepts-file-manager",
       "title": "File Manager",
       "description": "File browser and asset management UI",
@@ -795,6 +1301,126 @@
       "readingTime": 3,
       "lastUpdated": "2026-01-17",
       "searchText": "file manager file browser and asset management ui file manager architecture filemanagerdrawer creating a file manager folder tree view modes sorting selection file operations creating assets renaming context menus drag and drop search hidden files file type icons clipboard integration with editors refreshing performance limitations files browser assets drag-drop file manager\r\n\r\nthe file manager provides a visual file browser for navigating projects, managing assets, and opening files in editors. it integrates with the plugin system to show file type icons and provide context menus. the implementation is in ui-crates/uifilemanager/.\r\n\r\narchitecture\r\n\r\nthe file manager has several components:\r\n\r\n- filemanagerdrawer - main panel in the dock\r\n- foldernode - tree structure representing directory hierarchy\r\n- fileoperations - backend for create/rename/delete operations\r\n- drag and drop - support for moving files by dragging\r\n- context menus - right-click actions for files and folders\r\n\r\nfilemanagerdrawer\r\n\r\nthe main component:\r\nthis maintains the current directory, selection state, view preferences, and clipboard.\r\n\r\ncreating a file manager\r\n\r\ncreate a new file manager panel:\r\nthe project path is the root of the file tree. if none, no files are displayed.\r\n\r\nfolder tree\r\n\r\nthe foldernode represents a directory:\r\nthe tree is lazily loaded - children "
+    },
+    {
+      "id": "core-concepts-history-system",
+      "title": "History System",
+      "description": "Undo/redo functionality for state management",
+      "url": "/docs/core-concepts/history-system",
+      "slug": "core-concepts/history-system",
+      "category": "core-concepts",
+      "tags": [
+        "undo",
+        "redo",
+        "history",
+        "state"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "History System",
+          "slug": "history-system"
+        },
+        {
+          "level": 2,
+          "text": "What It Provides",
+          "slug": "what-it-provides"
+        },
+        {
+          "level": 2,
+          "text": "HistoryItem Trait",
+          "slug": "historyitem-trait"
+        },
+        {
+          "level": 2,
+          "text": "History Structure",
+          "slug": "history-structure"
+        },
+        {
+          "level": 2,
+          "text": "Creating History",
+          "slug": "creating-history"
+        },
+        {
+          "level": 2,
+          "text": "Pushing Changes",
+          "slug": "pushing-changes"
+        },
+        {
+          "level": 2,
+          "text": "Version Grouping",
+          "slug": "version-grouping"
+        },
+        {
+          "level": 2,
+          "text": "Undoing",
+          "slug": "undoing"
+        },
+        {
+          "level": 2,
+          "text": "Redoing",
+          "slug": "redoing"
+        },
+        {
+          "level": 2,
+          "text": "Checking State",
+          "slug": "checking-state"
+        },
+        {
+          "level": 2,
+          "text": "Clearing History",
+          "slug": "clearing-history"
+        },
+        {
+          "level": 2,
+          "text": "Ignore Mode",
+          "slug": "ignore-mode"
+        },
+        {
+          "level": 2,
+          "text": "Example: Text Input",
+          "slug": "example-text-input"
+        },
+        {
+          "level": 2,
+          "text": "Example: Blueprint Editor",
+          "slug": "example-blueprint-editor"
+        },
+        {
+          "level": 2,
+          "text": "Unique History",
+          "slug": "unique-history"
+        },
+        {
+          "level": 2,
+          "text": "Version Tracking",
+          "slug": "version-tracking"
+        },
+        {
+          "level": 2,
+          "text": "Max Undo Limit",
+          "slug": "max-undo-limit"
+        },
+        {
+          "level": 2,
+          "text": "Integration with UI",
+          "slug": "integration-with-ui"
+        },
+        {
+          "level": 2,
+          "text": "Performance Considerations",
+          "slug": "performance-considerations"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "Undo/redo functionality for state management",
+      "readingTime": 2,
+      "lastUpdated": "2026-01-17",
+      "searchText": "history system undo/redo functionality for state management history system what it provides historyitem trait history structure creating history pushing changes version grouping undoing redoing checking state clearing history ignore mode example: text input example: blueprint editor unique history version tracking max undo limit integration with ui performance considerations limitations undo redo history state history system\r\n\r\nthe history system provides undo/redo functionality for managing state changes. it's used throughout pulsar for text editing, blueprint modifications, and other reversible operations. the implementation is in crates/ui/src/history.rs.\r\n\r\nwhat it provides\r\n\r\nthe history system provides:\r\n- undo/redo stack management\r\n- configurable history size limits\r\n- change grouping by time interval\r\n- unique history (no duplicate entries)\r\n- version tracking for changes\r\n\r\nhistoryitem trait\r\n\r\nitems stored in history must implement historyitem:\r\nthe version is used for grouping related changes.\r\n\r\nhistory structure\r\n\r\nthe history manager:\r\nundos are items that can be undone. redos are items that can be redone (after undo).\r\n\r\ncreating history\r\n\r\ncreate a new history:\r\nwith configuration:\r\npushing changes\r\n\r\nadd a change to history:\r\nthis:\r\n1. increments version if enough time passed\r\n2. removes oldest change if at maxundo limit\r\n3. optionally removes duplicates\r\n4. adds item to un"
     },
     {
       "id": "core-concepts",
@@ -3306,8 +3932,8 @@
     }
   ],
   "metadata": {
-    "totalDocs": 25,
-    "totalWords": 20711,
+    "totalDocs": 30,
+    "totalWords": 22558,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -3323,11 +3949,13 @@
       "bevy",
       "blueprints",
       "browser",
+      "code",
       "code-analysis",
       "collaboration",
       "command-palette",
       "components",
       "concepts",
+      "coordination",
       "core",
       "customization",
       "database",
@@ -3336,17 +3964,25 @@
       "dlls",
       "dock",
       "drag-drop",
+      "editor",
+      "embedding",
       "errors",
       "extensibility",
       "files",
       "filesystem",
+      "fonts",
       "fundamentals",
       "getting-started",
+      "global",
       "gpu",
       "gpui",
       "graphics",
+      "graphs",
       "guides",
+      "history",
       "how-to",
+      "icons",
+      "images",
       "indexing",
       "inspection",
       "installation",
@@ -3355,6 +3991,7 @@
       "linux",
       "lsp",
       "macos",
+      "management",
       "multiplayer",
       "networking",
       "nodes",
@@ -3365,6 +4002,7 @@
       "pty",
       "quick-fixes",
       "quickstart",
+      "redo",
       "rendering",
       "rust-analyzer",
       "scripting",
@@ -3372,24 +4010,29 @@
       "server",
       "setup",
       "shell",
+      "state",
       "styling",
       "systems",
       "terminal",
+      "text",
       "themes",
       "tutorial",
       "tutorials",
       "type-debugger",
       "types",
       "ui",
+      "undo",
       "viewport",
       "views",
+      "virtualized",
       "visual-programming",
+      "visual-scripting",
       "warnings",
       "windows",
       "workspace",
       "zero-copy"
     ],
-    "lastGenerated": "2026-01-17T20:05:17.829Z",
+    "lastGenerated": "2026-01-17T20:09:30.586Z",
     "version": "1.0.0"
   }
 }

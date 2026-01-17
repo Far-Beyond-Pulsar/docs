@@ -144,6 +144,36 @@
     "category": "core-concepts"
   },
   {
+    "title": "Blueprint Graph System",
+    "path": "/docs/core-concepts/blueprint-graph-system",
+    "slug": "core-concepts/blueprint-graph-system",
+    "category": "core-concepts"
+  },
+  {
+    "title": "History System",
+    "path": "/docs/core-concepts/history-system",
+    "slug": "core-concepts/history-system",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Engine State Management",
+    "path": "/docs/core-concepts/engine-state",
+    "slug": "core-concepts/engine-state",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Asset Loading System",
+    "path": "/docs/core-concepts/asset-loading",
+    "slug": "core-concepts/asset-loading",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Code Editor Component",
+    "path": "/docs/core-concepts/code-editor",
+    "slug": "core-concepts/code-editor",
+    "category": "core-concepts"
+  },
+  {
     "title": "Guides",
     "path": "/docs/guides/index",
     "slug": "guides/index",
