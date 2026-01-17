@@ -152,21 +152,20 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
   };
 
   const sidebarContent = (
-    <nav className="docs-sidebar h-full overflow-y-auto bg-black">
-      <div className="p-6 pt-8">
-        {/* Logo/Title */}
-        <Link
-          href="/docs"
-          className="flex items-center gap-2 mb-4 text-sm font-semibold text-white hover:text-blue-400 transition-colors uppercase tracking-wider"
-          onClick={() => setIsMobileOpen(false)}
-        >
-          <LucideIcons.BookOpen className="w-4 h-4" />
-          <span>Documentation</span>
-        </Link>
+    <nav className="h-full overflow-y-auto bg-black px-6 pt-8 pb-6">
+      {/* Logo/Title */}
+      <Link
+        href="/docs"
+        className="flex items-center gap-2 mb-4 text-sm font-semibold text-white hover:text-blue-400 transition-colors uppercase tracking-wider"
+        onClick={() => setIsMobileOpen(false)}
+      >
+        <LucideIcons.BookOpen className="w-4 h-4" />
+        <span>Documentation</span>
+      </Link>
 
-        {/* Navigation sections */}
-        {navigation && navigation.length > 0 ? (
-          <div className="space-y-6">
+      {/* Navigation sections */}
+      {navigation && navigation.length > 0 ? (
+        <div className="space-y-6">
             {navigation.map(section => {
               const isExpanded = expandedSections.has(section.slug);
               const SectionIcon = section.icon && (LucideIcons as any)[section.icon]
@@ -208,7 +207,6 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
             <p>Loading navigation...</p>
           </div>
         )}
-      </div>
     </nav>
   );
 
@@ -238,10 +236,8 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
         </>
       )}
 
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:block w-80 flex-shrink-0 border-r border-gray-800 bg-black sticky top-0 h-screen overflow-hidden">
-        {sidebarContent}
-      </aside>
+      {/* Desktop sidebar - just return the content directly */}
+      {sidebarContent}
     </>
   );
 }

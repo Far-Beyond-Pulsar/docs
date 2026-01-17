@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Inter } from 'next/font/google';
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import mermaid from 'mermaid';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -32,6 +33,8 @@ const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [darkMode, setDarkMode] = useState(false);
+  const pathname = usePathname();
+  const isDocsPage = pathname?.startsWith('/docs') && pathname !== '/docs';
 
   useEffect(() => {
     // Detect user/system theme
@@ -54,12 +57,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
 
       <body
-        className={`${inter.className} min-h-screen flex flex-col bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100`}
+        className={`${inter.className} bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100`}
       >
         <Header />
         
         {/* Documentation Notice Banner - positioned below fixed header */}
-        <div className="pt-[60px] bg-yellow-500/10 border-b border-yellow-500/20">
+        <div className="fixed w-full top-[52px] z-40 bg-yellow-500/10 border-b border-yellow-500/20">
           <div className="max-w-7xl mx-auto px-6 py-3">
             <div className="flex items-start gap-3">
               <svg className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -74,10 +77,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </div>
         
-        <main className="flex-grow container mx-auto px-4 py-8">
-          {children}
-        </main>
-        <Footer />
+        {isDocsPage ? (
+          // Docs pages use their own layout (no container/padding)
+          <div className="pt-[120px]">
+            {children}
+          </div>
+        ) : (
+          // Other pages use normal layout
+          <div className="pt-[120px]">
+            <main className="flex-grow container mx-auto px-4 py-8">
+              {children}
+            </main>
+            <Footer />
+          </div>
+        )}
       </body>
     </html>
   );

@@ -63,18 +63,18 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
   if (isDocsHome) {
     return (
-      <>
+      <div className="min-h-screen">
         {children}
         <BackToTop />
-      </>
+      </div>
     );
   }
 
   return (
-    <div className="docs-layout flex min-h-screen">
-      {/* Left Sidebar - Navigation */}
-      {isNavigationLoading ? (
-        <aside className="hidden lg:block w-80 flex-shrink-0 border-r border-gray-800 bg-black sticky top-0 h-screen overflow-hidden">
+    <div className="docs-layout fixed inset-0 top-[120px] grid grid-cols-[320px_1fr_256px] overflow-hidden">
+      {/* Left Sidebar Column - Navigation */}
+      <aside className="hidden lg:block border-r border-gray-800 bg-black h-full overflow-y-auto">
+        {isNavigationLoading ? (
           <div className="p-6 pt-8 space-y-6">
             {/* Logo skeleton */}
             <div className="flex items-center gap-2 mb-8">
@@ -100,44 +100,39 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
               </div>
             ))}
           </div>
-        </aside>
-      ) : (
-        <DocsSidebar navigation={navigation} />
-      )}
+        ) : (
+          <DocsSidebar navigation={navigation} />
+        )}
+      </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1">
-        <div className="flex">
-          {/* Content */}
-          <div className="flex-1 min-w-0 px-8 py-8 max-w-4xl mx-auto">
-            <Breadcrumbs />
-            {children}
-          </div>
-
-          {/* Right Sidebar - Table of Contents */}
-          {isHeadingsLoading ? (
-            <aside className="hidden xl:block w-64 flex-shrink-0 sticky top-0 self-start h-screen">
-              <div className="p-6 pt-8 space-y-4">
-                {/* TOC header */}
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-4 h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"></div>
-                  <div className="w-24 h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"></div>
-                </div>
-                {/* TOC items */}
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="space-y-2">
-                    <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" style={{ width: `${60 + (i * 5)}%` }}></div>
-                  </div>
-                ))}
-              </div>
-            </aside>
-          ) : headings.length > 0 ? (
-            <TableOfContents headings={headings} />
-          ) : (
-            <aside className="hidden xl:block w-64 flex-shrink-0"></aside>
-          )}
+      {/* Middle Column - Main Content */}
+      <main className="h-full overflow-y-auto">
+        <div className="px-8 py-8 max-w-4xl mx-auto">
+          <Breadcrumbs />
+          {children}
         </div>
       </main>
+
+      {/* Right Sidebar Column - Table of Contents */}
+      <aside className="hidden xl:block border-l border-gray-800 h-full overflow-y-auto">
+        {isHeadingsLoading ? (
+          <div className="p-6 pt-8 space-y-4">
+            {/* TOC header */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-4 h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"></div>
+              <div className="w-24 h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"></div>
+            </div>
+            {/* TOC items */}
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" style={{ width: `${60 + (i * 5)}%` }}></div>
+              </div>
+            ))}
+          </div>
+        ) : headings.length > 0 ? (
+          <TableOfContents headings={headings} />
+        ) : null}
+      </aside>
 
       <BackToTop />
     </div>
