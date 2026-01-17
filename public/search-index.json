@@ -180,6 +180,231 @@
       "searchText": "pulsar architecture understanding how pulsar engine is built pulsar architecture what is pulsar? design philosophy core technologies gpui - the ui framework winit - window management bevy renderer - 3d graphics rapier3d - physics rust analyzer - code intelligence system architecture major components the launcher (ui_entry, ui_project_launcher) the editor shell (ui_core) file manager (ui_file_manager) problems panel (ui_problems) terminal (ui_terminal) type debugger (ui_type_debugger) 3d viewport (ui_level_editor) game object system plugin system engine backend (engine_backend) subsystems services engine state (engine_state) threading model project structure data flow example: opening a project configuration engine configuration project configuration future directions wrapping up architecture design systems pulsar architecture\n\npulsar is a game editor and engine built in rust with a focus on modularity, editor stability, and modern development workflows. this document explains how the major systems fit together.\n\nwhat is pulsar?\n[!note]\npulsar resembles a game editor in this early stage, it has less runtime that most engines as we are primarily focused on ux. think unity editor or unreal editor, built from scratch in rust. this is in the process of changing so you will see us refer to it as an engine too.\n\n- a launcher for managing and creating projects\n- file management and asset browsers\n- code editing with rust analyzer integration\n- a 3d scene viewport with real-time rendering\n- plugin system for custom editors and tools\n- integrated terminal and problem diagnostics\n- type inspection and debugging tools\n\ndesign philosophy\n\neditor stability is paramount - the editor should never crash, even when your game code does. pulsar runs the editor ui separately from game logic to achieve this.\n"
     },
     {
+      "id": "core-concepts-blueprint-system",
+      "title": "Blueprint Node System",
+      "description": "Visual programming node registry and runtime",
+      "url": "/docs/core-concepts/blueprint-system",
+      "slug": "core-concepts/blueprint-system",
+      "category": "core-concepts",
+      "tags": [
+        "blueprints",
+        "visual-programming",
+        "nodes",
+        "scripting"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Blueprint Node System",
+          "slug": "blueprint-node-system"
+        },
+        {
+          "level": 2,
+          "text": "What It Provides",
+          "slug": "what-it-provides"
+        },
+        {
+          "level": 2,
+          "text": "Node Types",
+          "slug": "node-types"
+        },
+        {
+          "level": 2,
+          "text": "Defining Nodes",
+          "slug": "defining-nodes"
+        },
+        {
+          "level": 3,
+          "text": "Pure Functions",
+          "slug": "pure-functions"
+        },
+        {
+          "level": 3,
+          "text": "Functions with Side Effects",
+          "slug": "functions-with-side-effects"
+        },
+        {
+          "level": 3,
+          "text": "Control Flow",
+          "slug": "control-flow"
+        },
+        {
+          "level": 3,
+          "text": "Events",
+          "slug": "events"
+        },
+        {
+          "level": 2,
+          "text": "Node Registry",
+          "slug": "node-registry"
+        },
+        {
+          "level": 2,
+          "text": "Querying Nodes",
+          "slug": "querying-nodes"
+        },
+        {
+          "level": 2,
+          "text": "Type Constructors",
+          "slug": "type-constructors"
+        },
+        {
+          "level": 2,
+          "text": "Import Tracking",
+          "slug": "import-tracking"
+        },
+        {
+          "level": 2,
+          "text": "Documentation",
+          "slug": "documentation"
+        },
+        {
+          "level": 2,
+          "text": "Node Colors",
+          "slug": "node-colors"
+        },
+        {
+          "level": 2,
+          "text": "Adding Custom Nodes",
+          "slug": "adding-custom-nodes"
+        },
+        {
+          "level": 2,
+          "text": "Code Generation",
+          "slug": "code-generation"
+        },
+        {
+          "level": 2,
+          "text": "Standard Library Organization",
+          "slug": "standard-library-organization"
+        },
+        {
+          "level": 2,
+          "text": "Execution Model",
+          "slug": "execution-model"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        },
+        {
+          "level": 2,
+          "text": "Future Enhancements",
+          "slug": "future-enhancements"
+        }
+      ],
+      "excerpt": "Visual programming node registry and runtime",
+      "readingTime": 4,
+      "lastUpdated": "2026-01-17",
+      "searchText": "blueprint node system visual programming node registry and runtime blueprint node system what it provides node types defining nodes pure functions functions with side effects control flow events node registry querying nodes type constructors import tracking documentation node colors adding custom nodes code generation standard library organization execution model limitations future enhancements blueprints visual-programming nodes scripting blueprint node system\r\n\r\npulsar includes a visual programming system called blueprints. the standard library (pulsarstd) provides built-in nodes for common operations. custom nodes can be added by creating rust functions with the #[blueprint] attribute. the implementation is in crates/pulsarstd/.\r\n\r\nwhat it provides\r\n\r\nthe blueprint system provides:\r\n- automatic node registration at compile time using linkme\r\n- node metadata extraction from rust functions\r\n- runtime node registry for querying available nodes\r\n- support for pure functions, side effects, control flow, and events\r\n- type constructor registry for generic types\r\n- category-based node organization\r\n\r\nnode types\r\n\r\nblueprints support four node types via the nodetypes enum:\r\nthese determine how the node appears in the visual editor and how code generation works.\r\n\r\ndefining nodes\r\n\r\nnodes are defined as regular rust functions with the #[blueprint] attribute:\r\nthe macro extracts metadata from the function signature and stores i"
+    },
+    {
+      "id": "core-concepts-engine-filesystem",
+      "title": "Engine Filesystem",
+      "description": "Asset management and type indexing system",
+      "url": "/docs/core-concepts/engine-filesystem",
+      "slug": "core-concepts/engine-filesystem",
+      "category": "core-concepts",
+      "tags": [
+        "filesystem",
+        "assets",
+        "indexing",
+        "types"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Engine Filesystem",
+          "slug": "engine-filesystem"
+        },
+        {
+          "level": 2,
+          "text": "What It Does",
+          "slug": "what-it-does"
+        },
+        {
+          "level": 2,
+          "text": "EngineFs",
+          "slug": "enginefs"
+        },
+        {
+          "level": 2,
+          "text": "Type Database Integration",
+          "slug": "type-database-integration"
+        },
+        {
+          "level": 2,
+          "text": "Asset Operations",
+          "slug": "asset-operations"
+        },
+        {
+          "level": 3,
+          "text": "Creating a Type Alias",
+          "slug": "creating-a-type-alias"
+        },
+        {
+          "level": 3,
+          "text": "Updating a Type Alias",
+          "slug": "updating-a-type-alias"
+        },
+        {
+          "level": 3,
+          "text": "Deleting a Type Alias",
+          "slug": "deleting-a-type-alias"
+        },
+        {
+          "level": 3,
+          "text": "Moving/Renaming",
+          "slug": "movingrenaming"
+        },
+        {
+          "level": 2,
+          "text": "File Watchers",
+          "slug": "file-watchers"
+        },
+        {
+          "level": 2,
+          "text": "Asset Templates",
+          "slug": "asset-templates"
+        },
+        {
+          "level": 2,
+          "text": "Project Structure",
+          "slug": "project-structure"
+        },
+        {
+          "level": 2,
+          "text": "Type Information Extraction",
+          "slug": "type-information-extraction"
+        },
+        {
+          "level": 2,
+          "text": "Usage Example",
+          "slug": "usage-example"
+        },
+        {
+          "level": 2,
+          "text": "Asset Operations Example",
+          "slug": "asset-operations-example"
+        },
+        {
+          "level": 2,
+          "text": "Scan vs Watch",
+          "slug": "scan-vs-watch"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "Asset management and type indexing system",
+      "readingTime": 4,
+      "lastUpdated": "2026-01-17",
+      "searchText": "engine filesystem asset management and type indexing system engine filesystem what it does enginefs type database integration asset operations creating a type alias updating a type alias deleting a type alias moving/renaming file watchers asset templates project structure type information extraction usage example asset operations example scan vs watch limitations filesystem assets indexing types engine filesystem\r\n\r\nthe engine filesystem (enginefs) provides centralized asset management and automatic indexing for pulsar projects. it handles file operations and maintains the type database for quick lookups. the implementation is in crates/enginefs/.\r\n\r\nwhat it does\r\n\r\nthe filesystem layer provides:\r\n- automatic scanning and indexing of project assets\r\n- file watchers that update indexes in real-time\r\n- type database integration for fast asset lookups\r\n- asset creation/update/delete operations\r\n- template-based asset creation\r\n\r\nenginefs\r\n\r\nthe main type is enginefs in lib.rs:\r\ncreating an enginefs instance scans the project directory and populates the type database:\r\nthe initial scan walks the project directory, finds all asset files, and registers them in the type database. it skips hidden files (starting with .) and the target directory.\r\n\r\ntype database integration\r\n\r\nthe filesystem integrates tightly with the type database. when files are created, modified, or deleted, the t"
+    },
+    {
       "id": "core-concepts",
       "title": "Core Concepts",
       "description": "Understanding the fundamental concepts behind Pulsar Engine",
@@ -280,59 +505,181 @@
       "searchText": "core concepts understanding the fundamental concepts behind pulsar engine core concepts what you'll learn why these concepts matter starting points a note on learning curves philosophy behind the concepts no magic modularity through boundaries type safety everywhere explicit over implicit performance by design, not by accident how systems interact common questions where to go from here contributing to these docs experimental notice core concepts fundamentals overview core concepts\n\nwelcome to the heart of pulsar engine. if you're going to build something with pulsar—or just understand how it works—you need to grasp these fundamental concepts. this isn't a feature list or a marketing pitch. these are the ideas that shape every line of code in the engine.\n\nwhat you'll learn\n\nthis section covers the architectural decisions and systems that make pulsar what it is. each concept builds on the others, so while you can jump around, reading in order will give you the clearest picture.\n\nwe'll explore:\n\n- architecture - how pulsar is structured and why\n- plugin system - extending the editor with dynamic libraries\n- type system - strong typing for game data\n- ui framework - gpui and how the editor interface works\n- rendering pipeline - from scene to pixels\n- entity-component-system - game object architecture\n\nwhy these concepts matter\n\ngame engines are complex beasts. they're not just single programs—they're platforms for building interactive experiences. unde"
     },
     {
+      "id": "core-concepts-multiplayer-server",
+      "title": "Multiplayer Server",
+      "description": "Real-time collaborative editing server architecture",
+      "url": "/docs/core-concepts/multiplayer-server",
+      "slug": "core-concepts/multiplayer-server",
+      "category": "core-concepts",
+      "tags": [
+        "multiplayer",
+        "networking",
+        "server",
+        "collaboration"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Multiplayer Server",
+          "slug": "multiplayer-server"
+        },
+        {
+          "level": 2,
+          "text": "What It Provides",
+          "slug": "what-it-provides"
+        },
+        {
+          "level": 2,
+          "text": "Server Architecture",
+          "slug": "server-architecture"
+        },
+        {
+          "level": 2,
+          "text": "Session Management",
+          "slug": "session-management"
+        },
+        {
+          "level": 2,
+          "text": "HTTP API",
+          "slug": "http-api"
+        },
+        {
+          "level": 3,
+          "text": "Creating a Session",
+          "slug": "creating-a-session"
+        },
+        {
+          "level": 3,
+          "text": "Joining a Session",
+          "slug": "joining-a-session"
+        },
+        {
+          "level": 2,
+          "text": "WebSocket Signaling",
+          "slug": "websocket-signaling"
+        },
+        {
+          "level": 2,
+          "text": "QUIC Relay",
+          "slug": "quic-relay"
+        },
+        {
+          "level": 2,
+          "text": "NAT Traversal",
+          "slug": "nat-traversal"
+        },
+        {
+          "level": 2,
+          "text": "Authentication",
+          "slug": "authentication"
+        },
+        {
+          "level": 2,
+          "text": "Metrics",
+          "slug": "metrics"
+        },
+        {
+          "level": 2,
+          "text": "Health Checks",
+          "slug": "health-checks"
+        },
+        {
+          "level": 2,
+          "text": "Configuration",
+          "slug": "configuration"
+        },
+        {
+          "level": 2,
+          "text": "CRDT Support",
+          "slug": "crdt-support"
+        },
+        {
+          "level": 2,
+          "text": "Persistence",
+          "slug": "persistence"
+        },
+        {
+          "level": 2,
+          "text": "Running the Server",
+          "slug": "running-the-server"
+        },
+        {
+          "level": 2,
+          "text": "Client Integration",
+          "slug": "client-integration"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "Real-time collaborative editing server architecture",
+      "readingTime": 5,
+      "lastUpdated": "2026-01-17",
+      "searchText": "multiplayer server real-time collaborative editing server architecture multiplayer server what it provides server architecture session management http api creating a session joining a session websocket signaling quic relay nat traversal authentication metrics health checks configuration crdt support persistence running the server client integration limitations multiplayer networking server collaboration multiplayer server\r\n\r\npulsar includes a production-grade multiplayer server for real-time collaborative editing. the server handles session management, peer coordination, and traffic relay. the implementation is in crates/multiuserserver/.\r\n\r\nwhat it provides\r\n\r\nthe multiuser server offers several services:\r\n\r\n- session management - create and join collaborative editing sessions\r\n- websocket signaling - real-time peer coordination and messaging\r\n- quic relay - high-performance encrypted relay for peer-to-peer traffic\r\n- nat traversal - udp hole punching coordinator for direct connections\r\n- authentication - jwt-based auth with role management (host/guest)\r\n- bandwidth control - per-session rate limiting and monitoring\r\n- health checks - kubernetes-ready liveness/readiness probes\r\n- metrics - prometheus metrics for observability\r\n\r\nserver architecture\r\n\r\nthe server runs multiple independent services:\r\n\r\n- http server (port 8080) - rest api and websocket signaling via axum\r\n- quic relay "
+    },
+    {
       "id": "core-concepts-palette-system",
-      "title": "Palette System",
-      "description": "Dynamic, extensible command palette architecture for search and discovery",
+      "title": "Command Palette System",
+      "description": "Command palette architecture in Pulsar",
       "url": "/docs/core-concepts/palette-system",
       "slug": "core-concepts/palette-system",
       "category": "core-concepts",
       "tags": [
         "ui",
-        "command-palette",
-        "search",
-        "extensibility",
-        "architecture"
+        "command-palette"
       ],
       "headings": [
         {
           "level": 1,
-          "text": "Palette System",
-          "slug": "palette-system"
+          "text": "Command Palette System",
+          "slug": "command-palette-system"
         },
         {
           "level": 2,
-          "text": "Why Dynamic Palettes?",
-          "slug": "why-dynamic-palettes"
+          "text": "What It Is",
+          "slug": "what-it-is"
         },
         {
           "level": 2,
-          "text": "Architecture Overview",
-          "slug": "architecture-overview"
+          "text": "How It Works",
+          "slug": "how-it-works"
         },
         {
           "level": 3,
-          "text": "Layer 1: PaletteManager (Global Registry)",
-          "slug": "layer-1-palettemanager-global-registry"
+          "text": "PaletteManager",
+          "slug": "palettemanager"
         },
         {
           "level": 3,
-          "text": "Layer 2: Palette (Data Container)",
-          "slug": "layer-2-palette-data-container"
+          "text": "Palette",
+          "slug": "palette"
         },
         {
           "level": 3,
-          "text": "Layer 3: PaletteViewDelegate (Adapter)",
-          "slug": "layer-3-paletteviewdelegate-adapter"
+          "text": "Rebindable Callbacks",
+          "slug": "rebindable-callbacks"
         },
         {
           "level": 3,
-          "text": "Layer 4: GenericPalette (UI Component)",
-          "slug": "layer-4-genericpalette-ui-component"
+          "text": "PaletteViewDelegate",
+          "slug": "paletteviewdelegate"
+        },
+        {
+          "level": 3,
+          "text": "GenericPalette",
+          "slug": "genericpalette"
         },
         {
           "level": 2,
-          "text": "Core Traits and Types",
-          "slug": "core-traits-and-types"
+          "text": "Actual Usage in Pulsar",
+          "slug": "actual-usage-in-pulsar"
+        },
+        {
+          "level": 2,
+          "text": "Key Types",
+          "slug": "key-types"
         },
         {
           "level": 3,
@@ -346,6 +693,11 @@
         },
         {
           "level": 3,
+          "text": "PaletteItemData",
+          "slug": "paletteitemdata"
+        },
+        {
+          "level": 3,
           "text": "PaletteItem Trait",
           "slug": "paletteitem-trait"
         },
@@ -355,185 +707,50 @@
           "slug": "palettedelegate-trait"
         },
         {
-          "level": 3,
-          "text": "PaletteItemData",
-          "slug": "paletteitemdata"
+          "level": 2,
+          "text": "Adding Items with Keywords",
+          "slug": "adding-items-with-keywords"
         },
         {
           "level": 2,
-          "text": "Basic Usage",
-          "slug": "basic-usage"
-        },
-        {
-          "level": 3,
-          "text": "Step 1: Initialize the Manager",
-          "slug": "step-1-initialize-the-manager"
-        },
-        {
-          "level": 3,
-          "text": "Step 2: Register a Palette",
-          "slug": "step-2-register-a-palette"
-        },
-        {
-          "level": 3,
-          "text": "Step 3: Add Items",
-          "slug": "step-3-add-items"
-        },
-        {
-          "level": 3,
-          "text": "Step 4: Show the Palette",
-          "slug": "step-4-show-the-palette"
-        },
-        {
-          "level": 3,
-          "text": "Step 5: Handle Selection",
-          "slug": "step-5-handle-selection"
-        },
-        {
-          "level": 2,
-          "text": "Advanced Usage",
-          "slug": "advanced-usage"
-        },
-        {
-          "level": 3,
-          "text": "Rebinding Callbacks",
-          "slug": "rebinding-callbacks"
-        },
-        {
-          "level": 3,
           "text": "Dynamic Items",
           "slug": "dynamic-items"
         },
         {
-          "level": 3,
+          "level": 2,
           "text": "Custom Delegates",
           "slug": "custom-delegates"
         },
         {
-          "level": 3,
-          "text": "Multiple Palettes",
-          "slug": "multiple-palettes"
-        },
-        {
-          "level": 3,
+          "level": 2,
           "text": "Swapping Delegates",
           "slug": "swapping-delegates"
         },
         {
           "level": 2,
-          "text": "Best Practices",
-          "slug": "best-practices"
-        },
-        {
-          "level": 3,
-          "text": "Categorize Thoughtfully",
-          "slug": "categorize-thoughtfully"
-        },
-        {
-          "level": 3,
-          "text": "Keywords Matter",
-          "slug": "keywords-matter"
-        },
-        {
-          "level": 3,
-          "text": "Use Descriptive Names",
-          "slug": "use-descriptive-names"
-        },
-        {
-          "level": 3,
-          "text": "Clean Up on Unload",
-          "slug": "clean-up-on-unload"
-        },
-        {
-          "level": 3,
-          "text": "Cache Delegates When Possible",
-          "slug": "cache-delegates-when-possible"
-        },
-        {
-          "level": 3,
-          "text": "Consider Accessibility",
-          "slug": "consider-accessibility"
+          "text": "Memory Management",
+          "slug": "memory-management"
         },
         {
           "level": 2,
-          "text": "Integration with Plugins",
-          "slug": "integration-with-plugins"
-        },
-        {
-          "level": 3,
-          "text": "EditorPlugin Integration",
-          "slug": "editorplugin-integration"
-        },
-        {
-          "level": 3,
-          "text": "Adding Global Commands",
-          "slug": "adding-global-commands"
-        },
-        {
-          "level": 3,
-          "text": "Context-Specific Palettes",
-          "slug": "context-specific-palettes"
+          "text": "Cleanup",
+          "slug": "cleanup"
         },
         {
           "level": 2,
-          "text": "Performance Considerations",
-          "slug": "performance-considerations"
-        },
-        {
-          "level": 3,
-          "text": "Filtering Performance",
-          "slug": "filtering-performance"
-        },
-        {
-          "level": 3,
-          "text": "Memory Usage",
-          "slug": "memory-usage"
-        },
-        {
-          "level": 3,
-          "text": "Rendering Performance",
-          "slug": "rendering-performance"
+          "text": "Implementation Notes",
+          "slug": "implementation-notes"
         },
         {
           "level": 2,
-          "text": "Troubleshooting",
-          "slug": "troubleshooting"
-        },
-        {
-          "level": 3,
-          "text": "\"Palette not found\" when retrieving by ID",
-          "slug": "palette-not-found-when-retrieving-by-id"
-        },
-        {
-          "level": 3,
-          "text": "Items not showing in palette",
-          "slug": "items-not-showing-in-palette"
-        },
-        {
-          "level": 3,
-          "text": "Callbacks not firing",
-          "slug": "callbacks-not-firing"
-        },
-        {
-          "level": 3,
-          "text": "Memory leak from closures",
-          "slug": "memory-leak-from-closures"
-        },
-        {
-          "level": 2,
-          "text": "Future Directions",
-          "slug": "future-directions"
-        },
-        {
-          "level": 2,
-          "text": "Summary",
-          "slug": "summary"
+          "text": "Limitations",
+          "slug": "limitations"
         }
       ],
-      "excerpt": "Dynamic, extensible command palette architecture for search and discovery",
-      "readingTime": 14,
+      "excerpt": "Command palette architecture in Pulsar",
+      "readingTime": 4,
       "lastUpdated": "2026-01-17",
-      "searchText": "palette system dynamic, extensible command palette architecture for search and discovery palette system why dynamic palettes? architecture overview layer 1: palettemanager (global registry) layer 2: palette (data container) layer 3: paletteviewdelegate (adapter) layer 4: genericpalette (ui component) core traits and types paletteid itemid paletteitem trait palettedelegate trait paletteitemdata basic usage step 1: initialize the manager step 2: register a palette step 3: add items step 4: show the palette step 5: handle selection advanced usage rebinding callbacks dynamic items custom delegates multiple palettes swapping delegates best practices categorize thoughtfully keywords matter use descriptive names clean up on unload cache delegates when possible consider accessibility integration with plugins editorplugin integration adding global commands context-specific palettes performance considerations filtering performance memory usage rendering performance troubleshooting \"palette not found\" when retrieving by id items not showing in palette callbacks not firing memory leak from closures future directions summary ui command-palette search extensibility architecture palette system\r\n\r\nthe palette system is pulsar's solution to the \"how do i find anything?\" problem that plagues complex editors. think of it as the editor's universal search and command interface—press a hotkey, type what you want, and the palette shows you relevant actions, files, settings, or anything else a plugin might expose.\r\n\r\nbut here's what makes it interesting: the palette system isn't a monolithic component. it's a dynamic, multi-layered architecture that lets plugins register their own searchable content with full ui customization. want to add a material browser? a scene object picker? a build configuration selector? the palette system provides the infrastructure.\r\n\r\nthis document explains how it all works, from the architecture to practical usage patterns for both engine users and plugin developers.\r\n\r\nwhy dynamic palettes?\r\n\r\nbefore diving into the technical details, let's understand the design requirements that shaped this system.\r\n\r\nextensibility without fragmentation -"
+      "searchText": "command palette system command palette architecture in pulsar command palette system what it is how it works palettemanager palette rebindable callbacks paletteviewdelegate genericpalette actual usage in pulsar key types paletteid itemid paletteitemdata paletteitem trait palettedelegate trait adding items with keywords dynamic items custom delegates swapping delegates memory management cleanup implementation notes limitations ui command-palette command palette system\r\n\r\npulsar has a command palette you can use to search for and execute actions. this document covers how it's built and how to use it in the codebase.\r\n\r\nwhat it is\r\n\r\nthe command palette is the searchable command interface you see when you press ctrl+shift+p (or cmd+shift+p on mac). it shows available commands, lets you filter them by typing, and executes the selected command.\r\n\r\nthe implementation is in ui-crates/uicommon/src/commandpalette/ and consists of four main types:\r\n\r\n- palettemanager - global registry for palette instances\r\n- palette - stores items and their callbacks\r\n- paletteviewdelegate - adapter between palette and the ui\r\n- genericpalette - the actual ui component with search and rendering\r\n\r\nhow it works\r\n\r\npalettemanager\r\n\r\nlocated in palettemanager.rs. this is a global singleton that tracks registered palettes.\r\nthe manager gives you a paletteid (just a usize wrapper) and an entity. the manager holds weak references, so you need to store the e"
     },
     {
       "id": "core-concepts-plugin-system",
@@ -871,6 +1088,311 @@
       "searchText": "rendering system how pulsar renders 3d scenes rendering system overview why bevy's renderer? architecture bevyrenderer rendering gameobjects materials lighting camera system render thread zero-copy rendering performance the compositor composition process zero-copy gpu texture sharing rendering pipeline performance characteristics device error recovery platform support integration with gpui limitations future plans wrapping up rendering graphics bevy 3d rendering system\n\npulsar's 3d viewport uses bevy's rendering modules to display game scenes in real-time. this document explains how the rendering system works and how it integrates with the editor.\n\noverview\n\npulsar doesn't implement its own custom rendering pipeline. instead, it uses bevy's proven rendering modules:\n\n- bevyrender - core rendering infrastructure\n- bevypbr - physically based rendering (pbr) materials\n- bevycorepipeline - rendering pipeline stages\n- bevyasset - asset loading and management\n\nthis leverages bevy's mature, well-tested rendering code while keeping pulsar focused on the editor experience.\n\nwhy bevy's renderer?\n\nproven technology - bevy's renderer powers many shipped games and has been battle-tested.\n\npbr materials - modern physically-based rendering with metallic/roughness workflows out of the box.\n\ncross-platform - works on windows, linux (when supported), and macos (when supported) via wgpu.\n\nactive development - benefits from bevy community improvements a"
     },
     {
+      "id": "core-concepts-rust-analyzer-integration",
+      "title": "Rust Analyzer Integration",
+      "description": "LSP integration for code analysis and diagnostics",
+      "url": "/docs/core-concepts/rust-analyzer-integration",
+      "slug": "core-concepts/rust-analyzer-integration",
+      "category": "core-concepts",
+      "tags": [
+        "lsp",
+        "rust-analyzer",
+        "diagnostics",
+        "code-analysis"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Rust Analyzer Integration",
+          "slug": "rust-analyzer-integration"
+        },
+        {
+          "level": 2,
+          "text": "What It Does",
+          "slug": "what-it-does"
+        },
+        {
+          "level": 2,
+          "text": "RustAnalyzerManager",
+          "slug": "rustanalyzermanager"
+        },
+        {
+          "level": 2,
+          "text": "Finding rust-analyzer",
+          "slug": "finding-rust-analyzer"
+        },
+        {
+          "level": 2,
+          "text": "Status Tracking",
+          "slug": "status-tracking"
+        },
+        {
+          "level": 2,
+          "text": "Starting the Process",
+          "slug": "starting-the-process"
+        },
+        {
+          "level": 2,
+          "text": "LSP Communication",
+          "slug": "lsp-communication"
+        },
+        {
+          "level": 2,
+          "text": "Progress Monitoring",
+          "slug": "progress-monitoring"
+        },
+        {
+          "level": 2,
+          "text": "Diagnostics",
+          "slug": "diagnostics"
+        },
+        {
+          "level": 2,
+          "text": "Code Actions (Quick Fixes)",
+          "slug": "code-actions-quick-fixes"
+        },
+        {
+          "level": 2,
+          "text": "Completion Requests",
+          "slug": "completion-requests"
+        },
+        {
+          "level": 2,
+          "text": "Thread Architecture",
+          "slug": "thread-architecture"
+        },
+        {
+          "level": 2,
+          "text": "Stopping",
+          "slug": "stopping"
+        },
+        {
+          "level": 2,
+          "text": "Error Handling",
+          "slug": "error-handling"
+        },
+        {
+          "level": 2,
+          "text": "Installation Fallback",
+          "slug": "installation-fallback"
+        },
+        {
+          "level": 2,
+          "text": "Usage Example",
+          "slug": "usage-example"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "LSP integration for code analysis and diagnostics",
+      "readingTime": 5,
+      "lastUpdated": "2026-01-17",
+      "searchText": "rust analyzer integration lsp integration for code analysis and diagnostics rust analyzer integration what it does rustanalyzermanager finding rust-analyzer status tracking starting the process lsp communication progress monitoring diagnostics code actions (quick fixes) completion requests thread architecture stopping error handling installation fallback usage example limitations lsp rust-analyzer diagnostics code-analysis rust analyzer integration\r\n\r\npulsar integrates rust-analyzer (the rust language server) to provide code intelligence features like diagnostics, code completion, and type information. this document covers how the integration works.\r\n\r\nwhat it does\r\n\r\nthe rust-analyzer integration provides:\r\n- real-time error and warning diagnostics from the rust compiler\r\n- code completion suggestions\r\n- go-to-definition and type information\r\n- quick fixes (code actions) for common issues\r\n\r\nthe implementation is in crates/enginebackend/src/services/rustanalyzermanager.rs.\r\n\r\nrustanalyzermanager\r\n\r\nthe rustanalyzermanager type spawns and communicates with a rust-analyzer process via the language server protocol (lsp).\r\nthe manager tracks the rust-analyzer process, handles lsp communication, and emits events for status changes and diagnostics.\r\n\r\nfinding rust-analyzer\r\n\r\nwhen the manager initializes, it searches for rust-analyzer in this order:\r\n\r\n1. via rustup: rustup which rust-analyzer (handles rustup"
+    },
+    {
+      "id": "core-concepts-theme-system",
+      "title": "Theme System",
+      "description": "Theme loading, switching, and persistence",
+      "url": "/docs/core-concepts/theme-system",
+      "slug": "core-concepts/theme-system",
+      "category": "core-concepts",
+      "tags": [
+        "themes",
+        "ui",
+        "styling",
+        "customization"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Theme System",
+          "slug": "theme-system"
+        },
+        {
+          "level": 2,
+          "text": "What It Provides",
+          "slug": "what-it-provides"
+        },
+        {
+          "level": 2,
+          "text": "Theme Storage",
+          "slug": "theme-storage"
+        },
+        {
+          "level": 2,
+          "text": "Initialization",
+          "slug": "initialization"
+        },
+        {
+          "level": 2,
+          "text": "Theme Extraction",
+          "slug": "theme-extraction"
+        },
+        {
+          "level": 2,
+          "text": "Theme State",
+          "slug": "theme-state"
+        },
+        {
+          "level": 2,
+          "text": "Theme Structure",
+          "slug": "theme-structure"
+        },
+        {
+          "level": 2,
+          "text": "Using Themes in UI",
+          "slug": "using-themes-in-ui"
+        },
+        {
+          "level": 2,
+          "text": "Switching Themes",
+          "slug": "switching-themes"
+        },
+        {
+          "level": 2,
+          "text": "Custom Themes",
+          "slug": "custom-themes"
+        },
+        {
+          "level": 2,
+          "text": "Built-in Themes",
+          "slug": "built-in-themes"
+        },
+        {
+          "level": 2,
+          "text": "Hot Reload",
+          "slug": "hot-reload"
+        },
+        {
+          "level": 2,
+          "text": "Theme API",
+          "slug": "theme-api"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "Theme loading, switching, and persistence",
+      "readingTime": 3,
+      "lastUpdated": "2026-01-17",
+      "searchText": "theme system theme loading, switching, and persistence theme system what it provides theme storage initialization theme extraction theme state theme structure using themes in ui switching themes custom themes built-in themes hot reload theme api limitations themes ui styling customization theme system\r\n\r\npulsar's theme system manages ui appearance with hot-reloadable themes. themes are json files that define colors, spacing, and other visual properties. the implementation is in crates/ui/src/themes.rs.\r\n\r\nwhat it provides\r\n\r\nthe theme system provides:\r\n- loading themes from embedded resources\r\n- extracting themes to app data directory\r\n- theme switching with automatic ui updates\r\n- persistent theme selection across sessions\r\n- integration with gpui's themeregistry\r\n\r\ntheme storage\r\n\r\nthemes are stored in multiple locations:\r\n\r\n- embedded - themes/.json (compiled into the binary)\r\n- runtime - {appdata}/themes/.json (extracted at first run)\r\n- state - {appdata}/state.json (saves selected theme)\r\n\r\nthe app data directory is platform-specific:\r\n- windows: c:\\users\\{user}\\appdata\\roaming\\pulsar\\pulsarengine\\\r\n- macos: ~/library/application support/com.pulsar.pulsarengine/\r\n- linux: ~/.local/share/pulsar/pulsarengine/\r\n\r\ninitialization\r\n\r\nthe theme system initializes on app s"
+    },
+    {
+      "id": "core-concepts-type-database-impl",
+      "title": "Type Database",
+      "description": "Fast in-memory type registry and search",
+      "url": "/docs/core-concepts/type-database-impl",
+      "slug": "core-concepts/type-database-impl",
+      "category": "core-concepts",
+      "tags": [
+        "types",
+        "database",
+        "indexing",
+        "search"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Type Database",
+          "slug": "type-database"
+        },
+        {
+          "level": 2,
+          "text": "What It Does",
+          "slug": "what-it-does"
+        },
+        {
+          "level": 2,
+          "text": "TypeInfo Structure",
+          "slug": "typeinfo-structure"
+        },
+        {
+          "level": 2,
+          "text": "TypeDatabase Structure",
+          "slug": "typedatabase-structure"
+        },
+        {
+          "level": 2,
+          "text": "Creating a Database",
+          "slug": "creating-a-database"
+        },
+        {
+          "level": 2,
+          "text": "Registering Types",
+          "slug": "registering-types"
+        },
+        {
+          "level": 2,
+          "text": "Querying Types",
+          "slug": "querying-types"
+        },
+        {
+          "level": 2,
+          "text": "Search",
+          "slug": "search"
+        },
+        {
+          "level": 2,
+          "text": "Fuzzy Search",
+          "slug": "fuzzy-search"
+        },
+        {
+          "level": 2,
+          "text": "Removing Types",
+          "slug": "removing-types"
+        },
+        {
+          "level": 2,
+          "text": "Statistics",
+          "slug": "statistics"
+        },
+        {
+          "level": 2,
+          "text": "Clearing",
+          "slug": "clearing"
+        },
+        {
+          "level": 2,
+          "text": "Thread Safety",
+          "slug": "thread-safety"
+        },
+        {
+          "level": 2,
+          "text": "Filesystem Integration",
+          "slug": "filesystem-integration"
+        },
+        {
+          "level": 2,
+          "text": "AST Storage",
+          "slug": "ast-storage"
+        },
+        {
+          "level": 2,
+          "text": "Display Names",
+          "slug": "display-names"
+        },
+        {
+          "level": 2,
+          "text": "Performance",
+          "slug": "performance"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "Fast in-memory type registry and search",
+      "readingTime": 3,
+      "lastUpdated": "2026-01-17",
+      "searchText": "type database fast in-memory type registry and search type database what it does typeinfo structure typedatabase structure creating a database registering types querying types search fuzzy search removing types statistics clearing thread safety filesystem integration ast storage display names performance limitations types database indexing search type database\r\n\r\nthe type database is an in-memory, thread-safe database for storing and searching user-defined runtime types. it provides fast registration, lookup, and fuzzy search capabilities. the implementation is in crates/typedb/src/lib.rs.\r\n\r\nwhat it does\r\n\r\nthe type database provides:\r\n- fast registration and lookup by id, name, or category\r\n- case-insensitive and fuzzy search\r\n- thread-safe concurrent access using dashmap\r\n- multiple indexes for efficient queries\r\n- file path tracking for filesystem integration\r\n\r\ntypeinfo structure\r\n\r\neach registered type has this structure:\r\ntypes are categorized by kind:\r\ntypedatabase structure\r\n\r\nthe database maintains multiple indexes for fast lookups:\r\nthe indexes allow o(1) lookups by id, name, category, or file path.\r\n\r\ncreating a database\r\n\r\ncreate a new empty database:\r\nthis initializes all indexes and sets the next id to 0.\r\n\r\nregistering types\r\n\r\nregister a simple type:\r\nregister with full metadata:\r\nregister with file path (autom"
+    },
+    {
       "id": "core-concepts-type-system",
       "title": "Type Database",
       "description": "Pulsar's type registry for inspecting project types",
@@ -1145,6 +1667,101 @@
       "readingTime": 8,
       "lastUpdated": "2026-01-12",
       "searchText": "ui framework (gpui) deep dive into pulsar's gpu-accelerated ui framework ui framework (gpui) why gpui exists core concepts entities views contexts the render loop layout system box model flexbox layout absolute positioning real example: editor panel layout styling system colors typography visual effects event system mouse events keyboard events click events custom events integration with the editor editor panels context menus tooltips performance considerations minimize re-renders batch updates virtualization conclusion ui gpui rendering views components ui framework (gpui)\n\ngpui is zed's custom ui framework, and it's unlike anything you've probably worked with before. it's not react, it's not immediate mode, and it's definitely not a traditional retained-mode gui toolkit. instead, gpui is a hybrid approach that combines the best ideas from modern ui frameworks with the performance requirements of a professional game engine editor.\n\nlet me explain why we built it this way, how it works, and—most importantly—how you actually use it to build editor interfaces.\n\nwhy gpui exists\n\nyou might be wondering: why build a custom ui framework when mature options like egui, iced, or even web technologies exist? the answer comes down to our specific requirements:\n\ngpu acceleration isn't optional - editor uis need to render smoothly at 60+ fps while updating constantly. project trees with thousands of files, code editors with syntax highlighting, property panels with live updates—all of this needs to be fast. gpui renders everything using the gpu, wh"
+    },
+    {
+      "id": "core-concepts-workspace-panels-docks",
+      "title": "Workspace, Panels & Docks",
+      "description": "The workspace and docking system in Pulsar",
+      "url": "/docs/core-concepts/workspace-panels-docks",
+      "slug": "core-concepts/workspace-panels-docks",
+      "category": "core-concepts",
+      "tags": [
+        "ui",
+        "workspace",
+        "dock",
+        "panels"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Workspace, Panels & Docks",
+          "slug": "workspace-panels-docks"
+        },
+        {
+          "level": 2,
+          "text": "Structure",
+          "slug": "structure"
+        },
+        {
+          "level": 2,
+          "text": "DockArea",
+          "slug": "dockarea"
+        },
+        {
+          "level": 2,
+          "text": "DockChannel - Isolation System",
+          "slug": "dockchannel---isolation-system"
+        },
+        {
+          "level": 2,
+          "text": "DockItem Tree",
+          "slug": "dockitem-tree"
+        },
+        {
+          "level": 2,
+          "text": "Docks (Left/Right/Bottom)",
+          "slug": "docks-leftrightbottom"
+        },
+        {
+          "level": 2,
+          "text": "Panels",
+          "slug": "panels"
+        },
+        {
+          "level": 2,
+          "text": "WorkspacePanel Helper",
+          "slug": "workspacepanel-helper"
+        },
+        {
+          "level": 2,
+          "text": "TabPanel",
+          "slug": "tabpanel"
+        },
+        {
+          "level": 2,
+          "text": "Workspace Helper",
+          "slug": "workspace-helper"
+        },
+        {
+          "level": 2,
+          "text": "Real Usage Example",
+          "slug": "real-usage-example"
+        },
+        {
+          "level": 2,
+          "text": "Layout Persistence",
+          "slug": "layout-persistence"
+        },
+        {
+          "level": 2,
+          "text": "Events",
+          "slug": "events"
+        },
+        {
+          "level": 2,
+          "text": "PanelView Trait",
+          "slug": "panelview-trait"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "The workspace and docking system in Pulsar",
+      "readingTime": 4,
+      "lastUpdated": "2026-01-17",
+      "searchText": "workspace, panels & docks the workspace and docking system in pulsar workspace, panels & docks structure dockarea dockchannel - isolation system dockitem tree docks (left/right/bottom) panels workspacepanel helper tabpanel workspace helper real usage example layout persistence events panelview trait limitations ui workspace dock panels workspace, panels & docks\r\n\r\npulsar uses a docking workspace system similar to vs code or unreal engine. you can drag tabs between panels, split panels, and dock them to the left/bottom/right edges. this document covers how it's implemented.\r\n\r\nstructure\r\n\r\nthe docking system is in crates/ui/src/dock/ and crates/ui/src/workspace/. there are several types involved:\r\n\r\n- workspace - high-level wrapper that creates a dockarea\r\n- dockarea - the main container with center content and optional side docks\r\n- dock - left, right, or bottom edge containers (collapsible/resizable)\r\n- dockitem - tree structure representing layouts (splits, tabs, panels, tiles)\r\n- tabpanel - renders tabs and handles drag/drop\r\n- panel - trait that custom panels implement\r\n\r\ndockarea\r\n\r\ndockarea is the core type. located in crates/ui/src/dock/mod.rs.\r\n\r\nstructure:\r\ncreating a dock area:\r\nthe version field is used for default layout versioning. when the version changes, the default layout can be reapplied.\r\n\r\ndockcha"
     },
     {
       "id": "getting-started-first-project",
@@ -2172,8 +2789,8 @@
     }
   ],
   "metadata": {
-    "totalDocs": 14,
-    "totalWords": 15333,
+    "totalDocs": 21,
+    "totalWords": 18315,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -2183,45 +2800,66 @@
     "tags": [
       "3d",
       "architecture",
+      "assets",
       "beginner",
       "bevy",
+      "blueprints",
+      "code-analysis",
+      "collaboration",
       "command-palette",
       "components",
       "concepts",
       "core",
+      "customization",
       "database",
       "design",
+      "diagnostics",
       "dlls",
+      "dock",
       "extensibility",
+      "filesystem",
       "fundamentals",
       "getting-started",
       "gpui",
       "graphics",
       "guides",
       "how-to",
+      "indexing",
       "inspection",
       "installation",
       "introduction",
       "learning",
       "linux",
+      "lsp",
       "macos",
+      "multiplayer",
+      "networking",
+      "nodes",
       "overview",
+      "panels",
       "plugins",
       "project",
       "quickstart",
       "rendering",
+      "rust-analyzer",
+      "scripting",
       "search",
+      "server",
       "setup",
+      "styling",
       "systems",
+      "themes",
       "tutorial",
       "tutorials",
       "type-debugger",
       "types",
       "ui",
       "views",
-      "windows"
+      "visual-programming",
+      "windows",
+      "workspace"
     ],
-    "lastGenerated": "2026-01-17T19:17:44.064Z",
+    "lastGenerated": "2026-01-17T19:57:56.590Z",
     "version": "1.0.0"
   }
 }

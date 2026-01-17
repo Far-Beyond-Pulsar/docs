@@ -125,12 +125,68 @@
           "icon": "Palette"
         },
         {
-          "title": "Palette System",
+          "title": "Command Palette System",
           "slug": "palette-system",
           "path": "/docs/core-concepts/palette-system",
           "type": "page",
           "order": 5,
           "icon": "Search"
+        },
+        {
+          "title": "Workspace, Panels & Docks",
+          "slug": "workspace-panels-docks",
+          "path": "/docs/core-concepts/workspace-panels-docks",
+          "type": "page",
+          "order": 6,
+          "icon": "LayoutDashboard"
+        },
+        {
+          "title": "Rust Analyzer Integration",
+          "slug": "rust-analyzer-integration",
+          "path": "/docs/core-concepts/rust-analyzer-integration",
+          "type": "page",
+          "order": 7,
+          "icon": "Code"
+        },
+        {
+          "title": "Multiplayer Server",
+          "slug": "multiplayer-server",
+          "path": "/docs/core-concepts/multiplayer-server",
+          "type": "page",
+          "order": 8,
+          "icon": "Users"
+        },
+        {
+          "title": "Engine Filesystem",
+          "slug": "engine-filesystem",
+          "path": "/docs/core-concepts/engine-filesystem",
+          "type": "page",
+          "order": 9,
+          "icon": "FolderTree"
+        },
+        {
+          "title": "Blueprint Node System",
+          "slug": "blueprint-system",
+          "path": "/docs/core-concepts/blueprint-system",
+          "type": "page",
+          "order": 10,
+          "icon": "Network"
+        },
+        {
+          "title": "Theme System",
+          "slug": "theme-system",
+          "path": "/docs/core-concepts/theme-system",
+          "type": "page",
+          "order": 12,
+          "icon": "Palette"
+        },
+        {
+          "title": "Type Database",
+          "slug": "type-database-impl",
+          "path": "/docs/core-concepts/type-database-impl",
+          "type": "page",
+          "order": 13,
+          "icon": "Database"
         }
       ]
     },
@@ -153,6 +209,6 @@
       ]
     }
   ],
-  "lastGenerated": "2026-01-17T19:17:43.665Z",
+  "lastGenerated": "2026-01-17T19:57:56.262Z",
   "version": "1.0.0"
 }

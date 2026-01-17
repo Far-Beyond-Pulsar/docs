@@ -72,9 +72,51 @@
     "category": "core-concepts"
   },
   {
-    "title": "Palette System",
+    "title": "Command Palette System",
     "path": "/docs/core-concepts/palette-system",
     "slug": "core-concepts/palette-system",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Workspace, Panels & Docks",
+    "path": "/docs/core-concepts/workspace-panels-docks",
+    "slug": "core-concepts/workspace-panels-docks",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Rust Analyzer Integration",
+    "path": "/docs/core-concepts/rust-analyzer-integration",
+    "slug": "core-concepts/rust-analyzer-integration",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Multiplayer Server",
+    "path": "/docs/core-concepts/multiplayer-server",
+    "slug": "core-concepts/multiplayer-server",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Engine Filesystem",
+    "path": "/docs/core-concepts/engine-filesystem",
+    "slug": "core-concepts/engine-filesystem",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Blueprint Node System",
+    "path": "/docs/core-concepts/blueprint-system",
+    "slug": "core-concepts/blueprint-system",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Theme System",
+    "path": "/docs/core-concepts/theme-system",
+    "slug": "core-concepts/theme-system",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Type Database",
+    "path": "/docs/core-concepts/type-database-impl",
+    "slug": "core-concepts/type-database-impl",
     "category": "core-concepts"
   },
   {
