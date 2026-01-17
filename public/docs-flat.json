@@ -120,6 +120,30 @@
     "category": "core-concepts"
   },
   {
+    "title": "Terminal Integration",
+    "path": "/docs/core-concepts/terminal-integration",
+    "slug": "core-concepts/terminal-integration",
+    "category": "core-concepts"
+  },
+  {
+    "title": "File Manager",
+    "path": "/docs/core-concepts/file-manager",
+    "slug": "core-concepts/file-manager",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Diagnostics System",
+    "path": "/docs/core-concepts/diagnostics-system",
+    "slug": "core-concepts/diagnostics-system",
+    "category": "core-concepts"
+  },
+  {
+    "title": "Bevy Viewport Integration",
+    "path": "/docs/core-concepts/bevy-viewport",
+    "slug": "core-concepts/bevy-viewport",
+    "category": "core-concepts"
+  },
+  {
     "title": "Guides",
     "path": "/docs/guides/index",
     "slug": "guides/index",

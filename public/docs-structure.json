@@ -187,6 +187,38 @@
           "type": "page",
           "order": 13,
           "icon": "Database"
+        },
+        {
+          "title": "Terminal Integration",
+          "slug": "terminal-integration",
+          "path": "/docs/core-concepts/terminal-integration",
+          "type": "page",
+          "order": 14,
+          "icon": "Terminal"
+        },
+        {
+          "title": "File Manager",
+          "slug": "file-manager",
+          "path": "/docs/core-concepts/file-manager",
+          "type": "page",
+          "order": 15,
+          "icon": "FolderOpen"
+        },
+        {
+          "title": "Diagnostics System",
+          "slug": "diagnostics-system",
+          "path": "/docs/core-concepts/diagnostics-system",
+          "type": "page",
+          "order": 16,
+          "icon": "AlertCircle"
+        },
+        {
+          "title": "Bevy Viewport Integration",
+          "slug": "bevy-viewport",
+          "path": "/docs/core-concepts/bevy-viewport",
+          "type": "page",
+          "order": 17,
+          "icon": "Box"
         }
       ]
     },
@@ -209,6 +241,6 @@
       ]
     }
   ],
-  "lastGenerated": "2026-01-17T19:57:56.262Z",
+  "lastGenerated": "2026-01-17T20:05:17.490Z",
   "version": "1.0.0"
 }

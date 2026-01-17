@@ -180,6 +180,152 @@
       "searchText": "pulsar architecture understanding how pulsar engine is built pulsar architecture what is pulsar? design philosophy core technologies gpui - the ui framework winit - window management bevy renderer - 3d graphics rapier3d - physics rust analyzer - code intelligence system architecture major components the launcher (ui_entry, ui_project_launcher) the editor shell (ui_core) file manager (ui_file_manager) problems panel (ui_problems) terminal (ui_terminal) type debugger (ui_type_debugger) 3d viewport (ui_level_editor) game object system plugin system engine backend (engine_backend) subsystems services engine state (engine_state) threading model project structure data flow example: opening a project configuration engine configuration project configuration future directions wrapping up architecture design systems pulsar architecture\n\npulsar is a game editor and engine built in rust with a focus on modularity, editor stability, and modern development workflows. this document explains how the major systems fit together.\n\nwhat is pulsar?\n[!note]\npulsar resembles a game editor in this early stage, it has less runtime that most engines as we are primarily focused on ux. think unity editor or unreal editor, built from scratch in rust. this is in the process of changing so you will see us refer to it as an engine too.\n\n- a launcher for managing and creating projects\n- file management and asset browsers\n- code editing with rust analyzer integration\n- a 3d scene viewport with real-time rendering\n- plugin system for custom editors and tools\n- integrated terminal and problem diagnostics\n- type inspection and debugging tools\n\ndesign philosophy\n\neditor stability is paramount - the editor should never crash, even when your game code does. pulsar runs the editor ui separately from game logic to achieve this.\n"
     },
     {
+      "id": "core-concepts-bevy-viewport",
+      "title": "Bevy Viewport Integration",
+      "description": "Zero-copy GPU rendering with Bevy engine",
+      "url": "/docs/core-concepts/bevy-viewport",
+      "slug": "core-concepts/bevy-viewport",
+      "category": "core-concepts",
+      "tags": [
+        "rendering",
+        "bevy",
+        "gpu",
+        "viewport",
+        "zero-copy"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Bevy Viewport Integration",
+          "slug": "bevy-viewport-integration"
+        },
+        {
+          "level": 2,
+          "text": "Architecture",
+          "slug": "architecture"
+        },
+        {
+          "level": 2,
+          "text": "Zero-Copy Rendering",
+          "slug": "zero-copy-rendering"
+        },
+        {
+          "level": 2,
+          "text": "BevyViewport Component",
+          "slug": "bevyviewport-component"
+        },
+        {
+          "level": 2,
+          "text": "Viewport State",
+          "slug": "viewport-state"
+        },
+        {
+          "level": 2,
+          "text": "Texture Initialization",
+          "slug": "texture-initialization"
+        },
+        {
+          "level": 2,
+          "text": "Double Buffering",
+          "slug": "double-buffering"
+        },
+        {
+          "level": 2,
+          "text": "GPU Canvas Source",
+          "slug": "gpu-canvas-source"
+        },
+        {
+          "level": 2,
+          "text": "Texture Handles",
+          "slug": "texture-handles"
+        },
+        {
+          "level": 2,
+          "text": "Render Loop",
+          "slug": "render-loop"
+        },
+        {
+          "level": 2,
+          "text": "GPU Renderer",
+          "slug": "gpu-renderer"
+        },
+        {
+          "level": 2,
+          "text": "Native Texture Handle",
+          "slug": "native-texture-handle"
+        },
+        {
+          "level": 2,
+          "text": "Object Fit",
+          "slug": "object-fit"
+        },
+        {
+          "level": 2,
+          "text": "Resizing",
+          "slug": "resizing"
+        },
+        {
+          "level": 2,
+          "text": "Performance Metrics",
+          "slug": "performance-metrics"
+        },
+        {
+          "level": 2,
+          "text": "BGRA8 Format",
+          "slug": "bgra8-format"
+        },
+        {
+          "level": 2,
+          "text": "Fallback Rendering",
+          "slug": "fallback-rendering"
+        },
+        {
+          "level": 2,
+          "text": "Continuous Rendering",
+          "slug": "continuous-rendering"
+        },
+        {
+          "level": 2,
+          "text": "Focus Handling",
+          "slug": "focus-handling"
+        },
+        {
+          "level": 2,
+          "text": "Platform Differences",
+          "slug": "platform-differences"
+        },
+        {
+          "level": 3,
+          "text": "Windows (DirectX)",
+          "slug": "windows-directx"
+        },
+        {
+          "level": 3,
+          "text": "macOS (Metal)",
+          "slug": "macos-metal"
+        },
+        {
+          "level": 3,
+          "text": "Linux (Vulkan)",
+          "slug": "linux-vulkan"
+        },
+        {
+          "level": 2,
+          "text": "Synchronization",
+          "slug": "synchronization"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "Zero-copy GPU rendering with Bevy engine",
+      "readingTime": 3,
+      "lastUpdated": "2026-01-17",
+      "searchText": "bevy viewport integration zero-copy gpu rendering with bevy engine bevy viewport integration architecture zero-copy rendering bevyviewport component viewport state texture initialization double buffering gpu canvas source texture handles render loop gpu renderer native texture handle object fit resizing performance metrics bgra8 format fallback rendering continuous rendering focus handling platform differences windows (directx) macos (metal) linux (vulkan) synchronization limitations rendering bevy gpu viewport zero-copy [!warning]\rthe rending system is currently tied heavily to bevy's renderer and ecs. while we may be remaining tied to bevyecs, the rendering engine will be made modular in the fiture. at such time this page will be moved to a new \"render engines\" section\r\n\r\nbevy viewport integration\r\n\r\npulsar integrates bevy (a rust game engine) for 3d rendering using zero-copy gpu texture sharing. the bevy renderer runs in a background thread and shares textures with gpui for display. the implementation is in crates/ui/src/bevyviewport.rs and crates/enginebackend/src/services/gpurenderer.rs.\r\n\r\narchitecture\r\n\r\nthe viewport system has several layers:\r\n\r\n- bevyviewport - gpui component that displays the render\r\n- bevyviewportstate - shared state for texture handles\r\n- gpurenderer - wrapper around bevy renderer\r\n- bevyrenderer - actual bevy ecs and rendering pipeline\r\n- gpu texture sharing - platform-specific shared memory\r\n\r\nzero-copy rendering\r\n\r\nthe key innovation is zero-copy gpu texture sharing:\r\nth"
+    },
+    {
       "id": "core-concepts-blueprint-system",
       "title": "Blueprint Node System",
       "description": "Visual programming node registry and runtime",
@@ -300,6 +446,127 @@
       "searchText": "blueprint node system visual programming node registry and runtime blueprint node system what it provides node types defining nodes pure functions functions with side effects control flow events node registry querying nodes type constructors import tracking documentation node colors adding custom nodes code generation standard library organization execution model limitations future enhancements blueprints visual-programming nodes scripting blueprint node system\r\n\r\npulsar includes a visual programming system called blueprints. the standard library (pulsarstd) provides built-in nodes for common operations. custom nodes can be added by creating rust functions with the #[blueprint] attribute. the implementation is in crates/pulsarstd/.\r\n\r\nwhat it provides\r\n\r\nthe blueprint system provides:\r\n- automatic node registration at compile time using linkme\r\n- node metadata extraction from rust functions\r\n- runtime node registry for querying available nodes\r\n- support for pure functions, side effects, control flow, and events\r\n- type constructor registry for generic types\r\n- category-based node organization\r\n\r\nnode types\r\n\r\nblueprints support four node types via the nodetypes enum:\r\nthese determine how the node appears in the visual editor and how code generation works.\r\n\r\ndefining nodes\r\n\r\nnodes are defined as regular rust functions with the #[blueprint] attribute:\r\nthe macro extracts metadata from the function signature and stores i"
     },
     {
+      "id": "core-concepts-diagnostics-system",
+      "title": "Diagnostics System",
+      "description": "Code diagnostics and quick fixes from LSP",
+      "url": "/docs/core-concepts/diagnostics-system",
+      "slug": "core-concepts/diagnostics-system",
+      "category": "core-concepts",
+      "tags": [
+        "diagnostics",
+        "lsp",
+        "errors",
+        "warnings",
+        "quick-fixes"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Diagnostics System",
+          "slug": "diagnostics-system"
+        },
+        {
+          "level": 2,
+          "text": "What It Provides",
+          "slug": "what-it-provides"
+        },
+        {
+          "level": 2,
+          "text": "Diagnostic Structure",
+          "slug": "diagnostic-structure"
+        },
+        {
+          "level": 2,
+          "text": "Severity Levels",
+          "slug": "severity-levels"
+        },
+        {
+          "level": 2,
+          "text": "Diagnostic Source",
+          "slug": "diagnostic-source"
+        },
+        {
+          "level": 2,
+          "text": "Diagnostic Codes",
+          "slug": "diagnostic-codes"
+        },
+        {
+          "level": 2,
+          "text": "Diagnostic Range",
+          "slug": "diagnostic-range"
+        },
+        {
+          "level": 2,
+          "text": "Code Actions (Quick Fixes)",
+          "slug": "code-actions-quick-fixes"
+        },
+        {
+          "level": 2,
+          "text": "Text Edits",
+          "slug": "text-edits"
+        },
+        {
+          "level": 2,
+          "text": "Example: Unused Import",
+          "slug": "example-unused-import"
+        },
+        {
+          "level": 2,
+          "text": "Applying Code Actions",
+          "slug": "applying-code-actions"
+        },
+        {
+          "level": 2,
+          "text": "LSP Integration",
+          "slug": "lsp-integration"
+        },
+        {
+          "level": 2,
+          "text": "Diagnostic Providers",
+          "slug": "diagnostic-providers"
+        },
+        {
+          "level": 2,
+          "text": "Collecting Diagnostics",
+          "slug": "collecting-diagnostics"
+        },
+        {
+          "level": 2,
+          "text": "UI Display",
+          "slug": "ui-display"
+        },
+        {
+          "level": 2,
+          "text": "Filtering",
+          "slug": "filtering"
+        },
+        {
+          "level": 2,
+          "text": "Sorting",
+          "slug": "sorting"
+        },
+        {
+          "level": 2,
+          "text": "Diagnostic Lifecycle",
+          "slug": "diagnostic-lifecycle"
+        },
+        {
+          "level": 2,
+          "text": "Performance",
+          "slug": "performance"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "Code diagnostics and quick fixes from LSP",
+      "readingTime": 4,
+      "lastUpdated": "2026-01-17",
+      "searchText": "diagnostics system code diagnostics and quick fixes from lsp diagnostics system what it provides diagnostic structure severity levels diagnostic source diagnostic codes diagnostic range code actions (quick fixes) text edits example: unused import applying code actions lsp integration diagnostic providers collecting diagnostics ui display filtering sorting diagnostic lifecycle performance limitations diagnostics lsp errors warnings quick-fixes diagnostics system\r\n\r\nthe diagnostics system collects and displays code errors, warnings, and hints from language servers. it includes support for quick fixes (code actions) that can automatically fix issues. the implementation is in crates/ui/src/diagnostics.rs.\r\n\r\nwhat it provides\r\n\r\nthe diagnostics system provides:\r\n- structured diagnostic data from lsp servers\r\n- severity levels (error, warning, information, hint)\r\n- quick fix actions with text edits\r\n- integration with rust-analyzer and other language servers\r\n\r\ndiagnostic structure\r\n\r\na diagnostic represents a single issue in code:\r\nthe file path, line, and column identify where the issue is. the message explains what's wrong.\r\n\r\nseverity levels\r\n\r\ndiagnostics are categorized by severity:\r\nerrors prevent compilation. warnings are potential issues. information provides context. hints suggest improvements.\r\n\r\ndiagnostic source\r\n\r\nthe source field identifies which tool produced the diagnostic:\r\nthis allows filtering diagnostics by s"
+    },
+    {
       "id": "core-concepts-engine-filesystem",
       "title": "Engine Filesystem",
       "description": "Asset management and type indexing system",
@@ -403,6 +670,131 @@
       "readingTime": 4,
       "lastUpdated": "2026-01-17",
       "searchText": "engine filesystem asset management and type indexing system engine filesystem what it does enginefs type database integration asset operations creating a type alias updating a type alias deleting a type alias moving/renaming file watchers asset templates project structure type information extraction usage example asset operations example scan vs watch limitations filesystem assets indexing types engine filesystem\r\n\r\nthe engine filesystem (enginefs) provides centralized asset management and automatic indexing for pulsar projects. it handles file operations and maintains the type database for quick lookups. the implementation is in crates/enginefs/.\r\n\r\nwhat it does\r\n\r\nthe filesystem layer provides:\r\n- automatic scanning and indexing of project assets\r\n- file watchers that update indexes in real-time\r\n- type database integration for fast asset lookups\r\n- asset creation/update/delete operations\r\n- template-based asset creation\r\n\r\nenginefs\r\n\r\nthe main type is enginefs in lib.rs:\r\ncreating an enginefs instance scans the project directory and populates the type database:\r\nthe initial scan walks the project directory, finds all asset files, and registers them in the type database. it skips hidden files (starting with .) and the target directory.\r\n\r\ntype database integration\r\n\r\nthe filesystem integrates tightly with the type database. when files are created, modified, or deleted, the t"
+    },
+    {
+      "id": "core-concepts-file-manager",
+      "title": "File Manager",
+      "description": "File browser and asset management UI",
+      "url": "/docs/core-concepts/file-manager",
+      "slug": "core-concepts/file-manager",
+      "category": "core-concepts",
+      "tags": [
+        "files",
+        "browser",
+        "assets",
+        "drag-drop"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "File Manager",
+          "slug": "file-manager"
+        },
+        {
+          "level": 2,
+          "text": "Architecture",
+          "slug": "architecture"
+        },
+        {
+          "level": 2,
+          "text": "FileManagerDrawer",
+          "slug": "filemanagerdrawer"
+        },
+        {
+          "level": 2,
+          "text": "Creating a File Manager",
+          "slug": "creating-a-file-manager"
+        },
+        {
+          "level": 2,
+          "text": "Folder Tree",
+          "slug": "folder-tree"
+        },
+        {
+          "level": 2,
+          "text": "View Modes",
+          "slug": "view-modes"
+        },
+        {
+          "level": 2,
+          "text": "Sorting",
+          "slug": "sorting"
+        },
+        {
+          "level": 2,
+          "text": "Selection",
+          "slug": "selection"
+        },
+        {
+          "level": 2,
+          "text": "File Operations",
+          "slug": "file-operations"
+        },
+        {
+          "level": 2,
+          "text": "Creating Assets",
+          "slug": "creating-assets"
+        },
+        {
+          "level": 2,
+          "text": "Renaming",
+          "slug": "renaming"
+        },
+        {
+          "level": 2,
+          "text": "Context Menus",
+          "slug": "context-menus"
+        },
+        {
+          "level": 2,
+          "text": "Drag and Drop",
+          "slug": "drag-and-drop"
+        },
+        {
+          "level": 2,
+          "text": "Search",
+          "slug": "search"
+        },
+        {
+          "level": 2,
+          "text": "Hidden Files",
+          "slug": "hidden-files"
+        },
+        {
+          "level": 2,
+          "text": "File Type Icons",
+          "slug": "file-type-icons"
+        },
+        {
+          "level": 2,
+          "text": "Clipboard",
+          "slug": "clipboard"
+        },
+        {
+          "level": 2,
+          "text": "Integration with Editors",
+          "slug": "integration-with-editors"
+        },
+        {
+          "level": 2,
+          "text": "Refreshing",
+          "slug": "refreshing"
+        },
+        {
+          "level": 2,
+          "text": "Performance",
+          "slug": "performance"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "File browser and asset management UI",
+      "readingTime": 3,
+      "lastUpdated": "2026-01-17",
+      "searchText": "file manager file browser and asset management ui file manager architecture filemanagerdrawer creating a file manager folder tree view modes sorting selection file operations creating assets renaming context menus drag and drop search hidden files file type icons clipboard integration with editors refreshing performance limitations files browser assets drag-drop file manager\r\n\r\nthe file manager provides a visual file browser for navigating projects, managing assets, and opening files in editors. it integrates with the plugin system to show file type icons and provide context menus. the implementation is in ui-crates/uifilemanager/.\r\n\r\narchitecture\r\n\r\nthe file manager has several components:\r\n\r\n- filemanagerdrawer - main panel in the dock\r\n- foldernode - tree structure representing directory hierarchy\r\n- fileoperations - backend for create/rename/delete operations\r\n- drag and drop - support for moving files by dragging\r\n- context menus - right-click actions for files and folders\r\n\r\nfilemanagerdrawer\r\n\r\nthe main component:\r\nthis maintains the current directory, selection state, view preferences, and clipboard.\r\n\r\ncreating a file manager\r\n\r\ncreate a new file manager panel:\r\nthe project path is the root of the file tree. if none, no files are displayed.\r\n\r\nfolder tree\r\n\r\nthe foldernode represents a directory:\r\nthe tree is lazily loaded - children "
     },
     {
       "id": "core-concepts",
@@ -1191,6 +1583,131 @@
       "readingTime": 5,
       "lastUpdated": "2026-01-17",
       "searchText": "rust analyzer integration lsp integration for code analysis and diagnostics rust analyzer integration what it does rustanalyzermanager finding rust-analyzer status tracking starting the process lsp communication progress monitoring diagnostics code actions (quick fixes) completion requests thread architecture stopping error handling installation fallback usage example limitations lsp rust-analyzer diagnostics code-analysis rust analyzer integration\r\n\r\npulsar integrates rust-analyzer (the rust language server) to provide code intelligence features like diagnostics, code completion, and type information. this document covers how the integration works.\r\n\r\nwhat it does\r\n\r\nthe rust-analyzer integration provides:\r\n- real-time error and warning diagnostics from the rust compiler\r\n- code completion suggestions\r\n- go-to-definition and type information\r\n- quick fixes (code actions) for common issues\r\n\r\nthe implementation is in crates/enginebackend/src/services/rustanalyzermanager.rs.\r\n\r\nrustanalyzermanager\r\n\r\nthe rustanalyzermanager type spawns and communicates with a rust-analyzer process via the language server protocol (lsp).\r\nthe manager tracks the rust-analyzer process, handles lsp communication, and emits events for status changes and diagnostics.\r\n\r\nfinding rust-analyzer\r\n\r\nwhen the manager initializes, it searches for rust-analyzer in this order:\r\n\r\n1. via rustup: rustup which rust-analyzer (handles rustup"
+    },
+    {
+      "id": "core-concepts-terminal-integration",
+      "title": "Terminal Integration",
+      "description": "Integrated terminal emulator using Alacritty",
+      "url": "/docs/core-concepts/terminal-integration",
+      "slug": "core-concepts/terminal-integration",
+      "category": "core-concepts",
+      "tags": [
+        "terminal",
+        "alacritty",
+        "pty",
+        "shell"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Terminal Integration",
+          "slug": "terminal-integration"
+        },
+        {
+          "level": 2,
+          "text": "Architecture",
+          "slug": "architecture"
+        },
+        {
+          "level": 2,
+          "text": "Terminal Core",
+          "slug": "terminal-core"
+        },
+        {
+          "level": 2,
+          "text": "Initialization",
+          "slug": "initialization"
+        },
+        {
+          "level": 2,
+          "text": "Terminal Context",
+          "slug": "terminal-context"
+        },
+        {
+          "level": 2,
+          "text": "Creating a Terminal",
+          "slug": "creating-a-terminal"
+        },
+        {
+          "level": 2,
+          "text": "Terminal Content",
+          "slug": "terminal-content"
+        },
+        {
+          "level": 2,
+          "text": "Terminal Bounds",
+          "slug": "terminal-bounds"
+        },
+        {
+          "level": 2,
+          "text": "Event Loop",
+          "slug": "event-loop"
+        },
+        {
+          "level": 2,
+          "text": "Terminal Events",
+          "slug": "terminal-events"
+        },
+        {
+          "level": 2,
+          "text": "Input Handling",
+          "slug": "input-handling"
+        },
+        {
+          "level": 2,
+          "text": "Rendering",
+          "slug": "rendering"
+        },
+        {
+          "level": 2,
+          "text": "Cursor Rendering",
+          "slug": "cursor-rendering"
+        },
+        {
+          "level": 2,
+          "text": "Scrollback",
+          "slug": "scrollback"
+        },
+        {
+          "level": 2,
+          "text": "Terminal Modes",
+          "slug": "terminal-modes"
+        },
+        {
+          "level": 2,
+          "text": "Shell Integration",
+          "slug": "shell-integration"
+        },
+        {
+          "level": 2,
+          "text": "Terminal Drawer",
+          "slug": "terminal-drawer"
+        },
+        {
+          "level": 2,
+          "text": "Terminal Window",
+          "slug": "terminal-window"
+        },
+        {
+          "level": 2,
+          "text": "Color Themes",
+          "slug": "color-themes"
+        },
+        {
+          "level": 2,
+          "text": "Performance",
+          "slug": "performance"
+        },
+        {
+          "level": 2,
+          "text": "Limitations",
+          "slug": "limitations"
+        }
+      ],
+      "excerpt": "Integrated terminal emulator using Alacritty",
+      "readingTime": 4,
+      "lastUpdated": "2026-01-17",
+      "searchText": "terminal integration integrated terminal emulator using alacritty terminal integration architecture terminal core initialization terminal context creating a terminal terminal content terminal bounds event loop terminal events input handling rendering cursor rendering scrollback terminal modes shell integration terminal drawer terminal window color themes performance limitations terminal alacritty pty shell [!warning]\rthe terminal is being removed from the core engine and moved to the terminal plugin the plugins will soon get their very own section. this page will be migrated there and updated accordingly\r\n\r\nterminal integration\r\n\r\npulsar includes an integrated terminal emulator built on alacritty's alacrittyterminal crate. it provides a full-featured terminal with pty support, rendering, and input handling. the implementation is in ui-crates/uiterminal/.\r\n\r\narchitecture\r\n\r\nthe terminal system has several components:\r\n\r\n- terminal - core terminal state using alacritty's term\r\n- terminaldrawer - panel that displays the terminal in the dock\r\n- terminalelement - gpui element that renders terminal content\r\n- terminalwindow - standalone terminal window\r\n- eventloop - background thread handling pty i/o\r\n\r\nterminal core\r\n\r\nthe terminal type wraps alacritty's terminal emulator:\r\nthis maintains the terminal state (screen buffer, cursor position, etc.) and communicates with the shell process throug"
     },
     {
       "id": "core-concepts-theme-system",
@@ -2789,8 +3306,8 @@
     }
   ],
   "metadata": {
-    "totalDocs": 21,
-    "totalWords": 18315,
+    "totalDocs": 25,
+    "totalWords": 20711,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -2799,11 +3316,13 @@
     ],
     "tags": [
       "3d",
+      "alacritty",
       "architecture",
       "assets",
       "beginner",
       "bevy",
       "blueprints",
+      "browser",
       "code-analysis",
       "collaboration",
       "command-palette",
@@ -2816,10 +3335,14 @@
       "diagnostics",
       "dlls",
       "dock",
+      "drag-drop",
+      "errors",
       "extensibility",
+      "files",
       "filesystem",
       "fundamentals",
       "getting-started",
+      "gpu",
       "gpui",
       "graphics",
       "guides",
@@ -2839,6 +3362,8 @@
       "panels",
       "plugins",
       "project",
+      "pty",
+      "quick-fixes",
       "quickstart",
       "rendering",
       "rust-analyzer",
@@ -2846,20 +3371,25 @@
       "search",
       "server",
       "setup",
+      "shell",
       "styling",
       "systems",
+      "terminal",
       "themes",
       "tutorial",
       "tutorials",
       "type-debugger",
       "types",
       "ui",
+      "viewport",
       "views",
       "visual-programming",
+      "warnings",
       "windows",
-      "workspace"
+      "workspace",
+      "zero-copy"
     ],
-    "lastGenerated": "2026-01-17T19:57:56.590Z",
+    "lastGenerated": "2026-01-17T20:05:17.829Z",
     "version": "1.0.0"
   }
 }
