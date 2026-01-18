@@ -21,9 +21,8 @@ Open your terminal in the Pulsar directory and run:
 cargo run --release
 ```
 
-::: info
-The first build will take a while as Cargo compiles all dependencies. Subsequent runs will be much faster.
-:::
+> [!NOTE]
+> The first build will take a while as Cargo compiles all dependencies. Subsequent runs will be much faster.
 
 If you're missing any required dependencies, Pulsar will detect this and guide you through installation before launching the editor.
 
