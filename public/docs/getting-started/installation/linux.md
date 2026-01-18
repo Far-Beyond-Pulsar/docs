@@ -12,11 +12,9 @@ tags: ["installation", "linux", "setup"]
 
 This guide covers setting up Pulsar Engine on Linux distributions. While Windows is currently the primary development platform, you can still build and run Pulsar on Linux with some additional setup.
 
-::: warning
-**Platform Support Notice**
-
-Linux support is temporarily limited while core architectural work is ongoing. Some features may not work as expected. Check the [GitHub discussions](https://github.com/orgs/Far-Beyond-Pulsar/discussions/17) for current status.
-:::
+> [!WARNING]
+> ## Platform Support Notice
+> Linux support is temporarily limited while core architectural work is ongoing. Some features may not work as expected. Check the [GitHub discussions](https://github.com/orgs/Far-Beyond-Pulsar/discussions/17) for current status.
 
 ## Prerequisites
 
@@ -105,10 +103,9 @@ cargo build --release
 
 The first build will take 10-20 minutes as dependencies compile.
 
-::: info
-**Debug vs Release**
-
-Use `--release` for normal use. Omit it for faster compile times during development, but expect slower runtime performance.
+> [!NOTE]
+> ## Debug vs Release
+> Use `--release` for normal use. Omit it for faster compile times during development, but expect slower runtime performance.
 :::
 
 ## Running Pulsar
