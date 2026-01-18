@@ -106,7 +106,6 @@ The first build will take 10-20 minutes as dependencies compile.
 > [!NOTE]
 > ## Debug vs Release
 > Use `--release` for normal use. Omit it for faster compile times during development, but expect slower runtime performance.
-:::
 
 ## Running Pulsar
 
