@@ -1971,6 +1971,97 @@
       "searchText": "plugin system understanding pulsar's dynamic plugin architecture plugin system why dynamic libraries? the performance argument the safety argument the power argument how plugins work the loading process the plugin interface memory management across the ffi boundary file type registration standalone files folder-based files categories and organization editor implementation the editorinstance trait basic editor structure rendering with gpui panel integration statusbar buttons lifecycle hooks error handling version compatibility performance considerations security considerations example plugins common patterns configuration files background processing shared resources debugging plugins logging panics and crashes debugger attachment publishing plugins limitations and future work wrapping up plugins architecture extensibility dlls plugin system\n[!note]\npulsar plugins are compiled rust dlls, not scripts. this gives you native performance and full api access.\n\npulsar's plugin system is one of its most distinctive features. unlike engines that use scripting languages or interpreted code for extensions, pulsar plugins are compiled rust dynamic libraries loaded at runtime. this gives you native performance, full type safety, and complete access to the editor api—while maintaining the flexibility of a plugin architecture.\n\nwhy dynamic libraries?\n\nlet's start with the question you're probably asking: why use dlls (dynamic link libraries) for plugins instead of something simpler like scripts or configuration files?\n\nthe performance argument\n\nplugins run at native speed. there's no interpreter, no virtual machine, no jit warmup time. when your plugin needs to process thousands of files or render a complex editor panel, it does so with zero overhead.\n\nthis matters when you're building professional tools. a material editor"
     },
     {
+      "id": "core-concepts-profiling-system",
+      "title": "Profiling & Performance Analysis",
+      "description": "Real-time instrumentation profiling with flamegraph visualization",
+      "url": "/docs/core-concepts/profiling-system",
+      "slug": "core-concepts/profiling-system",
+      "category": "core-concepts",
+      "tags": [
+        "profiling",
+        "performance",
+        "instrumentation",
+        "flamegraph",
+        "optimization"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Profiling & Performance Analysis",
+          "slug": "profiling-performance-analysis"
+        },
+        {
+          "level": 2,
+          "text": "The Problem With Traditional Profilers",
+          "slug": "the-problem-with-traditional-profilers"
+        },
+        {
+          "level": 2,
+          "text": "Architecture Overview",
+          "slug": "architecture-overview"
+        },
+        {
+          "level": 2,
+          "text": "Instrumentation Macros",
+          "slug": "instrumentation-macros"
+        },
+        {
+          "level": 2,
+          "text": "Thread Naming",
+          "slug": "thread-naming"
+        },
+        {
+          "level": 2,
+          "text": "Frame Time Tracking",
+          "slug": "frame-time-tracking"
+        },
+        {
+          "level": 2,
+          "text": "Using the Flamegraph UI",
+          "slug": "using-the-flamegraph-ui"
+        },
+        {
+          "level": 2,
+          "text": "Persistent Recordings",
+          "slug": "persistent-recordings"
+        },
+        {
+          "level": 2,
+          "text": "Performance Overhead",
+          "slug": "performance-overhead"
+        },
+        {
+          "level": 2,
+          "text": "Instrumentation Placement Strategy",
+          "slug": "instrumentation-placement-strategy"
+        },
+        {
+          "level": 2,
+          "text": "Interpreting Flamegraphs",
+          "slug": "interpreting-flamegraphs"
+        },
+        {
+          "level": 2,
+          "text": "Integration With Development Workflow",
+          "slug": "integration-with-development-workflow"
+        },
+        {
+          "level": 2,
+          "text": "Future Enhancements",
+          "slug": "future-enhancements"
+        },
+        {
+          "level": 2,
+          "text": "Summary",
+          "slug": "summary"
+        }
+      ],
+      "excerpt": "Real-time instrumentation profiling with flamegraph visualization",
+      "readingTime": 10,
+      "lastUpdated": "2026-01-20",
+      "searchText": "profiling & performance analysis real-time instrumentation profiling with flamegraph visualization profiling & performance analysis the problem with traditional profilers architecture overview instrumentation macros thread naming frame time tracking using the flamegraph ui persistent recordings performance overhead instrumentation placement strategy interpreting flamegraphs integration with development workflow future enhancements summary profiling performance instrumentation flamegraph optimization profiling & performance analysis\r\n\r\npulsar includes a production-grade profiling system inspired by unreal insights, providing microsecond-precision instrumentation with minimal runtime overhead. the profiler captures exact timing data from explicit instrumentation points throughout the engine, avoiding the inaccuracy and overhead of traditional sampling profilers.\r\n\r\nthe problem with traditional profilers\r\n\r\nmost profiling tools work by interrupting your program thousands of times per second to sample the call stack. this approach has fundamental limitations. the profiler cannot see what happens between samples, meaning fast operations may never appear in the results. interrupting threads adds overhead that skews measurements, and the statistical nature of sampling means results vary between runs. more critically, sampling profilers struggle with highly parallel workloads where threads briefly synchronize—the very patterns that matter most in game engines.\r\n\r\ninstrumentation profiling"
+    },
+    {
       "id": "core-concepts-rendering-pipeline",
       "title": "Rendering System",
       "description": "How Pulsar renders 3D scenes",
@@ -3236,7 +3327,7 @@
       "excerpt": "Install Pulsar Engine on Linux",
       "readingTime": 2,
       "lastUpdated": "2026-01-12",
-      "searchText": "linux installation install pulsar engine on linux installing pulsar on linux prerequisites install rust install rustup reload your shell verify installation install development tools install vulkan ubuntu/debian fedora arch getting pulsar building pulsar running pulsar known linux-specific issues wayland vs x11 force x11 for current session hidpi scaling set scale factor (adjust value as needed) missing libraries gpu driver issues install proprietary drivers mesa should work out of the box if not, install: optional: add to path add to ~/.bashrc or ~/.zshrc reload shell keeping updated troubleshooting \"error: linker cc not found\" slow compilation permission errors should show your username, not root graphics initialization failed next steps installation linux setup installing pulsar on linux\n\nthis guide covers setting up pulsar engine on linux distributions. while windows is currently the primary development platform, you can still build and run pulsar on linux with some additional setup.\n\n::: warning\nplatform support notice\n\nlinux support is temporarily limited while core architectural work is ongoing. some features may not work as expected. check the github discussions for current status.\n:::\n\nprerequisites\n\ninstall rust\n\npulsar requires rust 1.70 or newer:\n\ninstall development tools\n\nyou'll need build essentials and some additional libraries:\n\nubuntu/debian:\n\nfedora:\n\narch:\n\ninstall vulkan\n\npulsar uses vulkan for rendering:\n\nverify vulkan works:\n\nyou should see your gpu listed.\n\ngetting pulsar\n\nclone the repository:\n\nbuilding pulsar\n\nbuild with cargo:\n\nthe first build will take 10-20 minutes as dependencies compile.\n\n::: info\ndebug vs release\n\nuse --release for normal use. omit it for faster compile times during development, but expect slower "
+      "searchText": "linux installation install pulsar engine on linux installing pulsar on linux prerequisites install rust install rustup reload your shell verify installation install development tools install vulkan ubuntu/debian fedora arch getting pulsar building pulsar running pulsar known linux-specific issues wayland vs x11 force x11 for current session hidpi scaling set scale factor (adjust value as needed) missing libraries gpu driver issues install proprietary drivers mesa should work out of the box if not, install: optional: add to path add to ~/.bashrc or ~/.zshrc reload shell keeping updated troubleshooting \"error: linker cc not found\" slow compilation permission errors should show your username, not root graphics initialization failed next steps installation linux setup installing pulsar on linux\n\nthis guide covers setting up pulsar engine on linux distributions. while windows is currently the primary development platform, you can still build and run pulsar on linux with some additional setup.\n[!warning]\n## platform support notice\nlinux support is temporarily limited while core architectural work is ongoing. some features may not work as expected. check the github discussions for current status.\n\nprerequisites\n\ninstall rust\n\npulsar requires rust 1.70 or newer:\n\ninstall development tools\n\nyou'll need build essentials and some additional libraries:\n\nubuntu/debian:\n\nfedora:\n\narch:\n\ninstall vulkan\n\npulsar uses vulkan for rendering:\n\nverify vulkan works:\n\nyou should see your gpu listed.\n\ngetting pulsar\n\nclone the repository:\n\nbuilding pulsar\n\nbuild with cargo:\n\nthe first build will take 10-20 minutes as dependencies compile.\n[!note]\n## debug vs release\nuse --release for normal use. omit it for faster compile times during development, but expect slower runt"
     },
     {
       "id": "getting-started-installation-macos",
@@ -3788,7 +3879,7 @@
       "excerpt": "Get the Pulsar editor running and explore your first project",
       "readingTime": 6,
       "lastUpdated": "2026-01-12",
-      "searchText": "quick start guide get the pulsar editor running and explore your first project quick start guide running pulsar for the first time the launcher creating your first project the editor interface the main viewport the file manager the problems panel the terminal understanding pulsar projects project.toml plugins your project uses go here the cargo workspace the game crate running your game from the editor from the terminal working with assets using assets in code exploring the type debugger where to go from here common questions why isn't there a visual scene editor yet? can i use pulsar for 2d games? what if i find a bug? can i contribute to pulsar? tutorial quickstart beginner quick start guide\n\nlet's get pulsar running and take a tour of the editor. this guide assumes you've already installed rust and cloned the pulsar repository.\n\nrunning pulsar for the first time\n\nopen your terminal in the pulsar directory and run:\n\n::: info\nthe first build will take a while as cargo compiles all dependencies. subsequent runs will be much faster.\n:::\n\nif you're missing any required dependencies, pulsar will detect this and guide you through installation before launching the editor.\n\nthe launcher\n\nwhen pulsar starts, you'll see the launcher screen. this is your project hub where you can:\n\n- open existing projects\n- create new projects\n- configure engine settings\n- view recent projects\n\ncreating your first project\n\n1. click \"new project\"\n2. choose a name for your project (e.g., \"my-first-game\")\n3. select a location on your file system\n4. choose a template (start with \"empty project\" for now)\n5. click \"create\"\n\npulsar will generate the project structure and open the editor.\n"
+      "searchText": "quick start guide get the pulsar editor running and explore your first project quick start guide running pulsar for the first time the launcher creating your first project the editor interface the main viewport the file manager the problems panel the terminal understanding pulsar projects project.toml plugins your project uses go here the cargo workspace the game crate running your game from the editor from the terminal working with assets using assets in code exploring the type debugger where to go from here common questions why isn't there a visual scene editor yet? can i use pulsar for 2d games? what if i find a bug? can i contribute to pulsar? tutorial quickstart beginner quick start guide\n\nlet's get pulsar running and take a tour of the editor. this guide assumes you've already installed rust and cloned the pulsar repository.\n\nrunning pulsar for the first time\n\nopen your terminal in the pulsar directory and run:\n[!note]\nthe first build will take a while as cargo compiles all dependencies. subsequent runs will be much faster.\n\nif you're missing any required dependencies, pulsar will detect this and guide you through installation before launching the editor.\n\nthe launcher\n\nwhen pulsar starts, you'll see the launcher screen. this is your project hub where you can:\n\n- open existing projects\n- create new projects\n- configure engine settings\n- view recent projects\n\ncreating your first project\n\n1. click \"new project\"\n2. choose a name for your project (e.g., \"my-first-game\")\n3. select a location on your file system\n4. choose a template (start with \"empty project\" for now)\n5. click \"create\"\n\npulsar will generate the project structure and open the editor.\n\nthe e"
     },
     {
       "id": "guides",
@@ -3932,8 +4023,8 @@
     }
   ],
   "metadata": {
-    "totalDocs": 30,
-    "totalWords": 22558,
+    "totalDocs": 31,
+    "totalWords": 24403,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -3970,6 +4061,7 @@
       "extensibility",
       "files",
       "filesystem",
+      "flamegraph",
       "fonts",
       "fundamentals",
       "getting-started",
@@ -3986,6 +4078,7 @@
       "indexing",
       "inspection",
       "installation",
+      "instrumentation",
       "introduction",
       "learning",
       "linux",
@@ -3995,9 +4088,12 @@
       "multiplayer",
       "networking",
       "nodes",
+      "optimization",
       "overview",
       "panels",
+      "performance",
       "plugins",
+      "profiling",
       "project",
       "pty",
       "quick-fixes",
@@ -4032,7 +4128,7 @@
       "workspace",
       "zero-copy"
     ],
-    "lastGenerated": "2026-01-17T20:20:27.004Z",
+    "lastGenerated": "2026-01-20T19:22:50.459Z",
     "version": "1.0.0"
   }
 }

@@ -237,6 +237,14 @@
           "icon": "History"
         },
         {
+          "title": "Profiling & Performance Analysis",
+          "slug": "profiling-system",
+          "path": "/docs/core-concepts/profiling-system",
+          "type": "page",
+          "order": 19,
+          "icon": "Activity"
+        },
+        {
           "title": "Engine State Management",
           "slug": "engine-state",
           "path": "/docs/core-concepts/engine-state",
@@ -281,6 +289,6 @@
       ]
     }
   ],
-  "lastGenerated": "2026-01-17T20:20:26.681Z",
+  "lastGenerated": "2026-01-20T19:22:50.045Z",
   "version": "1.0.0"
 }

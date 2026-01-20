@@ -156,6 +156,12 @@
     "category": "core-concepts"
   },
   {
+    "title": "Profiling & Performance Analysis",
+    "path": "/docs/core-concepts/profiling-system",
+    "slug": "core-concepts/profiling-system",
+    "category": "core-concepts"
+  },
+  {
     "title": "Engine State Management",
     "path": "/docs/core-concepts/engine-state",
     "slug": "core-concepts/engine-state",
