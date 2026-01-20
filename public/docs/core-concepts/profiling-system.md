@@ -18,7 +18,7 @@ icon: Activity
 
 # Profiling & Performance Analysis
 
-Pulsar includes a production-grade profiling system inspired by Unreal Insights, providing microsecond-precision instrumentation with minimal runtime overhead. The profiler captures exact timing data from explicit instrumentation points throughout the engine, avoiding the inaccuracy and overhead of traditional sampling profilers.
+Pulsar includes a profiling system inspired by Unreal Insights, providing microsecond-precision instrumentation with minimal runtime overhead. The profiler captures exact timing data from explicit instrumentation points throughout the engine, avoiding the inaccuracy and overhead of traditional sampling profilers.
 
 ## The Problem With Traditional Profilers
 
