@@ -168,6 +168,12 @@
     "category": "core-concepts"
   },
   {
+    "title": "Translation & Internationalization",
+    "path": "/docs/core-concepts/translation-system",
+    "slug": "core-concepts/translation-system",
+    "category": "core-concepts"
+  },
+  {
     "title": "Asset Loading System",
     "path": "/docs/core-concepts/asset-loading",
     "slug": "core-concepts/asset-loading",

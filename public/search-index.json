@@ -1986,11 +1986,6 @@
       ],
       "headings": [
         {
-          "level": 1,
-          "text": "Profiling & Performance Analysis",
-          "slug": "profiling-performance-analysis"
-        },
-        {
           "level": 2,
           "text": "The Problem With Traditional Profilers",
           "slug": "the-problem-with-traditional-profilers"
@@ -2052,14 +2047,69 @@
         },
         {
           "level": 2,
+          "text": "Adding Profiling to Your Code",
+          "slug": "adding-profiling-to-your-code"
+        },
+        {
+          "level": 3,
+          "text": "Basic Function Instrumentation",
+          "slug": "basic-function-instrumentation"
+        },
+        {
+          "level": 3,
+          "text": "Instrumenting Code Blocks",
+          "slug": "instrumenting-code-blocks"
+        },
+        {
+          "level": 3,
+          "text": "Naming Conventions",
+          "slug": "naming-conventions"
+        },
+        {
+          "level": 3,
+          "text": "Instrumenting Loops",
+          "slug": "instrumenting-loops"
+        },
+        {
+          "level": 3,
+          "text": "Async and Thread Boundaries",
+          "slug": "async-and-thread-boundaries"
+        },
+        {
+          "level": 3,
+          "text": "Conditional Compilation",
+          "slug": "conditional-compilation"
+        },
+        {
+          "level": 3,
+          "text": "Integration with Engine Systems",
+          "slug": "integration-with-engine-systems"
+        },
+        {
+          "level": 3,
+          "text": "Error Handling and Early Returns",
+          "slug": "error-handling-and-early-returns"
+        },
+        {
+          "level": 3,
+          "text": "GPU Work and Synchronization Points",
+          "slug": "gpu-work-and-synchronization-points"
+        },
+        {
+          "level": 3,
+          "text": "Testing Your Instrumentation",
+          "slug": "testing-your-instrumentation"
+        },
+        {
+          "level": 2,
           "text": "Summary",
           "slug": "summary"
         }
       ],
       "excerpt": "Real-time instrumentation profiling with flamegraph visualization",
-      "readingTime": 10,
+      "readingTime": 16,
       "lastUpdated": "2026-01-20",
-      "searchText": "profiling & performance analysis real-time instrumentation profiling with flamegraph visualization profiling & performance analysis the problem with traditional profilers architecture overview instrumentation macros thread naming frame time tracking using the flamegraph ui persistent recordings performance overhead instrumentation placement strategy interpreting flamegraphs integration with development workflow future enhancements summary profiling performance instrumentation flamegraph optimization profiling & performance analysis\r\n\r\npulsar includes a production-grade profiling system inspired by unreal insights, providing microsecond-precision instrumentation with minimal runtime overhead. the profiler captures exact timing data from explicit instrumentation points throughout the engine, avoiding the inaccuracy and overhead of traditional sampling profilers.\r\n\r\nthe problem with traditional profilers\r\n\r\nmost profiling tools work by interrupting your program thousands of times per second to sample the call stack. this approach has fundamental limitations. the profiler cannot see what happens between samples, meaning fast operations may never appear in the results. interrupting threads adds overhead that skews measurements, and the statistical nature of sampling means results vary between runs. more critically, sampling profilers struggle with highly parallel workloads where threads briefly synchronize—the very patterns that matter most in game engines.\r\n\r\ninstrumentation profiling"
+      "searchText": "profiling & performance analysis real-time instrumentation profiling with flamegraph visualization the problem with traditional profilers architecture overview instrumentation macros thread naming frame time tracking using the flamegraph ui persistent recordings performance overhead instrumentation placement strategy interpreting flamegraphs integration with development workflow future enhancements adding profiling to your code basic function instrumentation instrumenting code blocks naming conventions instrumenting loops async and thread boundaries conditional compilation integration with engine systems error handling and early returns gpu work and synchronization points testing your instrumentation summary profiling performance instrumentation flamegraph optimization pulsar includes a profiling system inspired by unreal insights, providing microsecond-precision instrumentation with minimal runtime overhead. the profiler captures exact timing data from explicit instrumentation points throughout the engine, avoiding the inaccuracy and overhead of traditional sampling profilers.\r\n\r\nthe problem with traditional profilers\r\n\r\nmost profiling tools work by interrupting your program thousands of times per second to sample the call stack. this approach has fundamental limitations. the profiler cannot see what happens between samples, meaning fast operations may never appear in the results. interrupting threads adds overhead that skews measurements, and the statistical nature of sampling means results vary between runs. more critically, sampling profilers struggle with highly parallel workloads where threads briefly synchronize—the very patterns that matter most in game engines.\r\n\r\ninstrumentation profiling takes a different approach. rather than interrupting"
     },
     {
       "id": "core-concepts-rendering-pipeline",
@@ -2515,6 +2565,142 @@
       "readingTime": 3,
       "lastUpdated": "2026-01-17",
       "searchText": "theme system theme loading, switching, and persistence theme system what it provides theme storage initialization theme extraction theme state theme structure using themes in ui switching themes custom themes built-in themes hot reload theme api limitations themes ui styling customization theme system\r\n\r\npulsar's theme system manages ui appearance with hot-reloadable themes. themes are json files that define colors, spacing, and other visual properties. the implementation is in crates/ui/src/themes.rs.\r\n\r\nwhat it provides\r\n\r\nthe theme system provides:\r\n- loading themes from embedded resources\r\n- extracting themes to app data directory\r\n- theme switching with automatic ui updates\r\n- persistent theme selection across sessions\r\n- integration with gpui's themeregistry\r\n\r\ntheme storage\r\n\r\nthemes are stored in multiple locations:\r\n\r\n- embedded - themes/.json (compiled into the binary)\r\n- runtime - {appdata}/themes/.json (extracted at first run)\r\n- state - {appdata}/state.json (saves selected theme)\r\n\r\nthe app data directory is platform-specific:\r\n- windows: c:\\users\\{user}\\appdata\\roaming\\pulsar\\pulsarengine\\\r\n- macos: ~/library/application support/com.pulsar.pulsarengine/\r\n- linux: ~/.local/share/pulsar/pulsarengine/\r\n\r\ninitialization\r\n\r\nthe theme system initializes on app s"
+    },
+    {
+      "id": "core-concepts-translation-system",
+      "title": "Translation & Internationalization",
+      "description": "YAML-based translation system with instant language switching and zero-overhead lookups",
+      "url": "/docs/core-concepts/translation-system",
+      "slug": "core-concepts/translation-system",
+      "category": "core-concepts",
+      "tags": [
+        "i18n",
+        "localization",
+        "translations",
+        "internationalization",
+        "multi-language"
+      ],
+      "headings": [
+        {
+          "level": 2,
+          "text": "Why Internationalization Matters",
+          "slug": "why-internationalization-matters"
+        },
+        {
+          "level": 2,
+          "text": "Architecture Overview",
+          "slug": "architecture-overview"
+        },
+        {
+          "level": 2,
+          "text": "Translation File Format",
+          "slug": "translation-file-format"
+        },
+        {
+          "level": 2,
+          "text": "Using Translations in Code",
+          "slug": "using-translations-in-code"
+        },
+        {
+          "level": 2,
+          "text": "Initializing Translations",
+          "slug": "initializing-translations"
+        },
+        {
+          "level": 2,
+          "text": "Directory Structure",
+          "slug": "directory-structure"
+        },
+        {
+          "level": 2,
+          "text": "Adding New Languages",
+          "slug": "adding-new-languages"
+        },
+        {
+          "level": 2,
+          "text": "Naming Conventions",
+          "slug": "naming-conventions"
+        },
+        {
+          "level": 2,
+          "text": "Performance Characteristics",
+          "slug": "performance-characteristics"
+        },
+        {
+          "level": 2,
+          "text": "Language Selector Implementation",
+          "slug": "language-selector-implementation"
+        },
+        {
+          "level": 2,
+          "text": "Adding Translations to New Components",
+          "slug": "adding-translations-to-new-components"
+        },
+        {
+          "level": 2,
+          "text": "Handling Dynamic Content",
+          "slug": "handling-dynamic-content"
+        },
+        {
+          "level": 2,
+          "text": "Translation Workflow",
+          "slug": "translation-workflow"
+        },
+        {
+          "level": 1,
+          "text": "Tooltip for the button that starts the game simulation",
+          "slug": "tooltip-for-the-button-that-starts-the-game-simulation"
+        },
+        {
+          "level": 1,
+          "text": "Button label for saving the current scene",
+          "slug": "button-label-for-saving-the-current-scene"
+        },
+        {
+          "level": 2,
+          "text": "Testing Translations",
+          "slug": "testing-translations"
+        },
+        {
+          "level": 2,
+          "text": "Current Language Support",
+          "slug": "current-language-support"
+        },
+        {
+          "level": 2,
+          "text": "Migration from Hardcoded Strings",
+          "slug": "migration-from-hardcoded-strings"
+        },
+        {
+          "level": 2,
+          "text": "Best Practices",
+          "slug": "best-practices"
+        },
+        {
+          "level": 2,
+          "text": "Future Enhancements",
+          "slug": "future-enhancements"
+        },
+        {
+          "level": 2,
+          "text": "Integration with External Tools",
+          "slug": "integration-with-external-tools"
+        },
+        {
+          "level": 2,
+          "text": "Adding Translations to Your Project",
+          "slug": "adding-translations-to-your-project"
+        },
+        {
+          "level": 3,
+          "text": "Component-Level Translation Organization",
+          "slug": "component-level-translation-organization"
+        }
+      ],
+      "excerpt": "YAML-based translation system with instant language switching and zero-overhead lookups",
+      "readingTime": 11,
+      "lastUpdated": "2026-01-22",
+      "searchText": "translation & internationalization yaml-based translation system with instant language switching and zero-overhead lookups why internationalization matters architecture overview translation file format using translations in code initializing translations directory structure adding new languages naming conventions performance characteristics language selector implementation adding translations to new components handling dynamic content translation workflow tooltip for the button that starts the game simulation button label for saving the current scene testing translations current language support migration from hardcoded strings best practices future enhancements integration with external tools adding translations to your project component-level translation organization i18n localization translations internationalization multi-language pulsar includes a comprehensive translation system built on rust-i18n, providing instant language switching across the entire ui with zero runtime overhead. the system loads all translations for the current language into memory at startup, enabling o(1) lookups without disk i/o. users can switch languages dynamically via the titlebar dropdown, with the ui updating immediately without requiring a restart.\r\n\r\nwhy internationalization matters\r\n\r\ngame engines serve developers worldwide, and forcing everyone to work in english creates unnecessary barriers. a russian developer should be able to navigate the level editor in russian. a chinese artist should see ui panels in chinese. when tools adapt to users rather than forcing adaptation, productivity increases and frustration decreases.\r\n\r\nmost translation systems add significant overhead—either loading files on demand (slow) or using complex key lookup mechanisms (also slow). pulsar takes a different approach. all translations for the activ"
     },
     {
       "id": "core-concepts-type-database-impl",
@@ -4023,8 +4209,8 @@
     }
   ],
   "metadata": {
-    "totalDocs": 31,
-    "totalWords": 24403,
+    "totalDocs": 32,
+    "totalWords": 27564,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -4073,18 +4259,22 @@
       "guides",
       "history",
       "how-to",
+      "i18n",
       "icons",
       "images",
       "indexing",
       "inspection",
       "installation",
       "instrumentation",
+      "internationalization",
       "introduction",
       "learning",
       "linux",
+      "localization",
       "lsp",
       "macos",
       "management",
+      "multi-language",
       "multiplayer",
       "networking",
       "nodes",
@@ -4112,6 +4302,7 @@
       "terminal",
       "text",
       "themes",
+      "translations",
       "tutorial",
       "tutorials",
       "type-debugger",
@@ -4128,7 +4319,7 @@
       "workspace",
       "zero-copy"
     ],
-    "lastGenerated": "2026-01-20T19:22:50.459Z",
+    "lastGenerated": "2026-01-22T17:01:53.889Z",
     "version": "1.0.0"
   }
 }

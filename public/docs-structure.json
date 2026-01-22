@@ -253,6 +253,14 @@
           "icon": "Database"
         },
         {
+          "title": "Translation & Internationalization",
+          "slug": "translation-system",
+          "path": "/docs/core-concepts/translation-system",
+          "type": "page",
+          "order": 20,
+          "icon": "Globe"
+        },
+        {
           "title": "Asset Loading System",
           "slug": "asset-loading",
           "path": "/docs/core-concepts/asset-loading",
@@ -289,6 +297,6 @@
       ]
     }
   ],
-  "lastGenerated": "2026-01-20T19:22:50.045Z",
+  "lastGenerated": "2026-01-22T17:01:53.484Z",
   "version": "1.0.0"
 }
