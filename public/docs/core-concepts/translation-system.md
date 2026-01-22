@@ -433,46 +433,6 @@ Different languages have different pluralization rules. English has singular and
 
 ## Current Language Support
 
-Pulsar currently supports five languages:
-
-- **English (en)**: Primary language, source of truth
-- **Simplified Chinese (zh-CN)**: Mainland China
-- **Traditional Chinese (zh-HK)**: Hong Kong, Taiwan
-- **Italian (it)**: Italy
-- **Brazilian Portuguese (pt-BR)**: Brazil
-
-The main titlebar locale selector dynamically shows all available languages by detecting `.yml` files in the `locales/` directories. Adding new languages requires only creating new translation files—the system automatically discovers and registers them.
-
-## Migration from Hardcoded Strings
-
-Existing code with hardcoded English strings can be migrated incrementally:
-
-1. **Identify UI text** that should be translatable
-2. **Add translation keys** to the English YAML file
-3. **Replace string literals** with `t!()` calls
-4. **Add other language translations** to their respective language files
-5. **Test by switching languages** to verify the changes
-
-This approach allows gradual migration without requiring all strings to be translated simultaneously. The fallback to English ensures the UI remains functional throughout the migration process.
-
-## Best Practices
-
-Follow these guidelines when working with translations:
-
-- **Keep keys predictable**: Use consistent naming conventions
-- **Provide context**: Add comments for ambiguous strings
-- **Test all languages**: Switch languages regularly during development
-- **Avoid concatenation**: Use formatted strings instead of building text from pieces
-- **Handle pluralization**: Different languages have different plural rules
-- **Include shortcuts**: Keep keyboard shortcuts in translated strings when relevant
-- **Group related strings**: Organize keys by component and section
-- **Document new keys**: Explain context when adding translation keys
-- **Version your files**: The `_version` field helps track format changes
-
-## Future Enhancements
-
-## Current Language Support
-
 Pulsar ships with partial support for five languages covering major global markets:
 
 - **English (`en`)** - Default and fallback language
