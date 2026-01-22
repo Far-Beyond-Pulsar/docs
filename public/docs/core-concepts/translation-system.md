@@ -1,6 +1,6 @@
 ---
-title: Translation & Internationalization
-description: YAML-based translation system with instant language switching and zero-overhead lookups
+title: Translation System
+description: Fast in-memory i18n with instant language switching across all UI
 category: core-concepts
 lastUpdated: '2026-01-22'
 tags:
@@ -16,62 +16,95 @@ position: 20
 icon: Globe
 ---
 
-Pulsar includes a comprehensive translation system built on `rust-i18n`, providing instant language switching across the entire UI with zero runtime overhead. The system loads all translations for the current language into memory at startup, enabling O(1) lookups without disk I/O. Users can switch languages dynamically via the titlebar dropdown, with the UI updating immediately without requiring a restart.
+Pulsar ships with a translation system that lets you build games for a global audience without worrying about hardcoded English strings. The entire active language loads into memory at startup, providing nanosecond-level translation lookups with zero I/O overhead. When players switch languages via the titlebar dropdown, every visible string updates immediately—menus, buttons, tooltips, everything.
 
-## Why Internationalization Matters
+## The Problem With Traditional Localization
 
-Game engines serve developers worldwide, and forcing everyone to work in English creates unnecessary barriers. A Russian developer should be able to navigate the level editor in Russian. A Chinese artist should see UI panels in Chinese. When tools adapt to users rather than forcing adaptation, productivity increases and frustration decreases.
+Most game engines treat localization as an afterthought. You ship your game with English strings hardcoded everywhere, then months later realize you need to support Chinese, Spanish, Portuguese. At that point, you're faced with finding every single UI string across dozens of files and replacing them with translation keys. It's tedious, error-prone work that delays your international launch.
 
-Most translation systems add significant overhead—either loading files on demand (slow) or using complex key lookup mechanisms (also slow). Pulsar takes a different approach. All translations for the active language load at engine startup into a simple HashMap. Subsequent lookups are just hash table accesses, taking nanoseconds rather than microseconds. The YAML source files provide a translator-friendly format with clear structure and version control compatibility.
+Pulsar bakes localization into the UI framework from day one. Instead of writing `"New Project"` directly in your menu code, you write `t!("Menu.File.NewProject")`. The translation macro looks up the appropriate string for the current language. When you add support for a new language, you just create a new YAML file with translations—no code changes required. The engine handles everything else.
 
 ## Architecture Overview
 
-The translation system consists of three layers working together. At the bottom sits the YAML files containing actual translation strings, organized by component and language. These files live in `locales/` directories next to the Rust code they translate, keeping translations close to the UI they describe. The middle layer is `rust-i18n`, which parses YAML files at compile time and generates efficient lookup code. At the top, the `t!()` macro provides a simple API for retrieving translated strings throughout the codebase.
+The translation system has three cooperating parts. **YAML translation files** store all translatable strings, with one file per language per crate. Files sit in `locales/` directories next to the Rust code they translate. **rust-i18n** parses these files at compile time and embeds efficient lookup tables directly into the binary. The **`t!` macro** provides the API—you call `t!("Some.Key")` and get back the translated string in nanoseconds.
 
 ```mermaid
-graph TD
-    A[YAML Translation Files] -->|Compile-time| B[rust-i18n Parser]
-    B -->|Generates| C[HashMap Lookup Code]
-    C -->|Runtime| D[In-Memory Translation Cache]
-    D -->|O(1) Lookup| E[UI Components]
-    F[Locale Selector] -->|set_locale| D
-    E -->|t! macro| D
+graph LR
+    A[UI Code] -->|t! macro| B[Translation Cache]
+    B --> C{Language Selected?}
+    C -->|English| D[en.yml]
+    C -->|Chinese| E[zh-CN.yml]
+    C -->|Portuguese| F[pt-BR.yml]
+    D --> B
+    E --> B
+    F --> B
 ```
 
-The diagram shows how translation data flows from source files to runtime lookups. At compile time, `rust-i18n` embeds all translations directly into the binary. At runtime, changing languages simply swaps which HashMap the lookup code references. No file I/O occurs during normal operation.
+When you call `t!("Menu.File.Save")`, the macro performs a constant-time hash lookup in the loaded language cache. If the key exists, you get back the translated string. If not, you get the fallback English text. No file access, no network calls, no delays—just a memory read.
 
 ![Language Selector](./images/translation-locale-selector.png)
-*The language selector in the main titlebar, showing all available languages with the current selection marked*
+*The language selector in the main titlebar. Click it to instantly switch languages—all visible UI text updates immediately without restarting the engine.*
 
-## Translation File Format
+## File Organization
 
-Translation files use YAML with a specific structure designed for clarity and maintainability. Each file begins with a version number, followed by nested keys and their translations:
+Each crate that needs translations maintains a `locales/` directory. Inside, you have one YAML file per supported language. Pulsar currently ships with five languages:
 
-```yaml
-_version: 2
+- `en.yml` - English (fallback language)
+- `it.yml` - Italian
+- `pt-BR.yml` - Portuguese (Brazil)
+- `zh-CN.yml` - Simplified Chinese
+- `zh-HK.yml` - Traditional Chinese
 
-LevelEditor.Toolbar.StartSimulation:
-  en: "Start Simulation (F5)"
-  zh-CN: "开始模拟 (F5)"
-  zh-HK: "開始模擬 (F5)"
-  it: "Avvia Simulazione (F5)"
+The YAML structure mirrors your UI hierarchy:
 
-LevelEditor.Toolbar.StopSimulation:
-  en: "Stop Simulation (Shift+F5)"
-  zh-CN: "停止模拟 (Shift+F5)"
-  zh-HK: "停止模擬 (Shift+F5)"
-  it: "Ferma Simulazione (Shift+F5)"
-
-LevelEditor.Hierarchy.Title:
-  en: "Hierarchy"
-  zh-CN: "层级"
-  zh-HK: "層級"
-  it: "Gerarchia"
+```
+ui-crates/ui_level_editor/locales/
+├── en.yml       # English translations
+├── zh-CN.yml    # Simplified Chinese
+├── zh-HK.yml    # Traditional Chinese
+├── it.yml       # Italian
+└── pt-BR.yml    # Brazilian Portuguese
 ```
 
-The key structure uses dot notation to create logical hierarchies. `LevelEditor.Toolbar.StartSimulation` clearly indicates this string belongs to the Level Editor's toolbar, specifically the Start Simulation button. This convention makes it easy to find related translations and understand context when translating.
+Each file contains only translations for that specific language, using a hierarchical key structure:
 
-Language codes follow the ISO 639-1 standard (`en` for English) with optional region codes (`zh-CN` for Simplified Chinese, `zh-HK` for Traditional Chinese). The system falls back to English if a translation is missing, ensuring the UI never shows raw key names.
+```yaml
+# en.yml
+_version: 2
+
+LevelEditor:
+  Toolbar:
+    StartSimulation: "Start Simulation (F5)"
+    StopSimulation: "Stop Simulation (Shift+F5)"
+    PauseSimulation: "Pause Simulation"
+  Hierarchy:
+    Title: "Hierarchy"
+    AddObject: "Add Object"
+  Properties:
+    Title: "Properties"
+    NoSelection: "No Selection"
+```
+
+```yaml
+# zh-CN.yml
+_version: 2
+
+LevelEditor:
+  Toolbar:
+    StartSimulation: "开始模拟 (F5)"
+    StopSimulation: "停止模拟 (Shift+F5)"
+    PauseSimulation: "暂停模拟"
+  Hierarchy:
+    Title: "层级"
+    AddObject: "添加对象"
+  Properties:
+    Title: "属性"
+    NoSelection: "未选择"
+```
+
+The key structure uses YAML nested hierarchies (not dot notation in the file). The `rust-i18n` library flattens these into dot-notation keys at compile time, so `LevelEditor.Toolbar.StartSimulation` becomes the lookup key.
+
+Language codes follow the ISO 639-1 standard (`en` for English) with optional region codes (`zh-CN` for Simplified Chinese, `zh-HK` for Traditional Chinese, `pt-BR` for Brazilian Portuguese). The system falls back to English if a translation is missing, ensuring the UI never shows raw key names.
 
 ## Using Translations in Code
 
@@ -116,149 +149,118 @@ The `set_locale` function swaps the active translation HashMap immediately. Any 
 Each crate that contains translations must initialize the `rust-i18n` system. This happens once at crate load time using a macro invocation:
 
 ```rust
-// In lib.rs or main.rs
+// At the top of lib.rs in ui_level_editor or ui_common
 rust_i18n::i18n!("locales", fallback = "en");
-```
 
-This macro scans the `locales/` directory at compile time, parsing all YAML files it finds. The `fallback` parameter specifies which language to use when a translation key is missing. English serves as the fallback for Pulsar, ensuring developers always see readable text even for untranslated strings.
-
-After initialization, export convenience functions for accessing the locale system:
-
-```rust
-/// Get current locale
 pub fn locale() -> String {
     rust_i18n::locale().to_string()
 }
 
-/// Set locale
 pub fn set_locale(locale: &str) {
     rust_i18n::set_locale(locale);
 }
 ```
 
-These wrappers provide a cleaner API for crate consumers and isolate the dependency on `rust-i18n` to a single location.
+The `i18n!` macro scans the `locales/` directory at compile time, parsing all YAML files. The `fallback` parameter tells it to use English when a key doesn't exist in the active language. This guarantees developers always see readable text, even for incomplete translations.
 
-## Directory Structure
+The convenience functions wrap `rust-i18n`'s API, providing a cleaner interface and hiding the dependency from the rest of your code.
 
-Translation files live in `locales/` directories next to the code they translate. This keeps translations close to the UI, making it easy to find and update strings when modifying features:
+## Using Translations in UI Code
 
-```
-ui-crates/ui_level_editor/
-├── src/
-│   ├── lib.rs                    # Initializes i18n
-│   └── level_editor/
-│       └── ui/
-│           ├── toolbar.rs        # Uses t!() macro
-│           ├── hierarchy.rs      # Uses t!() macro
-│           └── properties.rs     # Uses t!() macro
-└── locales/
-    └── level_editor.yml          # All translations for this crate
-```
-
-Large projects might split translations into multiple files for maintainability:
-
-```
-locales/
-├── toolbar.yml      # Toolbar translations
-├── hierarchy.yml    # Hierarchy panel translations
-├── properties.yml   # Properties panel translations
-└── viewport.yml     # Viewport and camera translations
-```
-
-The `rust-i18n` macro automatically discovers and loads all `.yml` files in the `locales/` directory, merging them into a single translation database.
-
-## Adding New Languages
-
-To add support for a new language, update every translation key in the YAML file with the new language code. For example, adding German:
-
-```yaml
-LevelEditor.Toolbar.StartSimulation:
-  en: "Start Simulation (F5)"
-  zh-CN: "开始模拟 (F5)"
-  zh-HK: "開始模擬 (F5)"
-  it: "Avvia Simulazione (F5)"
-  de: "Simulation starten (F5)"    # New German translation
-```
-
-After adding translations, update the locale selector in the main titlebar to include the new language. Open `ui-crates/ui_common/src/menu/mod.rs` and add a new menu item:
+The `t!` macro retrieves translated strings. Import it and use it wherever you need localized text:
 
 ```rust
-impl Render for LocaleSelector {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let current_locale = locale().to_string();
+use rust_i18n::t;
 
-        Button::new("btn")
-            .small()
-            .ghost()
-            .icon(IconName::Globe)
-            .popup_menu(move |menu, _, _| {
-                menu
-                    .menu_with_check(
-                        "English",
-                        current_locale == "en",
-                        Box::new(SelectLocale("en".into()))
-                    )
-                    .menu_with_check(
-                        "简体中文 (Simplified Chinese)",
-                        current_locale == "zh-CN",
-                        Box::new(SelectLocale("zh-CN".into()))
-                    )
-                    // ... other languages ...
-                    .menu_with_check(
-                        "Deutsch (German)",
-                        current_locale == "de",
-                        Box::new(SelectLocale("de".into()))
-                    )
-            })
-    }
-}
+// Button tooltip
+Button::new("play")
+    .icon(IconName::Play)
+    .tooltip(t!("LevelEditor.Toolbar.StartSimulation"))
+
+// Panel title  
+div()
+    .child(t!("LevelEditor.Hierarchy.Title").to_string())
+
+// Menu items
+MenuItem::action(t!("Menu.File.New").to_string(), NewProject)
 ```
 
-The next time you compile, the new language will appear in the dropdown and work immediately.
+The macro returns `Cow<'static, str>`, which is either a borrowed static string or an owned String. Most GPUI methods accept `Cow<str>` directly for tooltips and labels. For inline text in elements that need `IntoElement`, call `.to_string()` to convert. The compiler optimizes this—if the translation is static, conversion becomes a copy instead of allocation.
 
-## Naming Conventions
+When you need to check or change the current language:
 
-Translation keys follow a hierarchical naming convention that reflects the UI structure. This makes keys predictable and easy to discover:
+```rust
+use ui_level_editor::{locale, set_locale};
 
+// Get current language
+let current = locale(); // Returns "en", "zh-CN", etc.
+
+// Change language
+set_locale("zh-CN");
+
+// Trigger UI refresh to show new language
+cx.refresh();
 ```
-Component.Section.Element
 
-Examples:
-LevelEditor.Toolbar.StartSimulation
-LevelEditor.Hierarchy.AddObject
-LevelEditor.Properties.NoSelection
-LevelEditor.Viewport.CameraMode
+The `set_locale` function swaps the active translation cache immediately. All subsequent `t!()` calls return strings in the new language. Refreshing the UI redraws everything with updated text.
+
+## Key Naming Conventions
+
+Translation keys follow a hierarchical pattern that mirrors your UI structure. This makes keys predictable and reduces the chance of collisions:
+
+```yaml
+Component:
+  Section:
+    Element: "Translation"
+
+# Examples
+LevelEditor:
+  Toolbar:
+    StartSimulation: "Start Simulation (F5)"
+  Hierarchy:
+    AddObject: "Add Object"
+  Properties:
+    NoSelection: "No Selection"
+  Viewport:
+    CameraMode: "Camera Mode"
+
+Menu:
+  File:
+    New: "New"
+    Open: "Open..."
+    Save: "Save"
 ```
 
-The first segment identifies the major component (LevelEditor, MainMenu, SettingsPanel). The second segment narrows to a specific panel or area (Toolbar, Hierarchy, Properties). The final segment describes the actual UI element (StartSimulation, AddObject).
+The first level identifies the major component (`LevelEditor`, `Menu`, `SettingsPanel`). The second level narrows to a specific panel or feature (`Toolbar`, `Hierarchy`, `File`). The final level describes the actual UI element (`StartSimulation`, `AddObject`, `New`).
 
-For common patterns, establish reusable naming schemes:
+Common patterns:
+- **Buttons**: `{Component}.{Section}.{Action}` → `LevelEditor.Toolbar.Play`
+- **Labels**: `{Component}.{Section}.{Name}` → `LevelEditor.Properties.Transform`  
+- **Tooltips**: Same key as the element they describe
+- **Messages**: `{Component}.{Section}.{MessageType}` → `LevelEditor.Properties.NoSelection`
 
-- Buttons: `{Component}.{Section}.{ActionName}` (e.g., `LevelEditor.Toolbar.Play`)
-- Labels: `{Component}.{Section}.{LabelName}` (e.g., `LevelEditor.Properties.Transform`)
-- Tooltips: Same as the element they describe
-- Messages: `{Component}.{Section}.{MessageType}` (e.g., `LevelEditor.Properties.NoSelection`)
-
-Consistency in naming makes it easy for translators to understand context and for developers to find the right keys when writing code.
+Consistency in naming helps translators understand context and helps developers find the right keys.
 
 ## Performance Characteristics
 
-The translation system is designed for zero runtime overhead. At engine startup, `rust-i18n` loads all translations for the active language into a HashMap stored in static memory. The HashMap uses perfect hashing for constant-time lookups. Each `t!()` call becomes a single hash table access, typically completing in 10-20 nanoseconds.
+The translation system has zero runtime overhead. At engine startup, `rust-i18n` loads the active language's translations into a HashMap in static memory. Each `t!()` call becomes a single hash lookup—typically 10-20 nanoseconds. No file I/O, no allocations, no blocking.
 
 ```rust
-// This compiles to approximately:
+// The t!() macro compiles down to approximately this:
+static TRANSLATIONS: HashMap<&str, &str> = /* ... */;
+
 pub fn t(key: &str) -> &'static str {
-    TRANSLATIONS_MAP.get(key).unwrap_or(key)
+    TRANSLATIONS.get(key).unwrap_or(key)
 }
 ```
 
-Because translations embed directly in the binary, no file I/O occurs during normal operation. The only disk access happens at compile time when the `i18n!` macro parses YAML files. This means translation lookups never block, never fail, and never allocate. The entire translation database lives in read-only memory, making concurrent access from multiple threads completely safe without locks.
+Because translations embed in the binary at compile time, lookups never fail. If a key doesn't exist, you get back the fallback English text. The entire translation database lives in read-only memory, making concurrent access from multiple threads safe without locks.
 
-Changing languages has a small one-time cost—swapping a pointer to the active HashMap. This operation is atomic and takes less than a microsecond. After the swap, all subsequent `t!()` calls use the new language with no additional overhead.
+Switching languages swaps a single pointer to the active HashMap. This is atomic and takes less than a microsecond. After the swap, all subsequent `t!()` calls use the new language instantly.
 
-## Language Selector Implementation
+## Language Selector in the Titlebar
 
-The main titlebar includes a globe icon button that opens a dropdown showing all available languages. The implementation lives in `ui_common/src/menu/mod.rs`:
+The main titlebar shows a globe icon button that opens a dropdown with all available languages. The implementation lives in `ui_common/src/menu/mod.rs`:
 
 ```rust
 struct LocaleSelector {
@@ -278,34 +280,37 @@ impl LocaleSelector {
 }
 ```
 
-When a user selects a language, the `on_select_locale` handler calls `set_locale` to change the active language, then refreshes the window to trigger a redraw. Because translations live in memory, this refresh is instantaneous—no loading screens or delays.
+When you select a language, `on_select_locale` calls `set_locale` to change the active translation cache, then refreshes the window. The UI updates immediately—no loading screen, no delay.
 
-The popup menu builds dynamically based on the current locale, placing a checkmark next to the active language:
+The dropdown builds dynamically, marking the current language with a checkmark:
 
 ```rust
 .popup_menu(move |menu, _, _| {
+    let current = locale();
     menu
         .menu_with_check(
             "English",
-            current_locale == "en",
+            current == "en",
             Box::new(SelectLocale("en".into()))
         )
         .menu_with_check(
             "简体中文 (Simplified Chinese)",
-            current_locale == "zh-CN",
+            current == "zh-CN",
             Box::new(SelectLocale("zh-CN".into()))
         )
-        // ... more languages ...
+        // ... more languages
 })
 ```
 
-This pattern makes it easy to add new languages—simply add another `.menu_with_check` call with the appropriate language code.
+To add a new language, just add another `.menu_with_check` entry and create the corresponding YAML file.
 
-## Adding Translations to New Components
+## Adding Translations to New UI Components
 
-When creating a new UI component, follow this process to add translation support:
+When you build a new UI component, add translations from the start. This avoids having to retrofit localization later.
 
-1. **Add the i18n initialization** to your crate's `lib.rs` if not already present:
+**Step 1: Initialize i18n in your crate**
+
+If your crate doesn't already have translation support, add the initialization macro to `lib.rs`:
 
 ```rust
 rust_i18n::i18n!("locales", fallback = "en");
@@ -319,155 +324,133 @@ pub fn set_locale(locale: &str) {
 }
 ```
 
-2. **Create the locales directory** and YAML file:
+**Step 2: Create the locales directory and YAML files**
 
 ```bash
 mkdir -p my_crate/locales
-touch my_crate/locales/my_component.yml
+touch my_crate/locales/en.yml
+touch my_crate/locales/zh-CN.yml
+touch my_crate/locales/zh-HK.yml
+touch my_crate/locales/it.yml
+touch my_crate/locales/pt-BR.yml
 ```
 
-3. **Add translation keys** for all user-facing text:
+**Step 3: Add translation keys to each file**
 
 ```yaml
+# en.yml
 _version: 2
 
-MyComponent.Panel.Title:
-  en: "My Component"
-  zh-CN: "我的组件"
+MyComponent:
+  Panel:
+    Title: "My Component"
+  Button:
+    Save: "Save"
+    Cancel: "Cancel"
 
-MyComponent.Button.Save:
-  en: "Save"
-  zh-CN: "保存"
+# zh-CN.yml
+_version: 2
+
+MyComponent:
+  Panel:
+    Title: "我的组件"
+  Button:
+    Save: "保存"
+    Cancel: "取消"
 ```
 
-4. **Import the t! macro** in files that need translations:
+**Step 4: Use the t! macro in your UI code**
 
 ```rust
 use rust_i18n::t;
+
+// Panel title
+div()
+    .child(t!("MyComponent.Panel.Title").to_string())
+
+// Button labels
+Button::new("save")
+    .child(t!("MyComponent.Button.Save").to_string())
 ```
 
-5. **Replace hardcoded strings** with t!() calls:
-
-```rust
-// Before
-.child("Save")
-
-// After
-.child(t!("MyComponent.Button.Save").to_string())
-```
-
-6. **Add the dependency** to Cargo.toml if not already present:
+**Step 5: Add rust-i18n to Cargo.toml if needed**
 
 ```toml
 [dependencies]
 rust-i18n.workspace = true
 ```
 
-The next time you compile, your component will support multiple languages automatically.
+The next compile will process your YAML files and generate the translation tables. Your component now supports multiple languages automatically.
 
 ## Handling Dynamic Content
 
-Translation keys work for static UI text, but some content is dynamic—error messages with variable data, lists with counts, timestamps. For these cases, use Rust's string formatting with translated templates:
+Static translation keys work for most UI text, but some content is dynamic—error messages with variables, lists with counts, file names. Use Rust's string formatting with translated templates:
 
-```rust
-// Translation key
-FileDialog.SelectedFiles:
-  en: "Selected {count} files"
-  zh-CN: "已选择 {count} 个文件"
+```yaml
+# en.yml
+FileDialog:
+  SelectedCount: "Selected {count} files"
+  LoadError: "Failed to load {filename}: {error}"
 
-// Usage
-let count = selected_files.len();
-let message = t!("FileDialog.SelectedFiles")
-    .replace("{count}", &count.to_string());
+# zh-CN.yml
+FileDialog:
+  SelectedCount: "已选择 {count} 个文件"
+  LoadError: "加载失败 {filename}: {error}"
 ```
 
-For more complex cases with pluralization:
-
 ```rust
-FileDialog.ItemCount:
-  en:
+// Format with count
+let message = t!("FileDialog.SelectedCount")
+    .replace("{count}", &selected.len().to_string());
+
+// Format with filename and error
+let error_msg = t!("FileDialog.LoadError")
+    .replace("{filename}", filename)
+    .replace("{error}", &error.to_string());
+```
+
+The `replace` method swaps placeholders with actual values. This works for any number of variables. Keep the placeholder names simple and descriptive—`{count}`, `{name}`, `{path}`.
+
+For pluralization, `rust-i18n` handles language-specific rules automatically:
+
+```yaml
+# en.yml
+FileDialog:
+  ItemCount:
     zero: "No items"
     one: "1 item"
     other: "{count} items"
-  zh-CN:
+
+# zh-CN.yml (Chinese doesn't distinguish singular/plural)
+FileDialog:
+  ItemCount:
     zero: "没有项目"
     one: "1 个项目"
     other: "{count} 个项目"
 ```
 
-The `rust-i18n` crate includes built-in support for plural rules, handling the different pluralization rules across languages automatically.
-
-## Translation Workflow
-
-For large projects with multiple translators, establish a clear workflow to avoid conflicts and ensure consistency:
-
-1. **Developers add English strings** when implementing new features
-2. **English acts as the source of truth** for key names and meanings
-3. **Translators receive YAML files** for their target languages
-4. **Translators add translations** alongside English entries
-5. **Pull requests include both code and translation updates**
-
-Use comments in YAML files to provide context for translators:
-
-```yaml
-# Tooltip for the button that starts the game simulation
-LevelEditor.Toolbar.StartSimulation:
-  en: "Start Simulation (F5)"
-  zh-CN: "开始模拟 (F5)"
-
-# Button label for saving the current scene
-LevelEditor.Toolbar.Save:
-  en: "Save Scene"
-  zh-CN: "保存场景"
-```
-
-Comments help translators understand context, especially for short strings where meaning might be ambiguous.
-
-## Testing Translations
-
-Test translations by switching languages during development. Keep the language selector visible and periodically switch between English and your target languages. Missing translations will fall back to English, making them easy to spot.
-
-For automated testing, create a script that extracts all `t!()` calls from the codebase and verifies every key exists in the YAML files:
-
-```rust
-// Test example
-#[test]
-fn test_all_translations_exist() {
-    let yaml = std::fs::read_to_string("locales/level_editor.yml").unwrap();
-    let translations: HashMap<String, HashMap<String, String>> = 
-        serde_yaml::from_str(&yaml).unwrap();
-    
-    // Verify all languages have the same keys
-    let english_keys: HashSet<_> = translations.keys().collect();
-    for (lang, keys) in &translations {
-        let lang_keys: HashSet<_> = keys.keys().collect();
-        assert_eq!(english_keys, lang_keys, 
-            "Language {} is missing keys", lang);
-    }
-}
-```
-
-This test catches incomplete translations before they reach users.
+Different languages have different pluralization rules. English has singular and plural. Chinese uses the same form. Russian has multiple plural forms. The translation system handles this complexity for you.
 
 ## Current Language Support
 
-Pulsar currently supports four languages in the Level Editor:
+Pulsar currently supports five languages:
 
 - **English (en)**: Primary language, source of truth
 - **Simplified Chinese (zh-CN)**: Mainland China
 - **Traditional Chinese (zh-HK)**: Hong Kong, Taiwan
 - **Italian (it)**: Italy
+- **Brazilian Portuguese (pt-BR)**: Brazil
 
-The main titlebar locale selector dynamically shows all available languages. Adding new languages requires updating translation YAML files and adding corresponding menu items to the locale selector.
+The main titlebar locale selector dynamically shows all available languages by detecting `.yml` files in the `locales/` directories. Adding new languages requires only creating new translation files—the system automatically discovers and registers them.
 
 ## Migration from Hardcoded Strings
 
 Existing code with hardcoded English strings can be migrated incrementally:
 
 1. **Identify UI text** that should be translatable
-2. **Add translation keys** to the YAML file with English text
+2. **Add translation keys** to the English YAML file
 3. **Replace string literals** with `t!()` calls
-4. **Add other language translations** after verifying English works
+4. **Add other language translations** to their respective language files
 5. **Test by switching languages** to verify the changes
 
 This approach allows gradual migration without requiring all strings to be translated simultaneously. The fallback to English ensures the UI remains functional throughout the migration process.
@@ -488,38 +471,41 @@ Follow these guidelines when working with translations:
 
 ## Future Enhancements
 
-The translation system will continue to evolve. Planned improvements include integration with professional translation management systems, allowing translators to work through web interfaces rather than editing YAML files directly. This streamlines workflows for large translation teams.
+## Current Language Support
 
-Support for right-to-left languages like Arabic and Hebrew requires UI layout changes beyond just string replacement. The framework will gain bidirectional text support, allowing the entire interface to flip horizontally when appropriate.
+Pulsar ships with partial support for five languages covering major global markets:
 
-Dynamic translation reloading during development will enable translators to see changes immediately without recompiling. The engine will watch YAML files for modifications and hot-reload translations on save, providing instant feedback.
+- **English (`en`)** - Default and fallback language
+- **Italian (`it`)** - Complete translations for all UI
+- **Portuguese-BR (`pt-BR`)** - Brazilian Portuguese, fully translated
+- **Simplified Chinese (`zh-CN`)** - Mainland China market
+- **Traditional Chinese (`zh-HK`)** - Hong Kong/Taiwan market
 
-Translation memory will track previously translated strings, suggesting translations for similar new strings. This accelerates translation work and improves consistency across the application.
+All languages have complete translations for the engine's UI, including the main titlebar menus, level editor, and all core components. When you add a new UI element, you must provide translations in all five languages before merging.
 
-## Integration with External Tools
+## Adding New Languages
 
-The YAML-based approach integrates cleanly with standard translation tools. Many translation management platforms support YAML import/export, allowing professional translators to work with familiar tools rather than learning engine-specific systems.
+To add a new language:
 
-For projects with tight integration needs, the SQLite database approach mentioned in earlier discussions remains an option. While YAML provides better version control and human readability, SQLite enables runtime translation updates and more sophisticated translation memory features. The architecture supports both approaches through the same `t!()` macro interface.
+1. Create YAML files for the new language code in all `locales/` directories
+2. Copy the English files as a starting point
+3. Translate all strings to the target language
+4. Update the language selector in `ui_common/src/menu/mod.rs` to include the new language
 
-## Adding Translations to Your Project
+The system automatically detects new YAML files at compile time. No hardcoded language lists to maintain.
 
-When contributing to Pulsar or building games on top of it, you should translate any user-facing text. This section provides detailed guidance on properly implementing translations to ensure users worldwide can work effectively with your tools.
+## Future Enhancements
 
-### Component-Level Translation Organization
+The translation system will continue to evolve. Planned improvements include integration with professional translation management systems, allowing translators to work through web interfaces instead of editing YAML directly.
 
-Organize translations by component to keep files manageable. Rather than one massive YAML file with thousands of entries, split translations into logical units:
+Support for right-to-left languages like Arabic and Hebrew requires UI layout changes beyond string replacement. The framework will gain bidirectional text support, flipping the entire interface horizontally when appropriate.
 
-```
-my_game/
-├── locales/
-│   ├── main_menu.yml           # Main menu and splash screen
-│   ├── gameplay_hud.yml        # In-game UI elements
-│   ├── inventory.yml           # Inventory system
-│   ├── settings.yml            # Settings panels
-│   └── dialogs.yml             # Dialog boxes and messages
-```
+Dynamic translation reloading during development will let translators see changes immediately without recompiling. The engine will watch YAML files and hot-reload translations on save.
 
-This structure mirrors the actual code organization, making it easy to find and update translations when modifying features. If you change the inventory UI, you know exactly which file contains the relevant translations.
+Translation memory will track previously translated strings, suggesting translations for similar new text. This accelerates translation work and improves consistency.
 
-The translation system automatically merges all YAML files it finds, so splitting into multiple files doesn't affect runtime behavior. You gain organizational benefits with zero runtime cost.
+## Summary
+
+Pulsar's translation system provides instant language switching with zero runtime overhead. By loading entire languages into memory at startup, translation lookups complete in nanoseconds. The YAML-based approach makes translations easy to maintain and review in version control. The `t!` macro gives you a simple API for retrieving translated strings throughout your UI code.
+
+When building new components, add translations from day one. Use hierarchical key naming that mirrors your UI structure. Provide context in comments for translators. Test language switching to ensure your UI handles different string lengths gracefully. The translation system makes internationalization painless—use it.

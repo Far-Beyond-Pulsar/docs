@@ -2597,6 +2597,16 @@
           "slug": "translation-file-format"
         },
         {
+          "level": 1,
+          "text": "en.yml",
+          "slug": "enyml"
+        },
+        {
+          "level": 1,
+          "text": "zh-CN.yml",
+          "slug": "zh-cnyml"
+        },
+        {
           "level": 2,
           "text": "Using Translations in Code",
           "slug": "using-translations-in-code"
@@ -2615,6 +2625,11 @@
           "level": 2,
           "text": "Adding New Languages",
           "slug": "adding-new-languages"
+        },
+        {
+          "level": 1,
+          "text": "de.yml",
+          "slug": "deyml"
         },
         {
           "level": 2,
@@ -2637,14 +2652,49 @@
           "slug": "adding-translations-to-new-components"
         },
         {
+          "level": 1,
+          "text": "en.yml",
+          "slug": "enyml"
+        },
+        {
+          "level": 1,
+          "text": "zh-CN.yml",
+          "slug": "zh-cnyml"
+        },
+        {
           "level": 2,
           "text": "Handling Dynamic Content",
           "slug": "handling-dynamic-content"
         },
         {
+          "level": 1,
+          "text": "en.yml",
+          "slug": "enyml"
+        },
+        {
+          "level": 1,
+          "text": "zh-CN.yml",
+          "slug": "zh-cnyml"
+        },
+        {
+          "level": 1,
+          "text": "en.yml",
+          "slug": "enyml"
+        },
+        {
+          "level": 1,
+          "text": "zh-CN.yml",
+          "slug": "zh-cnyml"
+        },
+        {
           "level": 2,
           "text": "Translation Workflow",
           "slug": "translation-workflow"
+        },
+        {
+          "level": 1,
+          "text": "en.yml",
+          "slug": "enyml"
         },
         {
           "level": 1,
@@ -2700,7 +2750,7 @@
       "excerpt": "YAML-based translation system with instant language switching and zero-overhead lookups",
       "readingTime": 11,
       "lastUpdated": "2026-01-22",
-      "searchText": "translation & internationalization yaml-based translation system with instant language switching and zero-overhead lookups why internationalization matters architecture overview translation file format using translations in code initializing translations directory structure adding new languages naming conventions performance characteristics language selector implementation adding translations to new components handling dynamic content translation workflow tooltip for the button that starts the game simulation button label for saving the current scene testing translations current language support migration from hardcoded strings best practices future enhancements integration with external tools adding translations to your project component-level translation organization i18n localization translations internationalization multi-language pulsar includes a comprehensive translation system built on rust-i18n, providing instant language switching across the entire ui with zero runtime overhead. the system loads all translations for the current language into memory at startup, enabling o(1) lookups without disk i/o. users can switch languages dynamically via the titlebar dropdown, with the ui updating immediately without requiring a restart.\r\n\r\nwhy internationalization matters\r\n\r\ngame engines serve developers worldwide, and forcing everyone to work in english creates unnecessary barriers. a russian developer should be able to navigate the level editor in russian. a chinese artist should see ui panels in chinese. when tools adapt to users rather than forcing adaptation, productivity increases and frustration decreases.\r\n\r\nmost translation systems add significant overhead—either loading files on demand (slow) or using complex key lookup mechanisms (also slow). pulsar takes a different approach. all translations for the activ"
+      "searchText": "translation & internationalization yaml-based translation system with instant language switching and zero-overhead lookups why internationalization matters architecture overview translation file format en.yml zh-cn.yml using translations in code initializing translations directory structure adding new languages de.yml naming conventions performance characteristics language selector implementation adding translations to new components en.yml zh-cn.yml handling dynamic content en.yml zh-cn.yml en.yml zh-cn.yml translation workflow en.yml tooltip for the button that starts the game simulation button label for saving the current scene testing translations current language support migration from hardcoded strings best practices future enhancements integration with external tools adding translations to your project component-level translation organization i18n localization translations internationalization multi-language pulsar includes a comprehensive translation system built on rust-i18n, providing instant language switching across the entire ui with zero runtime overhead. the system loads all translations for the current language into memory at startup, enabling o(1) lookups without disk i/o. users can switch languages dynamically via the titlebar dropdown, with the ui updating immediately without requiring a restart.\r\n\r\nwhy internationalization matters\r\n\r\ngame engines serve developers worldwide, and forcing everyone to work in english creates unnecessary barriers. a russian developer should be able to navigate the level editor in russian. a chinese artist should see ui panels in chinese. when tools adapt to users rather than forcing adaptation, productivity increases and frustration decreases.\r\n\r\nmost translation systems add significant overhead—either loading files on demand (slow) or using complex key lookup mechanisms (also slow). pulsar takes a different approach. all translations for the activ"
     },
     {
       "id": "core-concepts-type-database-impl",
@@ -4210,7 +4260,7 @@
   ],
   "metadata": {
     "totalDocs": 32,
-    "totalWords": 27564,
+    "totalWords": 27609,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -4319,7 +4369,7 @@
       "workspace",
       "zero-copy"
     ],
-    "lastGenerated": "2026-01-22T17:01:53.889Z",
+    "lastGenerated": "2026-01-22T22:44:53.232Z",
     "version": "1.0.0"
   }
 }
