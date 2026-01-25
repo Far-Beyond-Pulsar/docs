@@ -4461,7 +4461,7 @@
   ],
   "metadata": {
     "totalDocs": 33,
-    "totalWords": 30037,
+    "totalWords": 30039,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -4574,7 +4574,7 @@
       "workspace",
       "zero-copy"
     ],
-    "lastGenerated": "2026-01-25T08:19:53.157Z",
+    "lastGenerated": "2026-01-25T16:46:23.241Z",
     "version": "1.0.0"
   }
 }
