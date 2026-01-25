@@ -3,25 +3,22 @@
     {
       "id": "core-concepts-architecture",
       "title": "Pulsar Architecture",
-      "description": "Understanding how Pulsar Engine is built",
+      "description": "How Pulsar Engine is built from initialization to rendering",
       "url": "/docs/core-concepts/architecture",
       "slug": "core-concepts/architecture",
       "category": "core-concepts",
       "tags": [
         "architecture",
         "design",
-        "systems"
+        "systems",
+        "initialization",
+        "subsystems"
       ],
       "headings": [
         {
-          "level": 1,
-          "text": "Pulsar Architecture",
-          "slug": "pulsar-architecture"
-        },
-        {
           "level": 2,
-          "text": "What Is Pulsar?",
-          "slug": "what-is-pulsar"
+          "text": "What Pulsar Is (and Isn't)",
+          "slug": "what-pulsar-is-and-isnt"
         },
         {
           "level": 2,
@@ -34,109 +31,104 @@
           "slug": "core-technologies"
         },
         {
-          "level": 3,
-          "text": "GPUI - The UI Framework",
-          "slug": "gpui---the-ui-framework"
+          "level": 2,
+          "text": "Initialization Architecture",
+          "slug": "initialization-architecture"
         },
         {
           "level": 3,
-          "text": "Winit - Window Management",
-          "slug": "winit---window-management"
+          "text": "InitGraph - Dependency-Based Startup",
+          "slug": "initgraph---dependency-based-startup"
         },
         {
           "level": 3,
-          "text": "Bevy Renderer - 3D Graphics",
-          "slug": "bevy-renderer---3d-graphics"
-        },
-        {
-          "level": 3,
-          "text": "Rapier3D - Physics",
-          "slug": "rapier3d---physics"
-        },
-        {
-          "level": 3,
-          "text": "Rust Analyzer - Code Intelligence",
-          "slug": "rust-analyzer---code-intelligence"
+          "text": "Initialization Phases",
+          "slug": "initialization-phases"
         },
         {
           "level": 2,
-          "text": "System Architecture",
-          "slug": "system-architecture"
+          "text": "Subsystem Framework",
+          "slug": "subsystem-framework"
+        },
+        {
+          "level": 3,
+          "text": "Subsystem Trait",
+          "slug": "subsystem-trait"
+        },
+        {
+          "level": 3,
+          "text": "Example: PhysicsEngine Subsystem",
+          "slug": "example-physicsengine-subsystem"
+        },
+        {
+          "level": 3,
+          "text": "SubsystemRegistry",
+          "slug": "subsystemregistry"
+        },
+        {
+          "level": 3,
+          "text": "ManagedGameThread Pattern",
+          "slug": "managedgamethread-pattern"
         },
         {
           "level": 2,
-          "text": "Major Components",
-          "slug": "major-components"
+          "text": "Engine State Management",
+          "slug": "engine-state-management"
         },
         {
           "level": 3,
-          "text": "The Launcher (ui_entry, ui_project_launcher)",
-          "slug": "the-launcher-ui_entry-ui_project_launcher"
+          "text": "Typed Context System",
+          "slug": "typed-context-system"
         },
         {
           "level": 3,
-          "text": "The Editor Shell (ui_core)",
-          "slug": "the-editor-shell-ui_core"
+          "text": "EngineContext Structure",
+          "slug": "enginecontext-structure"
         },
         {
           "level": 3,
-          "text": "File Manager (ui_file_manager)",
-          "slug": "file-manager-ui_file_manager"
-        },
-        {
-          "level": 3,
-          "text": "Problems Panel (ui_problems)",
-          "slug": "problems-panel-ui_problems"
-        },
-        {
-          "level": 3,
-          "text": "Terminal (ui_terminal)",
-          "slug": "terminal-ui_terminal"
-        },
-        {
-          "level": 3,
-          "text": "Type Debugger (ui_type_debugger)",
-          "slug": "type-debugger-ui_type_debugger"
-        },
-        {
-          "level": 3,
-          "text": "3D Viewport (ui_level_editor)",
-          "slug": "3d-viewport-ui_level_editor"
+          "text": "TypedRendererRegistry",
+          "slug": "typedrendererregistry"
         },
         {
           "level": 2,
-          "text": "Game Object System",
-          "slug": "game-object-system"
-        },
-        {
-          "level": 2,
-          "text": "Plugin System",
-          "slug": "plugin-system"
-        },
-        {
-          "level": 2,
-          "text": "Engine Backend (engine_backend)",
-          "slug": "engine-backend-engine_backend"
+          "text": "Rendering Architecture",
+          "slug": "rendering-architecture"
         },
         {
           "level": 3,
-          "text": "Subsystems",
-          "slug": "subsystems"
+          "text": "Three-Layer Compositor",
+          "slug": "three-layer-compositor"
         },
         {
           "level": 3,
-          "text": "Services",
-          "slug": "services"
+          "text": "Zero-Copy GPU Texture Sharing",
+          "slug": "zero-copy-gpu-texture-sharing"
         },
         {
-          "level": 2,
-          "text": "Engine State (engine_state)",
-          "slug": "engine-state-engine_state"
+          "level": 3,
+          "text": "BevyViewport Component",
+          "slug": "bevyviewport-component"
         },
         {
           "level": 2,
           "text": "Threading Model",
           "slug": "threading-model"
+        },
+        {
+          "level": 3,
+          "text": "Thread Communication",
+          "slug": "thread-communication"
+        },
+        {
+          "level": 2,
+          "text": "Data Flow: Opening a Project",
+          "slug": "data-flow-opening-a-project"
+        },
+        {
+          "level": 2,
+          "text": "System Architecture Diagram",
+          "slug": "system-architecture-diagram"
         },
         {
           "level": 2,
@@ -145,18 +137,13 @@
         },
         {
           "level": 2,
-          "text": "Data Flow Example: Opening a Project",
-          "slug": "data-flow-example-opening-a-project"
-        },
-        {
-          "level": 2,
           "text": "Configuration",
           "slug": "configuration"
         },
         {
           "level": 3,
-          "text": "Engine Configuration",
-          "slug": "engine-configuration"
+          "text": "Global Configuration",
+          "slug": "global-configuration"
         },
         {
           "level": 3,
@@ -165,19 +152,24 @@
         },
         {
           "level": 2,
+          "text": "Performance Characteristics",
+          "slug": "performance-characteristics"
+        },
+        {
+          "level": 2,
           "text": "Future Directions",
           "slug": "future-directions"
         },
         {
           "level": 2,
-          "text": "Wrapping Up",
-          "slug": "wrapping-up"
+          "text": "Related Documentation",
+          "slug": "related-documentation"
         }
       ],
-      "excerpt": "Understanding how Pulsar Engine is built",
-      "readingTime": 7,
-      "lastUpdated": "2026-01-12",
-      "searchText": "pulsar architecture understanding how pulsar engine is built pulsar architecture what is pulsar? design philosophy core technologies gpui - the ui framework winit - window management bevy renderer - 3d graphics rapier3d - physics rust analyzer - code intelligence system architecture major components the launcher (ui_entry, ui_project_launcher) the editor shell (ui_core) file manager (ui_file_manager) problems panel (ui_problems) terminal (ui_terminal) type debugger (ui_type_debugger) 3d viewport (ui_level_editor) game object system plugin system engine backend (engine_backend) subsystems services engine state (engine_state) threading model project structure data flow example: opening a project configuration engine configuration project configuration future directions wrapping up architecture design systems pulsar architecture\n\npulsar is a game editor and engine built in rust with a focus on modularity, editor stability, and modern development workflows. this document explains how the major systems fit together.\n\nwhat is pulsar?\n[!note]\npulsar resembles a game editor in this early stage, it has less runtime that most engines as we are primarily focused on ux. think unity editor or unreal editor, built from scratch in rust. this is in the process of changing so you will see us refer to it as an engine too.\n\n- a launcher for managing and creating projects\n- file management and asset browsers\n- code editing with rust analyzer integration\n- a 3d scene viewport with real-time rendering\n- plugin system for custom editors and tools\n- integrated terminal and problem diagnostics\n- type inspection and debugging tools\n\ndesign philosophy\n\neditor stability is paramount - the editor should never crash, even when your game code does. pulsar runs the editor ui separately from game logic to achieve this.\n"
+      "excerpt": "How Pulsar Engine is built from initialization to rendering",
+      "readingTime": 15,
+      "lastUpdated": "2026-01-25",
+      "searchText": "pulsar architecture how pulsar engine is built from initialization to rendering what pulsar is (and isn't) design philosophy core technologies initialization architecture initgraph - dependency-based startup initialization phases subsystem framework subsystem trait example: physicsengine subsystem subsystemregistry managedgamethread pattern engine state management typed context system enginecontext structure typedrendererregistry rendering architecture three-layer compositor zero-copy gpu texture sharing bevyviewport component threading model thread communication data flow: opening a project system architecture diagram project structure configuration global configuration project configuration performance characteristics future directions related documentation architecture design systems initialization subsystems pulsar is a game engine and editor built entirely in rust, designed around the principle that the editor should never crash even when your game code does. this document explains how the major systems fit together—from the moment you launch the executable to the frame appearing on screen.\n\nwhat pulsar is (and isn't)\n\npulsar resembles a game editor like unity or unreal in this early stage. you get a launcher for managing projects, a file browser, code editing with rust analyzer integration, a 3d viewport with real-time rendering, and an integrated terminal. think of it as \"if you built unreal editor from scratch in rust, what would the architecture look like?\"\n\nthe key architectural decision is separation of editor from runtime. the editor ui runs in one process, your game logic runs separately (currently in-process but isolated via subsystems). if your game code panics, the editor catches it and logs the error without crashing. this makes development far less frustrating—you never lose "
     },
     {
       "id": "core-concepts-asset-loading",
@@ -4822,7 +4814,7 @@
   ],
   "metadata": {
     "totalDocs": 34,
-    "totalWords": 38794,
+    "totalWords": 40392,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -4942,7 +4934,7 @@
       "workspace",
       "zero-copy"
     ],
-    "lastGenerated": "2026-01-25T23:00:27.558Z",
+    "lastGenerated": "2026-01-25T23:08:16.605Z",
     "version": "1.0.0"
   }
 }
