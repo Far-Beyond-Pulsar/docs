@@ -24,14 +24,47 @@ Welcome to the heart of Pulsar Engine. If you're going to build something with P
 
 This section covers the architectural decisions and systems that make Pulsar what it is. Each concept builds on the others, so while you can jump around, reading in order will give you the clearest picture.
 
-We'll explore:
+### Foundational Architecture
 
-- **[Architecture](./architecture)** - How Pulsar is structured and why
+- **[Architecture](./architecture)** - How Pulsar is structured from initialization to rendering
+- **[Subsystems](./subsystems)** - The modular subsystem framework and dependency management
+- **[Engine State](./engine-state)** - Typed context system for global state management
+
+### Core Systems
+
+- **[Rendering Pipeline](./rendering-pipeline)** - Three-layer compositor and GPU architecture
+- **[Bevy Viewport](./bevy-viewport)** - Zero-copy GPU texture sharing for 3D viewports
+- **[Type System](./type-system)** - Strong typing and reflection for game data
+- **[Type Database Implementation](./type-database-impl)** - Runtime type information and introspection
 - **[Plugin System](./plugin-system)** - Extending the editor with dynamic libraries
-- **[Type System](./type-system)** - Strong typing for game data
-- **[UI Framework](./ui-framework)** - GPUI and how the editor interface works
-- **[Rendering Pipeline](./rendering-pipeline)** - From scene to pixels
-- **[Entity-Component-System](./entity-component-system)** - Game object architecture
+- **[Blueprint System](./blueprint-system)** - Visual scripting foundation
+- **[Blueprint Graph System](./blueprint-graph-system)** - Node-based logic editing
+- **[Profiling System](./profiling-system)** - Tracy integration and performance analysis
+- **[Translation System](./translation-system)** - Multi-language support and localization
+- **[Asset Loading](./asset-loading)** - Resource management and loading
+
+### Editor UI
+
+- **[UI Framework](./ui-framework)** - GPUI and declarative interface design
+- **[Workspace, Panels & Docks](./workspace-panels-docks)** - Editor layout system
+- **[Palette System](./palette-system)** - Command palette and quick actions
+- **[Theme System](./theme-system)** - Visual customization and color schemes
+- **[File Manager](./file-manager)** - Project file browser and navigation
+- **[Code Editor](./code-editor)** - Integrated Rust code editing
+- **[Terminal Integration](./terminal-integration)** - Embedded terminal emulator
+- **[Diagnostics System](./diagnostics-system)** - Error reporting and problem tracking
+- **[History System](./history-system)** - Undo/redo implementation
+
+### Platform Integration
+
+- **[Rust Analyzer Integration](./rust-analyzer-integration)** - LSP and code intelligence
+- **[Discord Integration](./discord-integration)** - Rich presence and activity status
+- **[URI Registration](./uri-registration)** - Deep linking with pulsar:// scheme
+
+### Advanced Topics
+
+- **[Multiplayer Server](./multiplayer-server)** - Networked game infrastructure
+- **[Engine Filesystem](./engine-filesystem)** - Virtual filesystem abstraction
 
 ## Why These Concepts Matter
 
@@ -47,11 +80,11 @@ Game engines are complex beasts. They're not just single programs—they're plat
 
 ## Starting Points
 
-If you're completely new to Pulsar, start with **[Architecture](./architecture)**. It gives you the big-picture view of how everything connects.
+If you're completely new to Pulsar, start with **[Architecture](./architecture)**. It gives you the big-picture view of how everything connects, from initialization through the subsystem framework to the event loop.
 
-If you're coming from another engine and want to understand what's different, check out **[Plugin System](./plugin-system)** and **[Type System](./type-system)**. These are two areas where Pulsar diverges significantly from Unity, Unreal, or Godot.
+If you're coming from another engine and want to understand what's different, check out **[Subsystems](./subsystems)** and **[Type System](./type-system)**. These are two areas where Pulsar diverges significantly from Unity, Unreal, or Godot.
 
-If you're ready to build something, the **[UI Framework](./ui-framework)** guide will teach you how to create editor tools, while **[Entity-Component-System](./entity-component-system)** covers game object architecture.
+If you're ready to build something, the **[UI Framework](./ui-framework)** guide will teach you how to create editor tools, while **[Plugin System](./plugin-system)** shows you how to extend the editor with custom functionality.
 
 ## A Note on Learning Curves
 
@@ -115,14 +148,16 @@ Ask questions! The Discord community is active and helpful. The core developers 
 
 ## Where to Go from Here
 
-Ready to dive in? Here's a suggested path:
+Ready to dive in? Here's a suggested learning path:
 
 1. **[Architecture](./architecture)** - Get the lay of the land
-2. **[Plugin System](./plugin-system)** - Understand extensibility
-3. **[Type System](./type-system)** - Learn how data works
-4. **[UI Framework](./ui-framework)** - Build editor tools
-5. **[ECS](./entity-component-system)** - Structure game logic
-6. **[Rendering Pipeline](./rendering-pipeline)** - Visualize your game
+2. **[Subsystems](./subsystems)** - Understand the modular framework
+3. **[Engine State](./engine-state)** - Learn typed context management
+4. **[Rendering Pipeline](./rendering-pipeline)** - From scene to pixels
+5. **[Bevy Viewport](./bevy-viewport)** - Zero-copy GPU integration
+6. **[Plugin System](./plugin-system)** - Extend the editor
+7. **[Type System](./type-system)** - Strong typing for game data
+8. **[UI Framework](./ui-framework)** - Build editor tools
 
 Or jump to whatever interests you most. Each doc is written to stand alone while linking to related concepts.
 
@@ -139,4 +174,3 @@ That said, the core ideas are solid. Understanding these concepts will serve you
 ---
 
 Let's explore what makes Pulsar tick. Choose a concept above and dive in.
-position: 2
