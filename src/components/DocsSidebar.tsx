@@ -24,6 +24,12 @@ interface NavSection {
   order?: number;
   collapsed?: boolean;
   children: NavItem[];
+  indexPage?: {
+    title: string;
+    slug: string;
+    path: string;
+    icon?: string;
+  };
 }
 
 interface DocsSidebarProps {
@@ -172,23 +178,38 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
                 ? (LucideIcons as any)[section.icon]
                 : LucideIcons.FileText;
 
+              const sectionPath = section.indexPage?.path || `/docs/${section.slug}`;
+              const isSectionActive = pathname === sectionPath || pathname.startsWith(`${sectionPath}/`);
+
               return (
                 <div key={section.slug}>
                   {/* Section header */}
-                  <button
-                    onClick={() => toggleSection(section.slug)}
-                    className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-gray-200 hover:bg-gray-900 rounded-lg transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => toggleSection(section.slug)}
+                      className="p-1 hover:bg-gray-900 rounded mr-1 flex-shrink-0"
+                      aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-gray-400" />
+                      )}
+                    </button>
+
+                    <Link
+                      href={sectionPath}
+                      className={`flex-1 flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${
+                        isSectionActive
+                          ? 'bg-blue-600 text-white'
+                          : 'text-gray-200 hover:bg-gray-900 hover:text-white'
+                      }`}
+                      onClick={() => setIsMobileOpen(false)}
+                    >
                       <SectionIcon className="w-5 h-5" />
                       <span>{section.title}</span>
-                    </div>
-                    {isExpanded ? (
-                      <ChevronDown className="w-4 h-4" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4" />
-                    )}
-                  </button>
+                    </Link>
+                  </div>
 
                   {/* Section items */}
                   {isExpanded && section.children && (

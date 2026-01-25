@@ -84,6 +84,18 @@ async function buildNavigationNode(dirPath, basePath = '') {
           console.warn(`Category directory not found: ${subDirPath}`);
         }
       } else if (item.type === 'page') {
+        // Skip index pages - they represent the category itself, not a child
+        if (itemSlug === 'index') {
+          // Store index page info on the category node itself
+          node.indexPage = {
+            title: item.title || node.title,
+            slug: 'index',
+            path: `/docs/${basePath}`,
+            icon: item.icon
+          };
+          continue;
+        }
+
         // This is a markdown file
         const hasFile = await markdownFileExists(dirPath, itemSlug);
 
@@ -95,12 +107,12 @@ async function buildNavigationNode(dirPath, basePath = '') {
             type: 'page',
             order: item.order !== undefined ? item.order : 999
           };
-          
+
           // Add icon if present
           if (item.icon) {
             pageNode.icon = item.icon;
           }
-          
+
           node.children.push(pageNode);
         } else {
           console.warn(`Markdown file not found: ${itemSlug}.md in ${dirPath}`);

@@ -1736,6 +1736,31 @@
           "slug": "what-youll-learn"
         },
         {
+          "level": 3,
+          "text": "Foundational Architecture",
+          "slug": "foundational-architecture"
+        },
+        {
+          "level": 3,
+          "text": "Core Systems",
+          "slug": "core-systems"
+        },
+        {
+          "level": 3,
+          "text": "Editor UI",
+          "slug": "editor-ui"
+        },
+        {
+          "level": 3,
+          "text": "Platform Integration",
+          "slug": "platform-integration"
+        },
+        {
+          "level": 3,
+          "text": "Advanced Topics",
+          "slug": "advanced-topics"
+        },
+        {
           "level": 2,
           "text": "Why These Concepts Matter",
           "slug": "why-these-concepts-matter"
@@ -1807,9 +1832,9 @@
         }
       ],
       "excerpt": "Understanding the fundamental concepts behind Pulsar Engine",
-      "readingTime": 6,
+      "readingTime": 7,
       "lastUpdated": "2026-01-12",
-      "searchText": "core concepts understanding the fundamental concepts behind pulsar engine core concepts what you'll learn why these concepts matter starting points a note on learning curves philosophy behind the concepts no magic modularity through boundaries type safety everywhere explicit over implicit performance by design, not by accident how systems interact common questions where to go from here contributing to these docs experimental notice core concepts fundamentals overview core concepts\n\nwelcome to the heart of pulsar engine. if you're going to build something with pulsar—or just understand how it works—you need to grasp these fundamental concepts. this isn't a feature list or a marketing pitch. these are the ideas that shape every line of code in the engine.\n\nwhat you'll learn\n\nthis section covers the architectural decisions and systems that make pulsar what it is. each concept builds on the others, so while you can jump around, reading in order will give you the clearest picture.\n\nwe'll explore:\n\n- architecture - how pulsar is structured and why\n- plugin system - extending the editor with dynamic libraries\n- type system - strong typing for game data\n- ui framework - gpui and how the editor interface works\n- rendering pipeline - from scene to pixels\n- entity-component-system - game object architecture\n\nwhy these concepts matter\n\ngame engines are complex beasts. they're not just single programs—they're platforms for building interactive experiences. unde"
+      "searchText": "core concepts understanding the fundamental concepts behind pulsar engine core concepts what you'll learn foundational architecture core systems editor ui platform integration advanced topics why these concepts matter starting points a note on learning curves philosophy behind the concepts no magic modularity through boundaries type safety everywhere explicit over implicit performance by design, not by accident how systems interact common questions where to go from here contributing to these docs experimental notice core concepts fundamentals overview core concepts\n\nwelcome to the heart of pulsar engine. if you're going to build something with pulsar—or just understand how it works—you need to grasp these fundamental concepts. this isn't a feature list or a marketing pitch. these are the ideas that shape every line of code in the engine.\n\nwhat you'll learn\n\nthis section covers the architectural decisions and systems that make pulsar what it is. each concept builds on the others, so while you can jump around, reading in order will give you the clearest picture.\n\nfoundational architecture\n\n- architecture - how pulsar is structured from initialization to rendering\n- subsystems - the modular subsystem framework and dependency management\n- engine state - typed context system for global state management\n\ncore systems\n\n- rendering pipeline - three-layer compositor and gpu architecture\n- bevy viewport - zero-copy gpu texture sharing for 3d viewports\n- type system - strong typing and reflection for game data\n- type database implementation - "
     },
     {
       "id": "core-concepts-multiplayer-server",
@@ -5039,7 +5064,7 @@
   ],
   "metadata": {
     "totalDocs": 37,
-    "totalWords": 41811,
+    "totalWords": 42039,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -5165,7 +5190,7 @@
       "workspace",
       "zero-copy"
     ],
-    "lastGenerated": "2026-01-25T23:18:38.581Z",
+    "lastGenerated": "2026-01-25T23:34:18.042Z",
     "version": "1.0.0"
   }
 }

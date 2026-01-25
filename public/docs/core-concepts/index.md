@@ -1,7 +1,6 @@
 ---
 title: Core Concepts
 description: Understanding the fundamental concepts behind Pulsar Engine
-category: core-concepts
 position: 2
 icon: BookOpen
 lastUpdated: '2026-01-12'

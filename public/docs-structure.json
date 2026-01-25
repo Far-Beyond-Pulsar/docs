@@ -9,14 +9,6 @@
       "collapsed": false,
       "children": [
         {
-          "title": "Getting Started with Pulsar",
-          "slug": "index",
-          "path": "/docs/getting-started/index",
-          "type": "page",
-          "order": 1,
-          "icon": "Home"
-        },
-        {
           "title": "Installation",
           "slug": "getting-started/installation",
           "icon": "Download",
@@ -66,7 +58,13 @@
           "order": 3,
           "icon": "FolderPlus"
         }
-      ]
+      ],
+      "indexPage": {
+        "title": "Getting Started with Pulsar",
+        "slug": "index",
+        "path": "/docs/getting-started",
+        "icon": "Home"
+      }
     },
     {
       "title": "Core Concepts",
@@ -83,14 +81,6 @@
           "type": "page",
           "order": 1,
           "icon": "Network"
-        },
-        {
-          "title": "Core Concepts",
-          "slug": "index",
-          "path": "/docs/core-concepts/index",
-          "type": "page",
-          "order": 2,
-          "icon": "BookOpen"
         },
         {
           "title": "Plugin System",
@@ -300,7 +290,13 @@
           "order": 22,
           "icon": "FileCode"
         }
-      ]
+      ],
+      "indexPage": {
+        "title": "Core Concepts",
+        "slug": "index",
+        "path": "/docs/core-concepts",
+        "icon": "BookOpen"
+      }
     },
     {
       "title": "Guides",
@@ -311,30 +307,19 @@
       "collapsed": false,
       "children": [
         {
-          "title": "Guides",
-          "slug": "index",
-          "path": "/docs/guides/index",
-          "type": "page",
-          "order": 4,
-          "icon": "BookOpen"
-        },
-        {
           "title": "Engine Dev Guides",
           "slug": "guides/engine-dev",
           "icon": "BookOpen",
           "description": "Step-by-step tutorials for building systems in Pulsar",
           "order": 4,
           "collapsed": false,
-          "children": [
-            {
-              "title": "Engine Dev Guides",
-              "slug": "index",
-              "path": "/docs/guides/engine-dev/index",
-              "type": "page",
-              "order": 4,
-              "icon": "BookOpen"
-            }
-          ]
+          "children": [],
+          "indexPage": {
+            "title": "Engine Dev Guides",
+            "slug": "index",
+            "path": "/docs/guides/engine-dev",
+            "icon": "BookOpen"
+          }
         },
         {
           "title": "Game Dev Guides",
@@ -343,20 +328,23 @@
           "description": "Step-by-step tutorials for building games in Pulsar",
           "order": 4,
           "collapsed": false,
-          "children": [
-            {
-              "title": "Game Dev Guides",
-              "slug": "index",
-              "path": "/docs/guides/game-dev/index",
-              "type": "page",
-              "order": 4,
-              "icon": "BookOpen"
-            }
-          ]
+          "children": [],
+          "indexPage": {
+            "title": "Game Dev Guides",
+            "slug": "index",
+            "path": "/docs/guides/game-dev",
+            "icon": "BookOpen"
+          }
         }
-      ]
+      ],
+      "indexPage": {
+        "title": "Guides",
+        "slug": "index",
+        "path": "/docs/guides",
+        "icon": "BookOpen"
+      }
     }
   ],
-  "lastGenerated": "2026-01-25T23:18:38.188Z",
+  "lastGenerated": "2026-01-25T23:34:17.633Z",
   "version": "1.0.0"
 }

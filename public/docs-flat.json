@@ -1,11 +1,5 @@
 [
   {
-    "title": "Getting Started with Pulsar",
-    "path": "/docs/getting-started/index",
-    "slug": "getting-started/index",
-    "category": "getting-started"
-  },
-  {
     "title": "Windows Installation",
     "path": "/docs/getting-started/installation/windows",
     "slug": "getting-started/getting-started/installation/windows",
@@ -39,12 +33,6 @@
     "title": "Pulsar Architecture",
     "path": "/docs/core-concepts/architecture",
     "slug": "core-concepts/architecture",
-    "category": "core-concepts"
-  },
-  {
-    "title": "Core Concepts",
-    "path": "/docs/core-concepts/index",
-    "slug": "core-concepts/index",
     "category": "core-concepts"
   },
   {
@@ -202,23 +190,5 @@
     "path": "/docs/core-concepts/code-editor",
     "slug": "core-concepts/code-editor",
     "category": "core-concepts"
-  },
-  {
-    "title": "Guides",
-    "path": "/docs/guides/index",
-    "slug": "guides/index",
-    "category": "guides"
-  },
-  {
-    "title": "Engine Dev Guides",
-    "path": "/docs/guides/engine-dev/index",
-    "slug": "guides/guides/engine-dev/index",
-    "category": "guides/guides/engine-dev"
-  },
-  {
-    "title": "Game Dev Guides",
-    "path": "/docs/guides/game-dev/index",
-    "slug": "guides/guides/game-dev/index",
-    "category": "guides/guides/game-dev"
   }
 ]

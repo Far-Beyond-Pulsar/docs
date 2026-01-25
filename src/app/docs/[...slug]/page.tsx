@@ -9,7 +9,21 @@ import Link from 'next/link';
 export async function generateStaticParams() {
   try {
     const slugs = await getDocSlugs();
-    return slugs.map((slug) => ({ slug }));
+    const params = [];
+
+    for (const slug of slugs) {
+      params.push({ slug });
+
+      // For index files, also generate the category route without /index
+      if (slug[slug.length - 1] === 'index') {
+        const categorySlug = slug.slice(0, -1);
+        if (categorySlug.length > 0) {
+          params.push({ slug: categorySlug });
+        }
+      }
+    }
+
+    return params;
   } catch (error) {
     console.error('Error generating static params:', error);
     return [];
