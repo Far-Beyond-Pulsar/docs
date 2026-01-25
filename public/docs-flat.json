@@ -180,6 +180,12 @@
     "category": "core-concepts"
   },
   {
+    "title": "Discord Rich Presence Integration",
+    "path": "/docs/core-concepts/discord-integration",
+    "slug": "core-concepts/discord-integration",
+    "category": "core-concepts"
+  },
+  {
     "title": "Subsystem Framework",
     "path": "/docs/core-concepts/subsystems",
     "slug": "core-concepts/subsystems",

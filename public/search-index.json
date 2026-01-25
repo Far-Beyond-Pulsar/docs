@@ -1079,6 +1079,166 @@
       "searchText": "diagnostics system code diagnostics and quick fixes from lsp diagnostics system what it provides diagnostic structure severity levels diagnostic source diagnostic codes diagnostic range code actions (quick fixes) text edits example: unused import applying code actions lsp integration diagnostic providers collecting diagnostics ui display filtering sorting diagnostic lifecycle performance limitations diagnostics lsp errors warnings quick-fixes diagnostics system\r\n\r\nthe diagnostics system collects and displays code errors, warnings, and hints from language servers. it includes support for quick fixes (code actions) that can automatically fix issues. the implementation is in crates/ui/src/diagnostics.rs.\r\n\r\nwhat it provides\r\n\r\nthe diagnostics system provides:\r\n- structured diagnostic data from lsp servers\r\n- severity levels (error, warning, information, hint)\r\n- quick fix actions with text edits\r\n- integration with rust-analyzer and other language servers\r\n\r\ndiagnostic structure\r\n\r\na diagnostic represents a single issue in code:\r\nthe file path, line, and column identify where the issue is. the message explains what's wrong.\r\n\r\nseverity levels\r\n\r\ndiagnostics are categorized by severity:\r\nerrors prevent compilation. warnings are potential issues. information provides context. hints suggest improvements.\r\n\r\ndiagnostic source\r\n\r\nthe source field identifies which tool produced the diagnostic:\r\nthis allows filtering diagnostics by s"
     },
     {
+      "id": "core-concepts-discord-integration",
+      "title": "Discord Rich Presence Integration",
+      "description": "Show what you're working on in Discord with real-time project and file status",
+      "url": "/docs/core-concepts/discord-integration",
+      "slug": "core-concepts/discord-integration",
+      "category": "core-concepts",
+      "tags": [
+        "discord",
+        "rich-presence",
+        "integration",
+        "social"
+      ],
+      "headings": [
+        {
+          "level": 2,
+          "text": "What is Discord Rich Presence?",
+          "slug": "what-is-discord-rich-presence"
+        },
+        {
+          "level": 2,
+          "text": "How It Works",
+          "slug": "how-it-works"
+        },
+        {
+          "level": 2,
+          "text": "Setting Up Your Discord Application",
+          "slug": "setting-up-your-discord-application"
+        },
+        {
+          "level": 3,
+          "text": "Creating the Application",
+          "slug": "creating-the-application"
+        },
+        {
+          "level": 3,
+          "text": "Uploading Rich Presence Assets",
+          "slug": "uploading-rich-presence-assets"
+        },
+        {
+          "level": 3,
+          "text": "Configuring Pulsar",
+          "slug": "configuring-pulsar"
+        },
+        {
+          "level": 2,
+          "text": "Using the Discord Integration",
+          "slug": "using-the-discord-integration"
+        },
+        {
+          "level": 3,
+          "text": "Initialization",
+          "slug": "initialization"
+        },
+        {
+          "level": 3,
+          "text": "Updating Presence",
+          "slug": "updating-presence"
+        },
+        {
+          "level": 3,
+          "text": "Custom Panel Icons",
+          "slug": "custom-panel-icons"
+        },
+        {
+          "level": 2,
+          "text": "Implementation Details",
+          "slug": "implementation-details"
+        },
+        {
+          "level": 3,
+          "text": "Connection Management",
+          "slug": "connection-management"
+        },
+        {
+          "level": 3,
+          "text": "Activity Payload Format",
+          "slug": "activity-payload-format"
+        },
+        {
+          "level": 3,
+          "text": "Icon Asset Configuration",
+          "slug": "icon-asset-configuration"
+        },
+        {
+          "level": 3,
+          "text": "Thread Safety",
+          "slug": "thread-safety"
+        },
+        {
+          "level": 3,
+          "text": "Presence Update Batching",
+          "slug": "presence-update-batching"
+        },
+        {
+          "level": 2,
+          "text": "Practical Integration Example",
+          "slug": "practical-integration-example"
+        },
+        {
+          "level": 2,
+          "text": "Troubleshooting",
+          "slug": "troubleshooting"
+        },
+        {
+          "level": 3,
+          "text": "Discord Presence Not Showing",
+          "slug": "discord-presence-not-showing"
+        },
+        {
+          "level": 3,
+          "text": "Missing Icons",
+          "slug": "missing-icons"
+        },
+        {
+          "level": 3,
+          "text": "Presence Not Updating",
+          "slug": "presence-not-updating"
+        },
+        {
+          "level": 2,
+          "text": "Best Practices",
+          "slug": "best-practices"
+        },
+        {
+          "level": 3,
+          "text": "Update Strategically",
+          "slug": "update-strategically"
+        },
+        {
+          "level": 3,
+          "text": "Handle None Gracefully",
+          "slug": "handle-none-gracefully"
+        },
+        {
+          "level": 3,
+          "text": "Use Descriptive States",
+          "slug": "use-descriptive-states"
+        },
+        {
+          "level": 3,
+          "text": "Clear Presence on Exit",
+          "slug": "clear-presence-on-exit"
+        },
+        {
+          "level": 2,
+          "text": "Performance Considerations",
+          "slug": "performance-considerations"
+        },
+        {
+          "level": 2,
+          "text": "Related Documentation",
+          "slug": "related-documentation"
+        }
+      ],
+      "excerpt": "Show what you're working on in Discord with real-time project and file status",
+      "readingTime": 10,
+      "lastUpdated": "2026-01-25",
+      "searchText": "discord rich presence integration show what you're working on in discord with real-time project and file status what is discord rich presence? how it works setting up your discord application creating the application uploading rich presence assets configuring pulsar using the discord integration initialization updating presence custom panel icons implementation details connection management activity payload format icon asset configuration thread safety presence update batching practical integration example troubleshooting discord presence not showing missing icons presence not updating best practices update strategically handle none gracefully use descriptive states clear presence on exit performance considerations related documentation discord rich-presence integration social pulsar integrates discord rich presence to show your current activity in discord's user profile. when you're working on a project, your discord friends see exactly what you're doing—which project you have open, what file you're editing, and how long you've been working. it's a small feature that creates a sense of community and makes it easy for team members to see who's actively developing.\r\n\r\nwhat is discord rich presence?\r\n\r\ndiscord rich presence is discord's api for displaying detailed game activity in user profiles. originally designed for games to show \"playing fortnite - battle royale - 12 players alive\", it works perfectly for development tools. instead of just showing \"pulsar engine\", your status might display \"project: spaceshooter | playercontroller.rs - editing in blueprint editor - 2 hours 34 minutes elapsed\".\r\n\r\nthe presence updates automatically as you switch between files and editor tabs. open a different project, and your discord status changes immediately. close pulsa"
+    },
+    {
       "id": "core-concepts-engine-filesystem",
       "title": "Engine Filesystem",
       "description": "Asset management and type indexing system",
@@ -1186,7 +1346,7 @@
     {
       "id": "core-concepts-engine-state",
       "title": "Engine State Management",
-      "description": "Centralized global state for the engine",
+      "description": "Type-safe state management with typed contexts",
       "url": "/docs/core-concepts/engine-state",
       "slug": "core-concepts/engine-state",
       "category": "core-concepts",
@@ -1194,104 +1354,125 @@
         "state",
         "global",
         "management",
-        "coordination"
+        "contexts",
+        "type-safety"
       ],
       "headings": [
         {
-          "level": 1,
-          "text": "Engine State Management",
-          "slug": "engine-state-management"
+          "level": 2,
+          "text": "The Problem With String-Based Metadata",
+          "slug": "the-problem-with-string-based-metadata"
         },
         {
           "level": 2,
-          "text": "What It Provides",
-          "slug": "what-it-provides"
+          "text": "Architecture Overview",
+          "slug": "architecture-overview"
         },
         {
           "level": 2,
-          "text": "EngineState Structure",
-          "slug": "enginestate-structure"
+          "text": "Creating and Accessing EngineContext",
+          "slug": "creating-and-accessing-enginecontext"
         },
         {
           "level": 2,
-          "text": "Creating Engine State",
-          "slug": "creating-engine-state"
+          "text": "Window Management with WindowContext",
+          "slug": "window-management-with-windowcontext"
         },
         {
           "level": 2,
-          "text": "Global Instance",
-          "slug": "global-instance"
+          "text": "Project State with ProjectContext",
+          "slug": "project-state-with-projectcontext"
         },
         {
           "level": 2,
-          "text": "Metadata Storage",
-          "slug": "metadata-storage"
+          "text": "Launch Context and URI Handling",
+          "slug": "launch-context-and-uri-handling"
         },
         {
           "level": 2,
-          "text": "Metadata Object",
-          "slug": "metadata-object"
+          "text": "Type-Safe Renderer Registry",
+          "slug": "type-safe-renderer-registry"
         },
         {
           "level": 2,
-          "text": "Renderer Registry",
-          "slug": "renderer-registry"
+          "text": "Window Communication Channels",
+          "slug": "window-communication-channels"
         },
         {
           "level": 2,
-          "text": "Window Communication",
-          "slug": "window-communication"
+          "text": "Thread Safety Everywhere",
+          "slug": "thread-safety-everywhere"
         },
         {
           "level": 2,
-          "text": "Window Counting",
-          "slug": "window-counting"
+          "text": "Complete Integration Example",
+          "slug": "complete-integration-example"
         },
         {
           "level": 2,
-          "text": "Discord Rich Presence",
-          "slug": "discord-rich-presence"
+          "text": "Migrating From String Metadata",
+          "slug": "migrating-from-string-metadata"
         },
         {
           "level": 2,
-          "text": "Type Database Access",
-          "slug": "type-database-access"
+          "text": "Debugging State Issues",
+          "slug": "debugging-state-issues"
+        },
+        {
+          "level": 3,
+          "text": "Context Not Initialized",
+          "slug": "context-not-initialized"
+        },
+        {
+          "level": 3,
+          "text": "Missing Renderer",
+          "slug": "missing-renderer"
+        },
+        {
+          "level": 3,
+          "text": "Window Count Mismatch",
+          "slug": "window-count-mismatch"
+        },
+        {
+          "level": 3,
+          "text": "Lock Debugging",
+          "slug": "lock-debugging"
         },
         {
           "level": 2,
-          "text": "Thread Safety",
-          "slug": "thread-safety"
+          "text": "Performance Characteristics",
+          "slug": "performance-characteristics"
+        },
+        {
+          "level": 3,
+          "text": "Memory Overhead",
+          "slug": "memory-overhead"
+        },
+        {
+          "level": 3,
+          "text": "Clone Performance",
+          "slug": "clone-performance"
+        },
+        {
+          "level": 3,
+          "text": "Lock Contention",
+          "slug": "lock-contention"
+        },
+        {
+          "level": 3,
+          "text": "Thread Scaling",
+          "slug": "thread-scaling"
         },
         {
           "level": 2,
-          "text": "Cloning",
-          "slug": "cloning"
-        },
-        {
-          "level": 2,
-          "text": "Example: Project Manager",
-          "slug": "example-project-manager"
-        },
-        {
-          "level": 2,
-          "text": "Example: GPU Renderer Lifecycle",
-          "slug": "example-gpu-renderer-lifecycle"
-        },
-        {
-          "level": 2,
-          "text": "Example: Session Persistence",
-          "slug": "example-session-persistence"
-        },
-        {
-          "level": 2,
-          "text": "Limitations",
-          "slug": "limitations"
+          "text": "Related Documentation",
+          "slug": "related-documentation"
         }
       ],
-      "excerpt": "Centralized global state for the engine",
-      "readingTime": 2,
-      "lastUpdated": "2026-01-17",
-      "searchText": "engine state management centralized global state for the engine engine state management what it provides enginestate structure creating engine state global instance metadata storage metadata object renderer registry window communication window counting discord rich presence type database access thread safety cloning example: project manager example: gpu renderer lifecycle example: session persistence limitations state global management coordination engine state management\r\n\r\nthe engine state provides centralized, thread-safe storage for global engine data. it manages metadata, gpu renderers, window communication, and shared resources. the implementation is in crates/engine_state/.\r\n\r\nwhat it provides\r\n\r\nthe engine state provides:\r\n- key-value metadata storage\r\n- gpu renderer registry (per-window)\r\n- window request channel\r\n- discord rich presence integration\r\n- type database access\r\n- window counting\r\n\r\nenginestate structure\r\n\r\nthe main state container:\r\nuses arc> for thread-safe shared access.\r\n\r\ncreating engine state\r\n\r\ncreate a new instance:\r\nwith window sender:\r\nglobal instance\r\n\r\nset as global singleton:\r\naccess globally:\r\nthis allows accessing state from anywhere without passing references.\r\n\r\nmetadata storage\r\n\r\nstore arbitrary key-value pairs:\r\nretrieve metadata:\r\nmetadata is thread-safe and can store any string data.\r\n\r\nmetadata object\r\n\r\ndirect metadata access:\r\nrenderer registry\r\n\r\ntrack gpu renderers per window:\r\nregi"
+      "excerpt": "Type-safe state management with typed contexts",
+      "readingTime": 21,
+      "lastUpdated": "2026-01-25",
+      "searchText": "engine state management type-safe state management with typed contexts the problem with string-based metadata architecture overview creating and accessing enginecontext window management with windowcontext project state with projectcontext launch context and uri handling type-safe renderer registry window communication channels thread safety everywhere complete integration example migrating from string metadata debugging state issues context not initialized missing renderer window count mismatch lock debugging performance characteristics memory overhead clone performance lock contention thread scaling related documentation state global management contexts type-safety pulsar's engine state system provides thread-safe access to global engine data through typed context objects rather than stringly-typed metadata. instead of storing everything as string key-value pairs that require runtime parsing, the engine uses strongly-typed rust structs with compile-time guarantees. this eliminates an entire class of bugs where you misspell a metadata key or try to parse an integer from a string that contains a path.\r\n\r\nthe problem with string-based metadata\r\n\r\nearly versions of pulsar used a traditional metadata system where all state lived in a hashmap. need to store the current project path? call state.setmetadata(\"currentprojectpath\", path). want to track which window is showing the editor? store it as state.setmetadata(\"latestwindowid\", windowid.tostring()). this worked, but created maintenance nightmares.\r\n\r\nthe issues compound quickly. first, there's no compile-time validation—typos don't show up until runtime. write \"curentprojectpath\" instead of \"currentp"
     },
     {
       "id": "core-concepts-file-manager",
@@ -4640,8 +4821,8 @@
     }
   ],
   "metadata": {
-    "totalDocs": 33,
-    "totalWords": 33231,
+    "totalDocs": 34,
+    "totalWords": 38794,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -4664,7 +4845,7 @@
       "components",
       "compositor",
       "concepts",
-      "coordination",
+      "contexts",
       "core",
       "customization",
       "d3d11",
@@ -4672,6 +4853,7 @@
       "dependency-graph",
       "design",
       "diagnostics",
+      "discord",
       "dlls",
       "dock",
       "drag-drop",
@@ -4701,6 +4883,7 @@
       "inspection",
       "installation",
       "instrumentation",
+      "integration",
       "internationalization",
       "introduction",
       "learning",
@@ -4726,12 +4909,14 @@
       "quickstart",
       "redo",
       "rendering",
+      "rich-presence",
       "rust-analyzer",
       "scripting",
       "search",
       "server",
       "setup",
       "shell",
+      "social",
       "state",
       "styling",
       "subsystems",
@@ -4743,6 +4928,7 @@
       "tutorial",
       "tutorials",
       "type-debugger",
+      "type-safety",
       "types",
       "ui",
       "undo",
@@ -4756,7 +4942,7 @@
       "workspace",
       "zero-copy"
     ],
-    "lastGenerated": "2026-01-25T17:09:52.138Z",
+    "lastGenerated": "2026-01-25T23:00:27.558Z",
     "version": "1.0.0"
   }
 }

@@ -269,6 +269,14 @@
           "icon": "Image"
         },
         {
+          "title": "Discord Rich Presence Integration",
+          "slug": "discord-integration",
+          "path": "/docs/core-concepts/discord-integration",
+          "type": "page",
+          "order": 21,
+          "icon": "MessageCircle"
+        },
+        {
           "title": "Subsystem Framework",
           "slug": "subsystems",
           "path": "/docs/core-concepts/subsystems",
@@ -305,6 +313,6 @@
       ]
     }
   ],
-  "lastGenerated": "2026-01-25T17:09:51.776Z",
+  "lastGenerated": "2026-01-25T23:00:27.196Z",
   "version": "1.0.0"
 }
