@@ -2352,6 +2352,252 @@
       "searchText": "rust analyzer integration lsp integration for code analysis and diagnostics rust analyzer integration what it does rustanalyzermanager finding rust-analyzer status tracking starting the process lsp communication progress monitoring diagnostics code actions (quick fixes) completion requests thread architecture stopping error handling installation fallback usage example limitations lsp rust-analyzer diagnostics code-analysis rust analyzer integration\r\n\r\npulsar integrates rust-analyzer (the rust language server) to provide code intelligence features like diagnostics, code completion, and type information. this document covers how the integration works.\r\n\r\nwhat it does\r\n\r\nthe rust-analyzer integration provides:\r\n- real-time error and warning diagnostics from the rust compiler\r\n- code completion suggestions\r\n- go-to-definition and type information\r\n- quick fixes (code actions) for common issues\r\n\r\nthe implementation is in crates/enginebackend/src/services/rustanalyzermanager.rs.\r\n\r\nrustanalyzermanager\r\n\r\nthe rustanalyzermanager type spawns and communicates with a rust-analyzer process via the language server protocol (lsp).\r\nthe manager tracks the rust-analyzer process, handles lsp communication, and emits events for status changes and diagnostics.\r\n\r\nfinding rust-analyzer\r\n\r\nwhen the manager initializes, it searches for rust-analyzer in this order:\r\n\r\n1. via rustup: rustup which rust-analyzer (handles rustup"
     },
     {
+      "id": "core-concepts-subsystems",
+      "title": "Subsystem Framework",
+      "description": "Type-safe, dependency-driven initialization and lifecycle management for engine subsystems",
+      "url": "/docs/core-concepts/subsystems",
+      "slug": "core-concepts/subsystems",
+      "category": "core-concepts",
+      "tags": [
+        "subsystems",
+        "architecture",
+        "initialization",
+        "lifecycle",
+        "dependency-graph"
+      ],
+      "headings": [
+        {
+          "level": 2,
+          "text": "The Problem With Procedural Initialization",
+          "slug": "the-problem-with-procedural-initialization"
+        },
+        {
+          "level": 2,
+          "text": "Architecture Overview",
+          "slug": "architecture-overview"
+        },
+        {
+          "level": 2,
+          "text": "The Subsystem Trait",
+          "slug": "the-subsystem-trait"
+        },
+        {
+          "level": 2,
+          "text": "SubsystemRegistry - Dependency Resolution",
+          "slug": "subsystemregistry---dependency-resolution"
+        },
+        {
+          "level": 3,
+          "text": "Registering Subsystems",
+          "slug": "registering-subsystems"
+        },
+        {
+          "level": 3,
+          "text": "Dependency Validation",
+          "slug": "dependency-validation"
+        },
+        {
+          "level": 3,
+          "text": "Topological Sorting",
+          "slug": "topological-sorting"
+        },
+        {
+          "level": 2,
+          "text": "SubsystemContext - Shared Resources",
+          "slug": "subsystemcontext---shared-resources"
+        },
+        {
+          "level": 2,
+          "text": "InitGraph - Engine Initialization DAG",
+          "slug": "initgraph---engine-initialization-dag"
+        },
+        {
+          "level": 3,
+          "text": "Profiling Integration",
+          "slug": "profiling-integration"
+        },
+        {
+          "level": 2,
+          "text": "ManagedGameThread Pattern",
+          "slug": "managedgamethread-pattern"
+        },
+        {
+          "level": 3,
+          "text": "The Problem",
+          "slug": "the-problem"
+        },
+        {
+          "level": 3,
+          "text": "The Wrapper Solution",
+          "slug": "the-wrapper-solution"
+        },
+        {
+          "level": 3,
+          "text": "Using the Managed Subsystem",
+          "slug": "using-the-managed-subsystem"
+        },
+        {
+          "level": 2,
+          "text": "Central Subsystem Loading",
+          "slug": "central-subsystem-loading"
+        },
+        {
+          "level": 3,
+          "text": "The Pattern",
+          "slug": "the-pattern"
+        },
+        {
+          "level": 3,
+          "text": "Benefits of Central Loading",
+          "slug": "benefits-of-central-loading"
+        },
+        {
+          "level": 2,
+          "text": "Creating Your Own Subsystem",
+          "slug": "creating-your-own-subsystem"
+        },
+        {
+          "level": 3,
+          "text": "Step 1: Define the Subsystem Structure",
+          "slug": "step-1-define-the-subsystem-structure"
+        },
+        {
+          "level": 3,
+          "text": "Step 2: Implement the Subsystem Trait",
+          "slug": "step-2-implement-the-subsystem-trait"
+        },
+        {
+          "level": 3,
+          "text": "Step 3: Add Constructor and Public API",
+          "slug": "step-3-add-constructor-and-public-api"
+        },
+        {
+          "level": 3,
+          "text": "Step 4: Register in EngineBackend",
+          "slug": "step-4-register-in-enginebackend"
+        },
+        {
+          "level": 3,
+          "text": "Step 5: Access from Application Code",
+          "slug": "step-5-access-from-application-code"
+        },
+        {
+          "level": 2,
+          "text": "Best Practices",
+          "slug": "best-practices"
+        },
+        {
+          "level": 3,
+          "text": "Dependency Declaration",
+          "slug": "dependency-declaration"
+        },
+        {
+          "level": 3,
+          "text": "Thread Management",
+          "slug": "thread-management"
+        },
+        {
+          "level": 3,
+          "text": "Error Handling",
+          "slug": "error-handling"
+        },
+        {
+          "level": 3,
+          "text": "Avoid Global State",
+          "slug": "avoid-global-state"
+        },
+        {
+          "level": 2,
+          "text": "Migrating Existing Code",
+          "slug": "migrating-existing-code"
+        },
+        {
+          "level": 3,
+          "text": "Step 1: Identify the Subsystem",
+          "slug": "step-1-identify-the-subsystem"
+        },
+        {
+          "level": 3,
+          "text": "Step 2: Extract Initialization Logic",
+          "slug": "step-2-extract-initialization-logic"
+        },
+        {
+          "level": 3,
+          "text": "Step 3: Add Shutdown Logic",
+          "slug": "step-3-add-shutdown-logic"
+        },
+        {
+          "level": 3,
+          "text": "Step 4: Remove Old Initialization Code",
+          "slug": "step-4-remove-old-initialization-code"
+        },
+        {
+          "level": 3,
+          "text": "Step 5: Update Access Patterns",
+          "slug": "step-5-update-access-patterns"
+        },
+        {
+          "level": 2,
+          "text": "Common Patterns",
+          "slug": "common-patterns"
+        },
+        {
+          "level": 3,
+          "text": "Subsystem Communication",
+          "slug": "subsystem-communication"
+        },
+        {
+          "level": 3,
+          "text": "Conditional Subsystems",
+          "slug": "conditional-subsystems"
+        },
+        {
+          "level": 3,
+          "text": "Subsystem-Specific Configuration",
+          "slug": "subsystem-specific-configuration"
+        },
+        {
+          "level": 2,
+          "text": "Debugging",
+          "slug": "debugging"
+        },
+        {
+          "level": 3,
+          "text": "Subsystem Not Initializing",
+          "slug": "subsystem-not-initializing"
+        },
+        {
+          "level": 3,
+          "text": "Dependency Cycles",
+          "slug": "dependency-cycles"
+        },
+        {
+          "level": 3,
+          "text": "Missing Dependencies",
+          "slug": "missing-dependencies"
+        },
+        {
+          "level": 3,
+          "text": "Shutdown Hangs",
+          "slug": "shutdown-hangs"
+        },
+        {
+          "level": 2,
+          "text": "Future Enhancements",
+          "slug": "future-enhancements"
+        },
+        {
+          "level": 2,
+          "text": "Summary",
+          "slug": "summary"
+        }
+      ],
+      "excerpt": "Type-safe, dependency-driven initialization and lifecycle management for engine subsystems",
+      "readingTime": 15,
+      "lastUpdated": "2026-01-25",
+      "searchText": "subsystem framework type-safe, dependency-driven initialization and lifecycle management for engine subsystems the problem with procedural initialization architecture overview the subsystem trait subsystemregistry - dependency resolution registering subsystems dependency validation topological sorting subsystemcontext - shared resources initgraph - engine initialization dag profiling integration managedgamethread pattern the problem the wrapper solution using the managed subsystem central subsystem loading the pattern benefits of central loading creating your own subsystem step 1: define the subsystem structure step 2: implement the subsystem trait step 3: add constructor and public api step 4: register in enginebackend step 5: access from application code best practices dependency declaration thread management error handling avoid global state migrating existing code step 1: identify the subsystem step 2: extract initialization logic step 3: add shutdown logic step 4: remove old initialization code step 5: update access patterns common patterns subsystem communication conditional subsystems subsystem-specific configuration debugging subsystem not initializing dependency cycles missing dependencies shutdown hangs future enhancements summary subsystems architecture initialization lifecycle dependency-graph pulsar's subsystem framework provides declarative, type-safe initialization and lifecycle management for major engine components. instead of manually ordering initialization steps in a fragile procedural sequence, you declare dependencies explicitly. the engine validates the dependency graph, detects cycles, and executes subsystems in correct topological order automatically.\r\n\r\nthe problem with procedural initialization\r\n\r\nmost game engines initialize subsystems through a long procedural sequence in main() or an equivalent entry point. this creates several fundamental problems. when you write fifteen sequential initialization calls, the dependencies between them are implicit—you must remember that discord integration depends on the global context being set first, or that uri registration requires the async runtime to exist. as the codebase grows, these implicit contracts become documentation rot. new developers add initialization steps in the wrong place, causing subtle bugs that only "
+    },
+    {
       "id": "core-concepts-terminal-integration",
       "title": "Terminal Integration",
       "description": "Integrated terminal emulator using Alacritty",
@@ -2568,8 +2814,8 @@
     },
     {
       "id": "core-concepts-translation-system",
-      "title": "Translation & Internationalization",
-      "description": "YAML-based translation system with instant language switching and zero-overhead lookups",
+      "title": "Translation System",
+      "description": "Fast in-memory i18n with instant language switching across all UI",
       "url": "/docs/core-concepts/translation-system",
       "slug": "core-concepts/translation-system",
       "category": "core-concepts",
@@ -2583,8 +2829,8 @@
       "headings": [
         {
           "level": 2,
-          "text": "Why Internationalization Matters",
-          "slug": "why-internationalization-matters"
+          "text": "The Problem With Traditional Localization",
+          "slug": "the-problem-with-traditional-localization"
         },
         {
           "level": 2,
@@ -2593,8 +2839,8 @@
         },
         {
           "level": 2,
-          "text": "Translation File Format",
-          "slug": "translation-file-format"
+          "text": "File Organization",
+          "slug": "file-organization"
         },
         {
           "level": 1,
@@ -2618,23 +2864,18 @@
         },
         {
           "level": 2,
-          "text": "Directory Structure",
-          "slug": "directory-structure"
+          "text": "Using Translations in UI Code",
+          "slug": "using-translations-in-ui-code"
         },
         {
           "level": 2,
-          "text": "Adding New Languages",
-          "slug": "adding-new-languages"
+          "text": "Key Naming Conventions",
+          "slug": "key-naming-conventions"
         },
         {
           "level": 1,
-          "text": "de.yml",
-          "slug": "deyml"
-        },
-        {
-          "level": 2,
-          "text": "Naming Conventions",
-          "slug": "naming-conventions"
+          "text": "Examples",
+          "slug": "examples"
         },
         {
           "level": 2,
@@ -2643,13 +2884,13 @@
         },
         {
           "level": 2,
-          "text": "Language Selector Implementation",
-          "slug": "language-selector-implementation"
+          "text": "Language Selector in the Titlebar",
+          "slug": "language-selector-in-the-titlebar"
         },
         {
           "level": 2,
-          "text": "Adding Translations to New Components",
-          "slug": "adding-translations-to-new-components"
+          "text": "Adding Translations to New UI Components",
+          "slug": "adding-translations-to-new-ui-components"
         },
         {
           "level": 1,
@@ -2683,33 +2924,8 @@
         },
         {
           "level": 1,
-          "text": "zh-CN.yml",
-          "slug": "zh-cnyml"
-        },
-        {
-          "level": 2,
-          "text": "Translation Workflow",
-          "slug": "translation-workflow"
-        },
-        {
-          "level": 1,
-          "text": "en.yml",
-          "slug": "enyml"
-        },
-        {
-          "level": 1,
-          "text": "Tooltip for the button that starts the game simulation",
-          "slug": "tooltip-for-the-button-that-starts-the-game-simulation"
-        },
-        {
-          "level": 1,
-          "text": "Button label for saving the current scene",
-          "slug": "button-label-for-saving-the-current-scene"
-        },
-        {
-          "level": 2,
-          "text": "Testing Translations",
-          "slug": "testing-translations"
+          "text": "zh-CN.yml (Chinese doesn't distinguish singular/plural)",
+          "slug": "zh-cnyml-chinese-doesnt-distinguish-singularplural"
         },
         {
           "level": 2,
@@ -2718,13 +2934,8 @@
         },
         {
           "level": 2,
-          "text": "Migration from Hardcoded Strings",
-          "slug": "migration-from-hardcoded-strings"
-        },
-        {
-          "level": 2,
-          "text": "Best Practices",
-          "slug": "best-practices"
+          "text": "Adding New Languages",
+          "slug": "adding-new-languages"
         },
         {
           "level": 2,
@@ -2733,24 +2944,14 @@
         },
         {
           "level": 2,
-          "text": "Integration with External Tools",
-          "slug": "integration-with-external-tools"
-        },
-        {
-          "level": 2,
-          "text": "Adding Translations to Your Project",
-          "slug": "adding-translations-to-your-project"
-        },
-        {
-          "level": 3,
-          "text": "Component-Level Translation Organization",
-          "slug": "component-level-translation-organization"
+          "text": "Summary",
+          "slug": "summary"
         }
       ],
-      "excerpt": "YAML-based translation system with instant language switching and zero-overhead lookups",
-      "readingTime": 11,
+      "excerpt": "Fast in-memory i18n with instant language switching across all UI",
+      "readingTime": 9,
       "lastUpdated": "2026-01-22",
-      "searchText": "translation & internationalization yaml-based translation system with instant language switching and zero-overhead lookups why internationalization matters architecture overview translation file format en.yml zh-cn.yml using translations in code initializing translations directory structure adding new languages de.yml naming conventions performance characteristics language selector implementation adding translations to new components en.yml zh-cn.yml handling dynamic content en.yml zh-cn.yml en.yml zh-cn.yml translation workflow en.yml tooltip for the button that starts the game simulation button label for saving the current scene testing translations current language support migration from hardcoded strings best practices future enhancements integration with external tools adding translations to your project component-level translation organization i18n localization translations internationalization multi-language pulsar includes a comprehensive translation system built on rust-i18n, providing instant language switching across the entire ui with zero runtime overhead. the system loads all translations for the current language into memory at startup, enabling o(1) lookups without disk i/o. users can switch languages dynamically via the titlebar dropdown, with the ui updating immediately without requiring a restart.\r\n\r\nwhy internationalization matters\r\n\r\ngame engines serve developers worldwide, and forcing everyone to work in english creates unnecessary barriers. a russian developer should be able to navigate the level editor in russian. a chinese artist should see ui panels in chinese. when tools adapt to users rather than forcing adaptation, productivity increases and frustration decreases.\r\n\r\nmost translation systems add significant overhead—either loading files on demand (slow) or using complex key lookup mechanisms (also slow). pulsar takes a different approach. all translations for the activ"
+      "searchText": "translation system fast in-memory i18n with instant language switching across all ui the problem with traditional localization architecture overview file organization en.yml zh-cn.yml using translations in code initializing translations using translations in ui code key naming conventions examples performance characteristics language selector in the titlebar adding translations to new ui components en.yml zh-cn.yml handling dynamic content en.yml zh-cn.yml en.yml zh-cn.yml (chinese doesn't distinguish singular/plural) current language support adding new languages future enhancements summary i18n localization translations internationalization multi-language pulsar ships with a translation system that lets you build games for a global audience without worrying about hardcoded english strings. the entire active language loads into memory at startup, providing nanosecond-level translation lookups with zero i/o overhead. when players switch languages via the titlebar dropdown, every visible string updates immediately—menus, buttons, tooltips, everything.\r\n\r\nthe problem with traditional localization\r\n\r\nmost game engines treat localization as an afterthought. you ship your game with english strings hardcoded everywhere, then months later realize you need to support chinese, spanish, portuguese. at that point, you're faced with finding every single ui string across dozens of files and replacing them with translation keys. it's tedious, error-prone work that delays your international launch.\r\n\r\npulsar bakes localization into the ui framework from day one. instead of writing \"new project\" directly in your menu code, you write t!(\"menu.file.newproj"
     },
     {
       "id": "core-concepts-type-database-impl",
@@ -4259,8 +4460,8 @@
     }
   ],
   "metadata": {
-    "totalDocs": 32,
-    "totalWords": 27609,
+    "totalDocs": 33,
+    "totalWords": 30037,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -4286,6 +4487,7 @@
       "core",
       "customization",
       "database",
+      "dependency-graph",
       "design",
       "diagnostics",
       "dlls",
@@ -4313,12 +4515,14 @@
       "icons",
       "images",
       "indexing",
+      "initialization",
       "inspection",
       "installation",
       "instrumentation",
       "internationalization",
       "introduction",
       "learning",
+      "lifecycle",
       "linux",
       "localization",
       "lsp",
@@ -4348,6 +4552,7 @@
       "shell",
       "state",
       "styling",
+      "subsystems",
       "systems",
       "terminal",
       "text",
@@ -4369,7 +4574,7 @@
       "workspace",
       "zero-copy"
     ],
-    "lastGenerated": "2026-01-22T22:44:53.232Z",
+    "lastGenerated": "2026-01-25T08:19:53.157Z",
     "version": "1.0.0"
   }
 }

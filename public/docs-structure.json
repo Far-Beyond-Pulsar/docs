@@ -253,7 +253,7 @@
           "icon": "Database"
         },
         {
-          "title": "Translation & Internationalization",
+          "title": "Translation System",
           "slug": "translation-system",
           "path": "/docs/core-concepts/translation-system",
           "type": "page",
@@ -267,6 +267,14 @@
           "type": "page",
           "order": 21,
           "icon": "Image"
+        },
+        {
+          "title": "Subsystem Framework",
+          "slug": "subsystems",
+          "path": "/docs/core-concepts/subsystems",
+          "type": "page",
+          "order": 21,
+          "icon": "Layers"
         },
         {
           "title": "Code Editor Component",
@@ -297,6 +305,6 @@
       ]
     }
   ],
-  "lastGenerated": "2026-01-22T22:44:52.862Z",
+  "lastGenerated": "2026-01-25T08:19:52.813Z",
   "version": "1.0.0"
 }
