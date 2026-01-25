@@ -3693,6 +3693,181 @@
       "searchText": "ui framework (gpui) deep dive into pulsar's gpu-accelerated ui framework ui framework (gpui) why gpui exists core concepts entities views contexts the render loop layout system box model flexbox layout absolute positioning real example: editor panel layout styling system colors typography visual effects event system mouse events keyboard events click events custom events integration with the editor editor panels context menus tooltips performance considerations minimize re-renders batch updates virtualization conclusion ui gpui rendering views components ui framework (gpui)\n\ngpui is zed's custom ui framework, and it's unlike anything you've probably worked with before. it's not react, it's not immediate mode, and it's definitely not a traditional retained-mode gui toolkit. instead, gpui is a hybrid approach that combines the best ideas from modern ui frameworks with the performance requirements of a professional game engine editor.\n\nlet me explain why we built it this way, how it works, and—most importantly—how you actually use it to build editor interfaces.\n\nwhy gpui exists\n\nyou might be wondering: why build a custom ui framework when mature options like egui, iced, or even web technologies exist? the answer comes down to our specific requirements:\n\ngpu acceleration isn't optional - editor uis need to render smoothly at 60+ fps while updating constantly. project trees with thousands of files, code editors with syntax highlighting, property panels with live updates—all of this needs to be fast. gpui renders everything using the gpu, wh"
     },
     {
+      "id": "core-concepts-uri-registration",
+      "title": "URI Scheme Registration",
+      "description": "How Pulsar registers and handles pulsar:// URIs for deep linking",
+      "url": "/docs/core-concepts/uri-registration",
+      "slug": "core-concepts/uri-registration",
+      "category": "core-concepts",
+      "tags": [
+        "uri",
+        "deep-linking",
+        "platform-integration",
+        "launch"
+      ],
+      "headings": [
+        {
+          "level": 2,
+          "text": "What are URI Schemes?",
+          "slug": "what-are-uri-schemes"
+        },
+        {
+          "level": 2,
+          "text": "The pulsar:// Scheme",
+          "slug": "the-pulsar-scheme"
+        },
+        {
+          "level": 3,
+          "text": "URI Format",
+          "slug": "uri-format"
+        },
+        {
+          "level": 3,
+          "text": "Example URIs",
+          "slug": "example-uris"
+        },
+        {
+          "level": 2,
+          "text": "Platform-Specific Registration",
+          "slug": "platform-specific-registration"
+        },
+        {
+          "level": 3,
+          "text": "Windows Registration",
+          "slug": "windows-registration"
+        },
+        {
+          "level": 1,
+          "text": "Check if scheme is registered",
+          "slug": "check-if-scheme-is-registered"
+        },
+        {
+          "level": 1,
+          "text": "Manually test URI handling",
+          "slug": "manually-test-uri-handling"
+        },
+        {
+          "level": 3,
+          "text": "macOS Registration",
+          "slug": "macos-registration"
+        },
+        {
+          "level": 1,
+          "text": "Check if scheme is registered",
+          "slug": "check-if-scheme-is-registered"
+        },
+        {
+          "level": 1,
+          "text": "Manually test URI handling",
+          "slug": "manually-test-uri-handling"
+        },
+        {
+          "level": 3,
+          "text": "Linux Registration",
+          "slug": "linux-registration"
+        },
+        {
+          "level": 1,
+          "text": "Check if scheme is registered",
+          "slug": "check-if-scheme-is-registered"
+        },
+        {
+          "level": 1,
+          "text": "Manually test URI handling",
+          "slug": "manually-test-uri-handling"
+        },
+        {
+          "level": 2,
+          "text": "URI Parsing and Validation",
+          "slug": "uri-parsing-and-validation"
+        },
+        {
+          "level": 3,
+          "text": "Parsing Pipeline",
+          "slug": "parsing-pipeline"
+        },
+        {
+          "level": 3,
+          "text": "Validation Rules",
+          "slug": "validation-rules"
+        },
+        {
+          "level": 2,
+          "text": "Integration with LaunchContext",
+          "slug": "integration-with-launchcontext"
+        },
+        {
+          "level": 3,
+          "text": "Implementation in main.rs",
+          "slug": "implementation-in-mainrs"
+        },
+        {
+          "level": 2,
+          "text": "Using URI Commands",
+          "slug": "using-uri-commands"
+        },
+        {
+          "level": 3,
+          "text": "Generating URI Links",
+          "slug": "generating-uri-links"
+        },
+        {
+          "level": 3,
+          "text": "HTML Links",
+          "slug": "html-links"
+        },
+        {
+          "level": 3,
+          "text": "Markdown Documentation",
+          "slug": "markdown-documentation"
+        },
+        {
+          "level": 3,
+          "text": "Discord/Slack Integration",
+          "slug": "discordslack-integration"
+        },
+        {
+          "level": 2,
+          "text": "Debugging URI Handling",
+          "slug": "debugging-uri-handling"
+        },
+        {
+          "level": 3,
+          "text": "Enable Verbose Logging",
+          "slug": "enable-verbose-logging"
+        },
+        {
+          "level": 3,
+          "text": "Test URI Parsing Manually",
+          "slug": "test-uri-parsing-manually"
+        },
+        {
+          "level": 3,
+          "text": "Common Issues",
+          "slug": "common-issues"
+        },
+        {
+          "level": 2,
+          "text": "Future Extensions",
+          "slug": "future-extensions"
+        },
+        {
+          "level": 2,
+          "text": "Security Best Practices",
+          "slug": "security-best-practices"
+        },
+        {
+          "level": 2,
+          "text": "Related Documentation",
+          "slug": "related-documentation"
+        }
+      ],
+      "excerpt": "How Pulsar registers and handles pulsar:// URIs for deep linking",
+      "readingTime": 8,
+      "lastUpdated": "2026-01-25",
+      "searchText": "uri scheme registration how pulsar registers and handles pulsar:// uris for deep linking what are uri schemes? the pulsar:// scheme uri format example uris platform-specific registration windows registration check if scheme is registered manually test uri handling macos registration check if scheme is registered manually test uri handling linux registration check if scheme is registered manually test uri handling uri parsing and validation parsing pipeline validation rules integration with launchcontext implementation in main.rs using uri commands generating uri links html links markdown documentation discord/slack integration debugging uri handling enable verbose logging test uri parsing manually common issues future extensions security best practices related documentation uri deep-linking platform-integration launch uri scheme registration enables \"click to open\" experiences where clicking a pulsar:// link in a browser, document, or website automatically launches pulsar with a specific project or file. this creates seamless integration between documentation, project management tools, and the engine itself.\r\n\r\nwhat are uri schemes?\r\n\r\nuri schemes are the protocol prefix in urls—the part before ://. you're familiar with http://, https://, mailto:, and file://. applications can register custom uri schemes with the operating system, allowing them to handle clicks on links with that scheme.\r\n\r\nwhen a user clicks pulsar://openproject/c:\\mygame, the os:\r\n1. looks up which application handles the pulsar:// scheme\r\n2. launches that application (if not already running)\r\n3. passes the full uri as a command-line argument\r\n4. the application parses the uri and performs the requested action\r\n\r\nthis enables powerful workflows:\r\n\r\n- documentation integration: tutorial sites can link directly to example projects: "
+    },
+    {
       "id": "core-concepts-workspace-panels-docks",
       "title": "Workspace, Panels & Docks",
       "description": "The workspace and docking system in Pulsar",
@@ -4672,6 +4847,56 @@
       "searchText": "quick start guide get the pulsar editor running and explore your first project quick start guide running pulsar for the first time the launcher creating your first project the editor interface the main viewport the file manager the problems panel the terminal understanding pulsar projects project.toml plugins your project uses go here the cargo workspace the game crate running your game from the editor from the terminal working with assets using assets in code exploring the type debugger where to go from here common questions why isn't there a visual scene editor yet? can i use pulsar for 2d games? what if i find a bug? can i contribute to pulsar? tutorial quickstart beginner quick start guide\n\nlet's get pulsar running and take a tour of the editor. this guide assumes you've already installed rust and cloned the pulsar repository.\n\nrunning pulsar for the first time\n\nopen your terminal in the pulsar directory and run:\n[!note]\nthe first build will take a while as cargo compiles all dependencies. subsequent runs will be much faster.\n\nif you're missing any required dependencies, pulsar will detect this and guide you through installation before launching the editor.\n\nthe launcher\n\nwhen pulsar starts, you'll see the launcher screen. this is your project hub where you can:\n\n- open existing projects\n- create new projects\n- configure engine settings\n- view recent projects\n\ncreating your first project\n\n1. click \"new project\"\n2. choose a name for your project (e.g., \"my-first-game\")\n3. select a location on your file system\n4. choose a template (start with \"empty project\" for now)\n5. click \"create\"\n\npulsar will generate the project structure and open the editor.\n\nthe e"
     },
     {
+      "id": "guides-engine-dev",
+      "title": "Engine Dev Guides",
+      "description": "Step-by-step tutorials for building systems in Pulsar",
+      "url": "/docs/guides/engine-dev",
+      "slug": "guides/engine-dev",
+      "category": "guides/engine-dev",
+      "tags": [
+        "guides",
+        "tutorials",
+        "how-to",
+        "learning"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Guides",
+          "slug": "guides"
+        }
+      ],
+      "excerpt": "Step-by-step tutorials for building systems in Pulsar",
+      "readingTime": 1,
+      "lastUpdated": "2026-01-12",
+      "searchText": "engine dev guides step-by-step tutorials for building systems in pulsar guides guides tutorials how-to learning guides\n\nwelcome to the pulsar engine dev guide section."
+    },
+    {
+      "id": "guides-game-dev",
+      "title": "Game Dev Guides",
+      "description": "Step-by-step tutorials for building games in Pulsar",
+      "url": "/docs/guides/game-dev",
+      "slug": "guides/game-dev",
+      "category": "guides/game-dev",
+      "tags": [
+        "guides",
+        "tutorials",
+        "how-to",
+        "learning"
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Guides",
+          "slug": "guides"
+        }
+      ],
+      "excerpt": "Step-by-step tutorials for building games in Pulsar",
+      "readingTime": 1,
+      "lastUpdated": "2026-01-12",
+      "searchText": "game dev guides step-by-step tutorials for building games in pulsar guides guides tutorials how-to learning guides\n\nwelcome to the pulsar enggameine dev guide section."
+    },
+    {
       "id": "guides",
       "title": "Guides",
       "description": "Step-by-step tutorials for building with Pulsar Engine",
@@ -4813,13 +5038,15 @@
     }
   ],
   "metadata": {
-    "totalDocs": 34,
-    "totalWords": 40392,
+    "totalDocs": 37,
+    "totalWords": 41811,
     "categories": [
       "core-concepts",
       "getting-started",
       "getting-started/installation",
-      "guides"
+      "guides",
+      "guides/engine-dev",
+      "guides/game-dev"
     ],
     "tags": [
       "3d",
@@ -4842,6 +5069,7 @@
       "customization",
       "d3d11",
       "database",
+      "deep-linking",
       "dependency-graph",
       "design",
       "diagnostics",
@@ -4878,6 +5106,7 @@
       "integration",
       "internationalization",
       "introduction",
+      "launch",
       "learning",
       "lifecycle",
       "linux",
@@ -4893,6 +5122,7 @@
       "overview",
       "panels",
       "performance",
+      "platform-integration",
       "plugins",
       "profiling",
       "project",
@@ -4924,6 +5154,7 @@
       "types",
       "ui",
       "undo",
+      "uri",
       "viewport",
       "views",
       "virtualized",
@@ -4934,7 +5165,7 @@
       "workspace",
       "zero-copy"
     ],
-    "lastGenerated": "2026-01-25T23:14:47.223Z",
+    "lastGenerated": "2026-01-25T23:18:38.581Z",
     "version": "1.0.0"
   }
 }

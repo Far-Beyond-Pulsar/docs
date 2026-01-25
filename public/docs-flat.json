@@ -96,6 +96,12 @@
     "category": "core-concepts"
   },
   {
+    "title": "URI Scheme Registration",
+    "path": "/docs/core-concepts/uri-registration",
+    "slug": "core-concepts/uri-registration",
+    "category": "core-concepts"
+  },
+  {
     "title": "Engine Filesystem",
     "path": "/docs/core-concepts/engine-filesystem",
     "slug": "core-concepts/engine-filesystem",
@@ -202,5 +208,17 @@
     "path": "/docs/guides/index",
     "slug": "guides/index",
     "category": "guides"
+  },
+  {
+    "title": "Engine Dev Guides",
+    "path": "/docs/guides/engine-dev/index",
+    "slug": "guides/guides/engine-dev/index",
+    "category": "guides/guides/engine-dev"
+  },
+  {
+    "title": "Game Dev Guides",
+    "path": "/docs/guides/game-dev/index",
+    "slug": "guides/guides/game-dev/index",
+    "category": "guides/guides/game-dev"
   }
 ]

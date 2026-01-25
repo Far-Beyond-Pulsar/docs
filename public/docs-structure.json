@@ -157,6 +157,14 @@
           "icon": "Users"
         },
         {
+          "title": "URI Scheme Registration",
+          "slug": "uri-registration",
+          "path": "/docs/core-concepts/uri-registration",
+          "type": "page",
+          "order": 8,
+          "icon": "Link"
+        },
+        {
           "title": "Engine Filesystem",
           "slug": "engine-filesystem",
           "path": "/docs/core-concepts/engine-filesystem",
@@ -309,10 +317,46 @@
           "type": "page",
           "order": 4,
           "icon": "BookOpen"
+        },
+        {
+          "title": "Engine Dev Guides",
+          "slug": "guides/engine-dev",
+          "icon": "BookOpen",
+          "description": "Step-by-step tutorials for building systems in Pulsar",
+          "order": 4,
+          "collapsed": false,
+          "children": [
+            {
+              "title": "Engine Dev Guides",
+              "slug": "index",
+              "path": "/docs/guides/engine-dev/index",
+              "type": "page",
+              "order": 4,
+              "icon": "BookOpen"
+            }
+          ]
+        },
+        {
+          "title": "Game Dev Guides",
+          "slug": "guides/game-dev",
+          "icon": "BookOpen",
+          "description": "Step-by-step tutorials for building games in Pulsar",
+          "order": 4,
+          "collapsed": false,
+          "children": [
+            {
+              "title": "Game Dev Guides",
+              "slug": "index",
+              "path": "/docs/guides/game-dev/index",
+              "type": "page",
+              "order": 4,
+              "icon": "BookOpen"
+            }
+          ]
         }
       ]
     }
   ],
-  "lastGenerated": "2026-01-25T23:14:46.861Z",
+  "lastGenerated": "2026-01-25T23:18:38.188Z",
   "version": "1.0.0"
 }
