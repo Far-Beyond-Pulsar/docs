@@ -318,7 +318,7 @@
     {
       "id": "core-concepts-bevy-viewport",
       "title": "Bevy Viewport Integration",
-      "description": "Zero-copy GPU rendering with Bevy engine",
+      "description": "Zero-copy GPU rendering with Bevy engine through compositor-based architecture",
       "url": "/docs/core-concepts/bevy-viewport",
       "slug": "core-concepts/bevy-viewport",
       "category": "core-concepts",
@@ -327,7 +327,8 @@
         "bevy",
         "gpu",
         "viewport",
-        "zero-copy"
+        "zero-copy",
+        "compositor"
       ],
       "headings": [
         {
@@ -337,13 +338,28 @@
         },
         {
           "level": 2,
-          "text": "Architecture",
-          "slug": "architecture"
+          "text": "Architecture Overview",
+          "slug": "architecture-overview"
+        },
+        {
+          "level": 3,
+          "text": "Component Layers",
+          "slug": "component-layers"
         },
         {
           "level": 2,
-          "text": "Zero-Copy Rendering",
-          "slug": "zero-copy-rendering"
+          "text": "Zero-Copy GPU Texture Sharing",
+          "slug": "zero-copy-gpu-texture-sharing"
+        },
+        {
+          "level": 2,
+          "text": "Three-Layer Compositor",
+          "slug": "three-layer-compositor"
+        },
+        {
+          "level": 3,
+          "text": "Composition Flow",
+          "slug": "composition-flow"
         },
         {
           "level": 2,
@@ -351,44 +367,94 @@
           "slug": "bevyviewport-component"
         },
         {
-          "level": 2,
-          "text": "Viewport State",
-          "slug": "viewport-state"
+          "level": 3,
+          "text": "Creating a Viewport",
+          "slug": "creating-a-viewport"
+        },
+        {
+          "level": 3,
+          "text": "How It Renders",
+          "slug": "how-it-renders"
         },
         {
           "level": 2,
-          "text": "Texture Initialization",
-          "slug": "texture-initialization"
+          "text": "BevyViewportState",
+          "slug": "bevyviewportstate"
         },
         {
           "level": 2,
-          "text": "Double Buffering",
-          "slug": "double-buffering"
+          "text": "GpuRenderer Wrapper",
+          "slug": "gpurenderer-wrapper"
+        },
+        {
+          "level": 3,
+          "text": "Key Methods",
+          "slug": "key-methods"
+        },
+        {
+          "level": 4,
+          "text": "Get Native Texture Handle (Zero-Copy)",
+          "slug": "get-native-texture-handle-zero-copy"
+        },
+        {
+          "level": 4,
+          "text": "Performance Metrics",
+          "slug": "performance-metrics"
+        },
+        {
+          "level": 4,
+          "text": "Camera Control",
+          "slug": "camera-control"
+        },
+        {
+          "level": 4,
+          "text": "Resizing",
+          "slug": "resizing"
         },
         {
           "level": 2,
-          "text": "GPU Canvas Source",
-          "slug": "gpu-canvas-source"
+          "text": "NativeTextureHandle",
+          "slug": "nativetexturehandle"
+        },
+        {
+          "level": 3,
+          "text": "Extraction from wgpu",
+          "slug": "extraction-from-wgpu"
         },
         {
           "level": 2,
-          "text": "Texture Handles",
-          "slug": "texture-handles"
+          "text": "Compositor Integration",
+          "slug": "compositor-integration"
+        },
+        {
+          "level": 3,
+          "text": "Claiming Bevy Renderer",
+          "slug": "claiming-bevy-renderer"
         },
         {
           "level": 2,
-          "text": "Render Loop",
-          "slug": "render-loop"
+          "text": "Complete Integration Example",
+          "slug": "complete-integration-example"
         },
         {
           "level": 2,
-          "text": "GPU Renderer",
-          "slug": "gpu-renderer"
+          "text": "Render Loop Flow",
+          "slug": "render-loop-flow"
+        },
+        {
+          "level": 3,
+          "text": "Performance Characteristics",
+          "slug": "performance-characteristics"
         },
         {
           "level": 2,
-          "text": "Native Texture Handle",
-          "slug": "native-texture-handle"
+          "text": "BGRA8UnormSrgb Pixel Format",
+          "slug": "bgra8unormsrgb-pixel-format"
+        },
+        {
+          "level": 2,
+          "text": "Profiling Integration",
+          "slug": "profiling-integration"
         },
         {
           "level": 2,
@@ -397,18 +463,13 @@
         },
         {
           "level": 2,
-          "text": "Resizing",
-          "slug": "resizing"
+          "text": "Focus and Input Handling",
+          "slug": "focus-and-input-handling"
         },
         {
           "level": 2,
-          "text": "Performance Metrics",
-          "slug": "performance-metrics"
-        },
-        {
-          "level": 2,
-          "text": "BGRA8 Format",
-          "slug": "bgra8-format"
+          "text": "Resizing Viewports",
+          "slug": "resizing-viewports"
         },
         {
           "level": 2,
@@ -417,18 +478,8 @@
         },
         {
           "level": 2,
-          "text": "Continuous Rendering",
-          "slug": "continuous-rendering"
-        },
-        {
-          "level": 2,
-          "text": "Focus Handling",
-          "slug": "focus-handling"
-        },
-        {
-          "level": 2,
-          "text": "Platform Differences",
-          "slug": "platform-differences"
+          "text": "Platform-Specific Details",
+          "slug": "platform-specific-details"
         },
         {
           "level": 3,
@@ -447,19 +498,84 @@
         },
         {
           "level": 2,
-          "text": "Synchronization",
-          "slug": "synchronization"
+          "text": "Best Practices",
+          "slug": "best-practices"
+        },
+        {
+          "level": 3,
+          "text": "✅ Do",
+          "slug": "-do"
+        },
+        {
+          "level": 3,
+          "text": "❌ Don't",
+          "slug": "-dont"
         },
         {
           "level": 2,
-          "text": "Limitations",
-          "slug": "limitations"
+          "text": "Debugging Rendering Issues",
+          "slug": "debugging-rendering-issues"
+        },
+        {
+          "level": 3,
+          "text": "Viewport Not Showing",
+          "slug": "viewport-not-showing"
+        },
+        {
+          "level": 3,
+          "text": "Black Screen",
+          "slug": "black-screen"
+        },
+        {
+          "level": 3,
+          "text": "Performance Issues",
+          "slug": "performance-issues"
+        },
+        {
+          "level": 2,
+          "text": "Limitations and Future Work",
+          "slug": "limitations-and-future-work"
+        },
+        {
+          "level": 3,
+          "text": "Current Limitations",
+          "slug": "current-limitations"
+        },
+        {
+          "level": 3,
+          "text": "Planned Improvements",
+          "slug": "planned-improvements"
+        },
+        {
+          "level": 2,
+          "text": "Related Documentation",
+          "slug": "related-documentation"
+        },
+        {
+          "level": 2,
+          "text": "API Reference",
+          "slug": "api-reference"
+        },
+        {
+          "level": 3,
+          "text": "BevyViewport",
+          "slug": "bevyviewport"
+        },
+        {
+          "level": 3,
+          "text": "GpuRenderer",
+          "slug": "gpurenderer"
+        },
+        {
+          "level": 3,
+          "text": "NativeTextureHandle",
+          "slug": "nativetexturehandle"
         }
       ],
-      "excerpt": "Zero-copy GPU rendering with Bevy engine",
-      "readingTime": 3,
-      "lastUpdated": "2026-01-17",
-      "searchText": "bevy viewport integration zero-copy gpu rendering with bevy engine bevy viewport integration architecture zero-copy rendering bevyviewport component viewport state texture initialization double buffering gpu canvas source texture handles render loop gpu renderer native texture handle object fit resizing performance metrics bgra8 format fallback rendering continuous rendering focus handling platform differences windows (directx) macos (metal) linux (vulkan) synchronization limitations rendering bevy gpu viewport zero-copy [!warning]\rthe rending system is currently tied heavily to bevy's renderer and ecs. while we may be remaining tied to bevyecs, the rendering engine will be made modular in the fiture. at such time this page will be moved to a new \"render engines\" section\r\n\r\nbevy viewport integration\r\n\r\npulsar integrates bevy (a rust game engine) for 3d rendering using zero-copy gpu texture sharing. the bevy renderer runs in a background thread and shares textures with gpui for display. the implementation is in crates/ui/src/bevyviewport.rs and crates/enginebackend/src/services/gpurenderer.rs.\r\n\r\narchitecture\r\n\r\nthe viewport system has several layers:\r\n\r\n- bevyviewport - gpui component that displays the render\r\n- bevyviewportstate - shared state for texture handles\r\n- gpurenderer - wrapper around bevy renderer\r\n- bevyrenderer - actual bevy ecs and rendering pipeline\r\n- gpu texture sharing - platform-specific shared memory\r\n\r\nzero-copy rendering\r\n\r\nthe key innovation is zero-copy gpu texture sharing:\r\nth"
+      "excerpt": "Zero-copy GPU rendering with Bevy engine through compositor-based architecture",
+      "readingTime": 6,
+      "lastUpdated": "2026-01-25",
+      "searchText": "bevy viewport integration zero-copy gpu rendering with bevy engine through compositor-based architecture bevy viewport integration architecture overview component layers zero-copy gpu texture sharing three-layer compositor composition flow bevyviewport component creating a viewport how it renders bevyviewportstate gpurenderer wrapper key methods get native texture handle (zero-copy) performance metrics camera control resizing nativetexturehandle extraction from wgpu compositor integration claiming bevy renderer complete integration example render loop flow performance characteristics bgra8unormsrgb pixel format profiling integration object fit focus and input handling resizing viewports fallback rendering platform-specific details windows (directx) macos (metal) linux (vulkan) best practices ✅ do ❌ don't debugging rendering issues viewport not showing black screen performance issues limitations and future work current limitations planned improvements related documentation api reference bevyviewport gpurenderer nativetexturehandle rendering bevy gpu viewport zero-copy compositor [!warning]\rthe rendering system is currently tied heavily to bevy's renderer and ecs. while we may be remaining tied to bevyecs, the rendering engine will be made modular in the future. at such time this page will be moved to a new \"render engines\" section.\r\n\r\nbevy viewport integration\r\n\r\npulsar integrates bevy (a rust game engine) for 3d rendering using a compositor-based zero-copy gpu texture sharing architecture. unlike traditional approaches that render to intermediate buffers, pulsar's viewport creates a transparent \"hole\" in the gpui ui while the compositor directly composites bevy's gpu textures into the window's back buffer.\r\n\r\narchitecture overview\r\n\r\nthe viewport system uses a three-layer compositor architecture rather than embedding rendered content directly in gpui elements:\r\ncomponent layers\r\n\r\nthe system consists of these key components:\r\n\r\n- bevyviewport (crates/ui/src/bevyviewport.rs) - gpui component that renders as a transparent div, creating a \"hole\" to see the compo"
     },
     {
       "id": "core-concepts-blueprint-graph-system",
@@ -2114,7 +2230,7 @@
     {
       "id": "core-concepts-rendering-pipeline",
       "title": "Rendering System",
-      "description": "How Pulsar renders 3D scenes",
+      "description": "Zero-copy GPU composition with Bevy 3D and GPUI UI layering",
       "url": "/docs/core-concepts/rendering-pipeline",
       "slug": "core-concepts/rendering-pipeline",
       "category": "core-concepts",
@@ -2122,48 +2238,102 @@
         "rendering",
         "graphics",
         "bevy",
-        "3d"
+        "3d",
+        "gpu",
+        "zero-copy",
+        "d3d11",
+        "compositor"
       ],
       "headings": [
         {
-          "level": 1,
-          "text": "Rendering System",
-          "slug": "rendering-system"
+          "level": 2,
+          "text": "The Problem With Traditional Game Engine Rendering",
+          "slug": "the-problem-with-traditional-game-engine-rendering"
         },
         {
           "level": 2,
-          "text": "Overview",
-          "slug": "overview"
+          "text": "Architecture Overview",
+          "slug": "architecture-overview"
         },
         {
           "level": 2,
-          "text": "Why Bevy's Renderer?",
-          "slug": "why-bevys-renderer"
-        },
-        {
-          "level": 2,
-          "text": "Architecture",
-          "slug": "architecture"
+          "text": "Zero-Copy GPU Texture Sharing",
+          "slug": "zero-copy-gpu-texture-sharing"
         },
         {
           "level": 3,
-          "text": "BevyRenderer",
-          "slug": "bevyrenderer"
+          "text": "Cross-Platform Texture Sharing",
+          "slug": "cross-platform-texture-sharing"
         },
         {
           "level": 2,
-          "text": "Rendering GameObjects",
-          "slug": "rendering-gameobjects"
+          "text": "The Three-Layer Compositor",
+          "slug": "the-three-layer-compositor"
+        },
+        {
+          "level": 3,
+          "text": "Layer 0: Black Background",
+          "slug": "layer-0-black-background"
+        },
+        {
+          "level": 3,
+          "text": "Layer 1: Bevy 3D Rendering",
+          "slug": "layer-1-bevy-3d-rendering"
+        },
+        {
+          "level": 3,
+          "text": "Layer 2: GPUI UI Overlay",
+          "slug": "layer-2-gpui-ui-overlay"
         },
         {
           "level": 2,
-          "text": "Materials",
-          "slug": "materials"
+          "text": "Rendering Pipeline Execution Flow",
+          "slug": "rendering-pipeline-execution-flow"
         },
         {
           "level": 2,
-          "text": "Lighting",
-          "slug": "lighting"
+          "text": "BevyViewport Component",
+          "slug": "bevyviewport-component"
+        },
+        {
+          "level": 3,
+          "text": "Viewport Lifecycle",
+          "slug": "viewport-lifecycle"
+        },
+        {
+          "level": 2,
+          "text": "GpuRenderer - The Bevy Wrapper",
+          "slug": "gpurenderer---the-bevy-wrapper"
+        },
+        {
+          "level": 3,
+          "text": "BGRA8UnormSrgb Format",
+          "slug": "bgra8unormsrgb-format"
+        },
+        {
+          "level": 2,
+          "text": "GameObjects and Rendering",
+          "slug": "gameobjects-and-rendering"
+        },
+        {
+          "level": 3,
+          "text": "Default Scene",
+          "slug": "default-scene"
+        },
+        {
+          "level": 2,
+          "text": "Bevy Rendering Modules",
+          "slug": "bevy-rendering-modules"
+        },
+        {
+          "level": 3,
+          "text": "PBR Materials",
+          "slug": "pbr-materials"
+        },
+        {
+          "level": 3,
+          "text": "Lighting System",
+          "slug": "lighting-system"
         },
         {
           "level": 2,
@@ -2172,79 +2342,89 @@
         },
         {
           "level": 2,
-          "text": "Render Thread",
-          "slug": "render-thread"
-        },
-        {
-          "level": 2,
-          "text": "Zero-Copy Rendering",
-          "slug": "zero-copy-rendering"
-        },
-        {
-          "level": 2,
-          "text": "Performance",
-          "slug": "performance"
-        },
-        {
-          "level": 2,
-          "text": "The Compositor",
-          "slug": "the-compositor"
-        },
-        {
-          "level": 3,
-          "text": "Composition Process",
-          "slug": "composition-process"
-        },
-        {
-          "level": 3,
-          "text": "Zero-Copy GPU Texture Sharing",
-          "slug": "zero-copy-gpu-texture-sharing"
-        },
-        {
-          "level": 3,
-          "text": "Rendering Pipeline",
-          "slug": "rendering-pipeline"
-        },
-        {
-          "level": 3,
           "text": "Performance Characteristics",
           "slug": "performance-characteristics"
         },
         {
           "level": 3,
+          "text": "Profiling Integration",
+          "slug": "profiling-integration"
+        },
+        {
+          "level": 2,
           "text": "Device Error Recovery",
           "slug": "device-error-recovery"
         },
         {
-          "level": 3,
+          "level": 2,
           "text": "Platform Support",
           "slug": "platform-support"
         },
         {
+          "level": 3,
+          "text": "Windows (Current Implementation)",
+          "slug": "windows-current-implementation"
+        },
+        {
+          "level": 3,
+          "text": "Linux (Planned)",
+          "slug": "linux-planned"
+        },
+        {
+          "level": 3,
+          "text": "macOS (Planned)",
+          "slug": "macos-planned"
+        },
+        {
           "level": 2,
-          "text": "Integration with GPUI",
+          "text": "Integration With GPUI",
           "slug": "integration-with-gpui"
         },
         {
           "level": 2,
-          "text": "Limitations",
-          "slug": "limitations"
+          "text": "Limitations and Future Work",
+          "slug": "limitations-and-future-work"
+        },
+        {
+          "level": 3,
+          "text": "Planned Enhancements",
+          "slug": "planned-enhancements"
         },
         {
           "level": 2,
-          "text": "Future Plans",
-          "slug": "future-plans"
+          "text": "Debugging Rendering Issues",
+          "slug": "debugging-rendering-issues"
+        },
+        {
+          "level": 3,
+          "text": "Black Viewport",
+          "slug": "black-viewport"
+        },
+        {
+          "level": 3,
+          "text": "Tearing or Artifacts",
+          "slug": "tearing-or-artifacts"
+        },
+        {
+          "level": 3,
+          "text": "UI Not Updating",
+          "slug": "ui-not-updating"
+        },
+        {
+          "level": 3,
+          "text": "Low Frame Rate",
+          "slug": "low-frame-rate"
         },
         {
           "level": 2,
-          "text": "Wrapping Up",
-          "slug": "wrapping-up"
+          "text": "Summary",
+          "slug": "summary"
         }
       ],
-      "excerpt": "How Pulsar renders 3D scenes",
-      "readingTime": 6,
-      "lastUpdated": "2026-01-12",
-      "searchText": "rendering system how pulsar renders 3d scenes rendering system overview why bevy's renderer? architecture bevyrenderer rendering gameobjects materials lighting camera system render thread zero-copy rendering performance the compositor composition process zero-copy gpu texture sharing rendering pipeline performance characteristics device error recovery platform support integration with gpui limitations future plans wrapping up rendering graphics bevy 3d rendering system\n\npulsar's 3d viewport uses bevy's rendering modules to display game scenes in real-time. this document explains how the rendering system works and how it integrates with the editor.\n\noverview\n\npulsar doesn't implement its own custom rendering pipeline. instead, it uses bevy's proven rendering modules:\n\n- bevyrender - core rendering infrastructure\n- bevypbr - physically based rendering (pbr) materials\n- bevycorepipeline - rendering pipeline stages\n- bevyasset - asset loading and management\n\nthis leverages bevy's mature, well-tested rendering code while keeping pulsar focused on the editor experience.\n\nwhy bevy's renderer?\n\nproven technology - bevy's renderer powers many shipped games and has been battle-tested.\n\npbr materials - modern physically-based rendering with metallic/roughness workflows out of the box.\n\ncross-platform - works on windows, linux (when supported), and macos (when supported) via wgpu.\n\nactive development - benefits from bevy community improvements a"
+      "excerpt": "Zero-copy GPU composition with Bevy 3D and GPUI UI layering",
+      "readingTime": 19,
+      "lastUpdated": "2026-01-25",
+      "searchText": "rendering system zero-copy gpu composition with bevy 3d and gpui ui layering the problem with traditional game engine rendering architecture overview zero-copy gpu texture sharing cross-platform texture sharing the three-layer compositor layer 0: black background layer 1: bevy 3d rendering layer 2: gpui ui overlay rendering pipeline execution flow bevyviewport component viewport lifecycle gpurenderer - the bevy wrapper bgra8unormsrgb format gameobjects and rendering default scene bevy rendering modules pbr materials lighting system camera system performance characteristics profiling integration device error recovery platform support windows (current implementation) linux (planned) macos (planned) integration with gpui limitations and future work planned enhancements debugging rendering issues black viewport tearing or artifacts ui not updating low frame rate summary rendering graphics bevy 3d gpu zero-copy d3d11 compositor pulsar renders complex scenes by compositing multiple gpu layers—bevy's 3d rendering, gpui's editor ui, and background fills—into a final frame using direct3d 11. the entire pipeline operates with zero cpu copies, sharing textures directly in gpu memory across different rendering apis. bevy renders continuously at 60 fps on a background thread while gpui renders the ui on-demand, combined by the compositor into the window you see.\n\nthe problem with traditional game engine rendering\n\nmost game engines tightly couple the game's 3d rendering with the editor ui, forcing both to redraw together even when the ui is static. this wastes gpu cycles re-rendering menus and panels that haven't changed, and creates instability—a crash in game rendering code can bring down the entire editor. the naive solution of rendering to separate textures and copying them to a final framebuffer works but introduces latency and memory bandwidth overhead, especially at 4k resolution where each frame transfer move"
     },
     {
       "id": "core-concepts-rust-analyzer-integration",
@@ -4461,7 +4641,7 @@
   ],
   "metadata": {
     "totalDocs": 33,
-    "totalWords": 30039,
+    "totalWords": 33231,
     "categories": [
       "core-concepts",
       "getting-started",
@@ -4482,10 +4662,12 @@
       "collaboration",
       "command-palette",
       "components",
+      "compositor",
       "concepts",
       "coordination",
       "core",
       "customization",
+      "d3d11",
       "database",
       "dependency-graph",
       "design",
@@ -4574,7 +4756,7 @@
       "workspace",
       "zero-copy"
     ],
-    "lastGenerated": "2026-01-25T16:46:23.241Z",
+    "lastGenerated": "2026-01-25T16:59:23.602Z",
     "version": "1.0.0"
   }
 }
