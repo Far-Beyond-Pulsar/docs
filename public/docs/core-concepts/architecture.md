@@ -137,18 +137,18 @@ Pulsar's startup happens in 10 distinct phases:
 
 ```mermaid
 graph TD
-    START[main entry point] --> LOGGING[1. Logging<br/>Tracy & tracing]
-    LOGGING --> APPDATA[2. App Data<br/>Config directories]
-    APPDATA --> SETTINGS[3. Settings<br/>Load config]
-    LOGGING --> RUNTIME[4. Async Runtime<br/>Tokio setup]
-    RUNTIME --> BACKEND[5. Backend<br/>Subsystems init]
-    LOGGING --> CHANNELS[6. Channels<br/>Window requests]
-    CHANNELS --> CONTEXT[7. Engine Context<br/>Typed state]
-    CONTEXT --> GLOBAL[8. Set Global<br/>Make accessible]
-    GLOBAL --> DISCORD[9. Discord<br/>Rich Presence]
-    RUNTIME --> URI[10. URI Registration<br/>pulsar:// scheme]
+    START["main entry point"] --> LOGGING["1 Logging: Tracy & tracing"]
+    LOGGING --> APPDATA["2 App Data: Config directories"]
+    APPDATA --> SETTINGS["3 Settings: Load config"]
+    LOGGING --> RUNTIME["4 Async Runtime: Tokio setup"]
+    RUNTIME --> BACKEND["5 Backend: Subsystems init"]
+    LOGGING --> CHANNELS["6 Channels: Window requests"]
+    CHANNELS --> CONTEXT["7 Engine Context: Typed state"]
+    CONTEXT --> GLOBAL["8 Set Global: Make accessible"]
+    GLOBAL --> DISCORD["9 Discord: Rich Presence"]
+    RUNTIME --> URI["10 URI Registration: pulsar:// scheme"]
 
-    BACKEND --> EVENTLOOP[Event Loop]
+    BACKEND --> EVENTLOOP["Event Loop"]
     CONTEXT --> EVENTLOOP
     DISCORD --> EVENTLOOP
     URI --> EVENTLOOP
@@ -500,8 +500,8 @@ The key innovation is **true zero-copy sharing** between Bevy's D3D12 renderer a
 
 ```mermaid
 sequenceDiagram
-    participant BT as Bevy Thread<br/>(D3D12)
-    participant MT as Main Thread<br/>(D3D11)
+    participant BT as Bevy Thread (D3D12)
+    participant MT as Main Thread (D3D11)
     participant COMP as Compositor
     participant GPU as GPU
 
@@ -516,7 +516,7 @@ sequenceDiagram
     MT->>COMP: Composite texture to back buffer
     COMP->>GPU: Present final frame
 
-    Note over BT,GPU: NO CPU COPY, NO STAGING BUFFER<br/>Direct GPU-to-GPU sharing
+    Note over BT,GPU: NO CPU COPY, NO STAGING BUFFER - Direct GPU-to-GPU sharing
 ```
 
 Bevy renders to a D3D12 texture in a background thread. It creates a shared NT handle for that texture—just a number identifying the GPU resource. The compositor receives this handle, opens the same texture in D3D11, and renders it to the back buffer. The pixel data never touches CPU memory—it stays in VRAM the entire time.
@@ -588,12 +588,12 @@ graph TB
     WE --> MT
     MT --> COMP
     COMP --> GPUI
-    MT <-->|WindowRequest<br/>Channel| GT
+    MT <-->|WindowRequest Channel| GT
     MT <-->|NativeTextureHandle| BT
     BT --> BP
     BP --> GPU
-    GT <-->|GameState<br/>Arc Mutex| BT
-    MT <-->|EngineContext<br/>Arc RwLock| RA
+    GT <-->|GameState Arc/Mutex| BT
+    MT <-->|EngineContext Arc/RwLock| RA
     MT <-->|EngineContext| FW
     MT <-->|EngineContext| AL
     GT <-->|State| PH
@@ -714,21 +714,21 @@ graph TB
     end
 
     subgraph "Core Systems"
-        EC[EngineContext<br/>Typed State]
-        SR[SubsystemRegistry<br/>Framework]
-        EB[EngineBackend<br/>Subsystem Manager]
+        EC[EngineContext - Typed State]
+        SR[SubsystemRegistry - Framework]
+        EB[EngineBackend - Subsystem Manager]
     end
 
     subgraph "Subsystems"
-        PHYS[PhysicsEngine<br/>Rapier3D]
-        MGT[ManagedGameThread<br/>GameObject Updates]
-        REND[Renderer<br/>Bevy Integration]
+        PHYS[PhysicsEngine - Rapier3D]
+        MGT[ManagedGameThread - GameObject Updates]
+        REND[Renderer - Bevy Integration]
     end
 
     subgraph "UI Layer"
-        WINIT[Winit<br/>Windows & Events]
-        COMP[Compositor<br/>3-Layer Rendering]
-        GPUI[GPUI<br/>UI Framework]
+        WINIT[Winit - Windows & Events]
+        COMP[Compositor - 3-Layer Rendering]
+        GPUI[GPUI - UI Framework]
     end
 
     subgraph "Editor UI Crates"
@@ -739,9 +739,9 @@ graph TB
     end
 
     subgraph "Services"
-        RA[RustAnalyzer<br/>LSP Client]
-        DRP[Discord<br/>Rich Presence]
-        TDB[TypeDatabase<br/>Reflection]
+        RA[RustAnalyzer - LSP Client]
+        DRP[Discord - Rich Presence]
+        TDB[TypeDatabase - Reflection]
     end
 
     MAIN --> IG
@@ -755,14 +755,14 @@ graph TB
     EC --> WINIT
     WINIT --> COMP
     COMP --> GPUI
-    COMP <-->|Zero-Copy<br/>NT Handles| REND
+    COMP <-->|Zero-Copy NT Handles| REND
 
     GPUI --> FM
     GPUI --> LE
     GPUI --> TERM
     GPUI --> PROB
 
-    LE <-->|GameThread<br/>Control| MGT
+    LE <-->|GameThread Control| MGT
 
     EC --> RA
     EC --> DRP
