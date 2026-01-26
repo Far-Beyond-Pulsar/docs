@@ -86,14 +86,28 @@
 }
 
 .content {
-  display: inline-block;
+  display: block;
   transition: transform 0.1s ease-out;
   user-select: none;
   text-align: center;
-  width: auto;
+  width: 100%;
   height: auto;
   position: relative;
   z-index: 1;
+}
+
+.content > div {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.content svg {
+  max-width: 100%;
+  height: auto !important;
+  display: block !important;
+  margin: 0 auto;
+  visibility: visible !important;
 }
 
 .modalOverlay {

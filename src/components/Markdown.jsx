@@ -15,6 +15,32 @@ import { defaultSchema } from 'hast-util-sanitize';
 import slugify from 'slugify';
 import ZoomableMermaid from './ZoomableMermaid';
 
+// Global queue for sequential mermaid rendering
+let renderQueue = [];
+let isRendering = false;
+
+async function processRenderQueue() {
+  if (isRendering || renderQueue.length === 0) return;
+  
+  isRendering = true;
+  const { id, callback } = renderQueue.shift();
+  
+  console.log('Processing diagram from queue:', id);
+  await callback();
+  
+  isRendering = false;
+  
+  // Process next in queue
+  if (renderQueue.length > 0) {
+    setTimeout(processRenderQueue, 50);
+  }
+}
+
+export function queueMermaidRender(id, callback) {
+  renderQueue.push({ id, callback });
+  processRenderQueue();
+}
+
 const customSchema = {
   ...defaultSchema,
   attributes: {
@@ -340,7 +366,13 @@ export default function MarkdownRenderer({
               
               // Handle Mermaid diagrams
               if (language === 'mermaid') {
-                return <ZoomableMermaid content={codeContent} />;
+                // Create a unique key based on content hash and position
+                const contentKey = codeContent.split('').reduce((a, b) => {
+                  a = ((a << 5) - a) + b.charCodeAt(0);
+                  return a & a;
+                }, 0);
+                const uniqueKey = `mermaid-${contentKey}-${Math.random().toString(36).substr(2, 5)}`;
+                return <ZoomableMermaid key={uniqueKey} diagramKey={uniqueKey} content={codeContent} />;
               }
               
               // Handle regular code blocks

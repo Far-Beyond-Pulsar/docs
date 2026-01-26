@@ -3,8 +3,9 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './ZoomableMermaid.module.css';
+import { queueMermaidRender } from './Markdown';
 
-export default function ZoomableMermaid({ content }) {
+export default function ZoomableMermaid({ content, diagramKey }) {
   const containerRef = useRef(null);
   const contentRef = useRef(null);
   const modalContainerRef = useRef(null);
@@ -15,6 +16,8 @@ export default function ZoomableMermaid({ content }) {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [svgContent, setSvgContent] = useState('');
+  const [modalSvgContent, setModalSvgContent] = useState('');
   const diagramId = useRef(`mermaid-${Math.random().toString(36).substr(2, 9)}`);
   const modalDiagramId = useRef(`mermaid-modal-${Math.random().toString(36).substr(2, 9)}`);
   
@@ -148,35 +151,35 @@ export default function ZoomableMermaid({ content }) {
   useEffect(() => {
     if (!mounted) return;
     
-    const renderMermaid = async () => {
+    const renderCallback = async () => {
       try {
         const mermaid = (await import('mermaid')).default;
         
-        // Render only this component's regular diagram
-        if (contentRef.current) {
-          const node = contentRef.current.querySelector(`#${diagramId.current}`);
-          if (node && !node.querySelector('svg')) {
-            // Remove any existing content first
-            node.innerHTML = content;
-            
-            console.log('Rendering diagram:', diagramId.current, 'with content length:', content.length);
-            
-            try {
-              await mermaid.run({ nodes: [node] });
-              console.log('Successfully rendered:', diagramId.current);
-            } catch (err) {
-              console.error('Mermaid render error for', diagramId.current, err);
-            }
-          }
+        // Ensure mermaid is initialized before rendering
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: 'dark',
+          securityLevel: 'loose',
+        });
+        
+        console.log('Rendering diagram:', diagramKey || diagramId.current, 'with content length:', content.length);
+        
+        try {
+          // Use mermaid.render() to get SVG
+          const result = await mermaid.render(diagramId.current, content);
+          console.log('Render successful, setting SVG content');
+          setSvgContent(result.svg);
+        } catch (err) {
+          console.error('Mermaid render error for', diagramKey || diagramId.current, err);
         }
       } catch (err) {
         console.error('Failed to load mermaid:', err);
       }
     };
 
-    const timer = setTimeout(renderMermaid, 100);
-    return () => clearTimeout(timer);
-  }, [content, mounted]);
+    // Queue the render to happen sequentially
+    queueMermaidRender(diagramKey || diagramId.current, renderCallback);
+  }, [content, mounted, diagramKey]);
 
   // Separate effect for modal rendering
   useEffect(() => {
@@ -186,22 +189,22 @@ export default function ZoomableMermaid({ content }) {
       try {
         const mermaid = (await import('mermaid')).default;
         
-        // Modal diagram (if open)
-        if (modalContentRef.current) {
-          const modalNode = modalContentRef.current.querySelector(`#${modalDiagramId.current}`);
-          if (modalNode && !modalNode.querySelector('svg')) {
-            // Remove any existing content first
-            modalNode.innerHTML = content;
-            
-            console.log('Rendering modal diagram:', modalDiagramId.current);
-            
-            try {
-              await mermaid.run({ nodes: [modalNode] });
-              console.log('Successfully rendered modal:', modalDiagramId.current);
-            } catch (err) {
-              console.error('Mermaid modal render error for', modalDiagramId.current, err);
-            }
-          }
+        // Ensure mermaid is initialized
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: 'dark',
+          securityLevel: 'loose',
+        });
+        
+        console.log('Rendering modal diagram:', modalDiagramId.current);
+        
+        try {
+          // Use mermaid.render() for modal too
+          const result = await mermaid.render(modalDiagramId.current, content);
+          setModalSvgContent(result.svg);
+          console.log('Successfully rendered modal:', modalDiagramId.current);
+        } catch (err) {
+          console.error('Mermaid modal render error for', modalDiagramId.current, err);
         }
       } catch (err) {
         console.error('Failed to load mermaid for modal:', err);
@@ -288,9 +291,8 @@ export default function ZoomableMermaid({ content }) {
               transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
               transformOrigin: 'center center'
             }}
-          >
-            <div id={diagramId.current} data-content-hash={contentHash.current} className="mermaid">{content}</div>
-          </div>
+            dangerouslySetInnerHTML={{ __html: svgContent }}
+          />
         </div>
       </div>
 
@@ -342,9 +344,8 @@ export default function ZoomableMermaid({ content }) {
                   transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
                   transformOrigin: 'center center'
                 }}
-              >
-                <div id={modalDiagramId.current} data-content-hash={contentHash.current} className="mermaid">{content}</div>
-              </div>
+                dangerouslySetInnerHTML={{ __html: modalSvgContent }}
+              />
             </div>
           </div>
         </div>,
