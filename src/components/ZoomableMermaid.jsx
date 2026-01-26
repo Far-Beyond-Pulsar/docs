@@ -14,9 +14,9 @@ export default function ZoomableMermaid({ content }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const MIN_SCALE = 0.5;
-  const MAX_SCALE = 3;
-  const ZOOM_STEP = 0.2;
+  const MIN_SCALE = 0.1;
+  const MAX_SCALE = 10;
+  const ZOOM_STEP = 0.25;
 
   useEffect(() => {
     setMounted(true);
@@ -127,7 +127,6 @@ export default function ZoomableMermaid({ content }) {
         <div className={styles.controls}>
           <button
             onClick={handleZoomOut}
-            disabled={scale <= MIN_SCALE}
             className={styles.btn}
             title="Zoom Out (Ctrl+Scroll)"
           >
@@ -142,7 +141,6 @@ export default function ZoomableMermaid({ content }) {
           </button>
           <button
             onClick={handleZoomIn}
-            disabled={scale >= MAX_SCALE}
             className={styles.btn}
             title="Zoom In (Ctrl+Scroll)"
           >
@@ -184,7 +182,6 @@ export default function ZoomableMermaid({ content }) {
             <div className={styles.modalControls}>
               <button
                 onClick={handleZoomOut}
-                disabled={scale <= MIN_SCALE}
                 className={styles.btn}
                 title="Zoom Out (Ctrl+Scroll)"
               >
@@ -199,7 +196,6 @@ export default function ZoomableMermaid({ content }) {
               </button>
               <button
                 onClick={handleZoomIn}
-                disabled={scale >= MAX_SCALE}
                 className={styles.btn}
                 title="Zoom In (Ctrl+Scroll)"
               >

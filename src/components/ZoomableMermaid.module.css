@@ -3,8 +3,9 @@
   margin: 1.5em 0;
   background-color: rgba(0, 0, 0, 0.03);
   border-radius: 0.5em;
-  overflow: hidden;
+  overflow: visible;
   min-height: 200px;
+  isolation: isolate;
 }
 
 .controls {
@@ -58,11 +59,6 @@
   transform: scale(0.95);
 }
 
-.btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
 .closeBtn:hover {
   background-color: rgba(239, 68, 68, 0.8) !important;
 }
@@ -82,7 +78,7 @@
   position: relative;
   width: 100%;
   min-height: fit-content;
-  overflow: hidden;
+  overflow: visible;
   padding: 2em;
   display: flex;
   align-items: center;
@@ -96,6 +92,8 @@
   text-align: center;
   width: auto;
   height: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .modalOverlay {
