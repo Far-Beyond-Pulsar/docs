@@ -82,13 +82,17 @@
   width: 100%;
   min-height: 300px;
   overflow: hidden;
-  padding: 1em;
+  padding: 2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .content {
   display: inline-block;
   transition: transform 0.1s ease-out;
   user-select: none;
+  text-align: center;
 }
 
 .modalOverlay {
@@ -127,7 +131,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 1em;
+  padding: 2em;
 }
 
 @keyframes fadeIn {
