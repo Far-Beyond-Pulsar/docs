@@ -3,7 +3,7 @@
   margin: 1.5em 0;
   background-color: rgba(0, 0, 0, 0.03);
   border-radius: 0.5em;
-  overflow: visible;
+  overflow: hidden;
   min-height: 200px;
   isolation: isolate;
 }
@@ -78,7 +78,7 @@
   position: relative;
   width: 100%;
   min-height: fit-content;
-  overflow: visible;
+  overflow: hidden;
   padding: 2em;
   display: flex;
   align-items: center;

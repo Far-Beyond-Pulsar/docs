@@ -115,32 +115,22 @@ export default function MarkdownRenderer({
     }
   }, []);
 
-  // Initialize mermaid when the component mounts
-useEffect(() => {
-  if (!isMounted) return;
+  // Initialize mermaid once globally when component mounts
+  useEffect(() => {
+    if (!isMounted) return;
 
-  import('mermaid').then(({ default: mermaid }) => {
-    mermaid.initialize({
-      startOnLoad: true,
-      theme: darkMode ? 'dark' : 'default',
-      securityLevel: 'loose',
-    });
-
-    const render = () => {
-      requestAnimationFrame(() => {
-        const nodes = document.querySelectorAll('div.mermaid:not(:has(svg))');
-        if (nodes.length > 0) {
-          mermaid.run({ querySelector: 'div.mermaid:not(:has(svg))' });
-        }
+    import('mermaid').then(({ default: mermaid }) => {
+      // Initialize once with proper config
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: darkMode ? 'dark' : 'default',
+        securityLevel: 'loose',
+        deterministicIds: true,
+        deterministicIDSeed: 'pulsar-docs',
       });
-    };
-
-    render();
-
-    const id = setTimeout(render, 300); // 2nd try
-    return () => clearTimeout(id);
-  });
-}, [isMounted, content, darkMode]); // <-- ensure content is part of deps
+      console.log('Mermaid initialized globally');
+    });
+  }, [isMounted, darkMode]);
 
 
   // Process custom containers after ReactMarkdown has rendered
