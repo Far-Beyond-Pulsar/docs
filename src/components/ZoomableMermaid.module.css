@@ -1,0 +1,151 @@
+.wrapper {
+  position: relative;
+  margin: 1.5em 0;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 0.5em;
+  overflow: hidden;
+}
+
+.controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 5px;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.modalControls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 5px;
+  z-index: 9999999 !important;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.closeBtn:hover {
+  background-color: rgba(239, 68, 68, 0.8) !important;
+}
+
+.zoomLevel {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 50px;
+  justify-content: center;
+}
+
+.viewport {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  overflow: hidden;
+  padding: 1em;
+}
+
+.content {
+  display: inline-block;
+  transition: transform 0.1s ease-out;
+  user-select: none;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999 !important;
+  animation: fadeIn 0.2s ease-out;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  position: relative;
+  width: 95vw;
+  height: 95vh;
+  background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: scaleIn 0.2s ease-out;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 999999 !important;
+}
+
+.modalViewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 1em;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

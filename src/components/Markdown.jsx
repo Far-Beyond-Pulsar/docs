@@ -13,6 +13,7 @@ import rehypeSanitize from 'rehype-sanitize';
 import 'katex/dist/katex.min.css';
 import { defaultSchema } from 'hast-util-sanitize';
 import slugify from 'slugify';
+import ZoomableMermaid from './ZoomableMermaid';
 
 const customSchema = {
   ...defaultSchema,
@@ -349,11 +350,7 @@ useEffect(() => {
               
               // Handle Mermaid diagrams
               if (language === 'mermaid') {
-                return (
-                  <div className="mermaid-diagram-container">
-                    <div className="mermaid">{codeContent}</div>
-                  </div>
-                );
+                return <ZoomableMermaid content={codeContent} />;
               }
               
               // Handle regular code blocks
