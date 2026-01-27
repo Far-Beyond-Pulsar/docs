@@ -7,13 +7,14 @@ import remarkMath from 'remark-math';
 import remarkGithubBlockquoteAlert from 'remark-github-blockquote-alert';
 import rehypeKatex from 'rehype-katex';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus, prism } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { github as githubDark } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import 'katex/dist/katex.min.css';
 import { defaultSchema } from 'hast-util-sanitize';
 import slugify from 'slugify';
 import ZoomableMermaid from './ZoomableMermaid';
+import CodeBlock from './CodeBlock';
 
 // Global queue for sequential mermaid rendering
 let renderQueue = [];
@@ -165,23 +166,24 @@ export default function MarkdownRenderer({
     
     // Create a function that's safe to call multiple times
     const processCustomContainers = () => {
-      try {
-        const markdownContent = document.querySelector('.markdown-content');
-        if (!markdownContent) return;
-        
-        // Find all container start markers like ::: info
-        // that haven't already been processed (look for those without a custom-block parent)
-        const containerStarts = Array.from(markdownContent.querySelectorAll('p'))
-          .filter(p => 
-            /^:::(\s+)?([a-zA-Z0-9_-]+)/.test(p.textContent.trim()) && 
-            !p.closest('.custom-block')
-          );
-        
-        if (containerStarts.length === 0) return;
-        
-        // Track if we made any changes
-        let changesMade = false;
-        
+      return (
+        <SyntaxHighlighter
+          language={language}
+          style={atomOneDark}
+          PreTag="div"
+          customStyle={{
+            fontSize: '1em',
+            borderRadius: '8px',
+            margin: '0.5em 0',
+            padding: '1em',
+            overflowX: 'auto',
+            fontFamily: 'JetBrains Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+          }}
+          {...props}
+        >
+          {String(children).replace(/\n$/, '')}
+        </SyntaxHighlighter>
+      );
         containerStarts.forEach(startP => {
           const match = startP.textContent.trim().match(/^:::(\s+)?([a-zA-Z0-9_-]+)/);
           if (!match) return;
@@ -258,9 +260,7 @@ export default function MarkdownRenderer({
           const event = new CustomEvent('custom-containers-processed');
           document.dispatchEvent(event);
         }
-      } catch (error) {
-        console.error('Error processing custom containers:', error);
-      }
+
     };
     
     // Run initially after a small delay to ensure ReactMarkdown has rendered
@@ -301,12 +301,12 @@ export default function MarkdownRenderer({
 
   if (!content) return null;
 
-  // Choose syntax highlighting theme based on dark mode
+  // Use GitHub Dark theme for code blocks
   const codeStyle = {
-    ... (darkMode ? vscDarkPlus : prism),
+    ...githubDark,
     'pre[class*="language-"]': {
-      ...(darkMode ? vscDarkPlus['pre[class*="language-"]'] : prism['pre[class*="language-"]']),
-      margin: 0, // Remove default margin
+      ...githubDark['pre[class*="language-"]'],
+      margin: 0,
     },
   };
 
@@ -378,26 +378,11 @@ export default function MarkdownRenderer({
               // Handle regular code blocks
               if (!inline && language) {
                 return (
-                  <div className="code-block-container">
-                    <div className="code-header">
-                      <span className="language-badge">{language}</span>
-                      <button
-                        onClick={() => handleCopyCode(codeContent, codeId)}
-                        className="copy-button"
-                      >
-                        {copied[codeId] ? 'Copied!' : 'Copy'}
-                      </button>
-                    </div>
-                    <SyntaxHighlighter
-                      style={codeStyle}
-                      language={language}
-                      PreTag="div"
-                      showLineNumbers={language !== 'markdown'}
-                      {...props}
-                    >
-                      {codeContent}
-                    </SyntaxHighlighter>
-                  </div>
+                  <CodeBlock 
+                    language={language} 
+                    code={codeContent}
+                    showLineNumbers={language !== 'markdown'}
+                  />
                 );
               }
               
@@ -448,6 +433,7 @@ export default function MarkdownRenderer({
       )}
       
       <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
         /* Math styling */
         .katex {
           font-size: 1.1em !important;
@@ -465,12 +451,189 @@ export default function MarkdownRenderer({
           color: #e4e4e7;
         }
         
-        /* Code block styling */
+        /* Custom dark theme for code blocks */
         .code-block-container {
-          margin: 1.5em 0;
-          border-radius: 0.5em;
+          margin: 2em 0;
+          border-radius: 8px;
+          overflow: auto;
+          border: 1px solid #23272e;
+          background: #181a20;
+          box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
+          font-size: 0.9em;
+          position: relative;
+        }
+        .code-block-container,
+        .code-block-container pre,
+        .code-block-container code,
+        .code-block-container div,
+        .code-block-container .code-header {
+          background: rgb(13, 17, 23) !important;
+        }
+        .code-block-container {
+          margin: 2em 0;
+          border-radius: 8px;
           overflow: hidden;
-          border: 1px solid ${darkMode ? '#444' : '#ddd'};
+          border: 1px solid #30363d;
+          background: rgb(13, 17, 23);
+          box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
+          font-size: 0.9em;
+        }
+        .code-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.5em 1em;
+          background: #161b22;
+          border-bottom: 1px solid #30363d;
+        }
+        .language-badge {
+          font-size: 0.8em;
+          color: #8b949e;
+        }
+        .copy-button {
+          font-size: 0.8em;
+          padding: 0.25em 0.5em;
+          background: #21262d;
+          border: 1px solid #30363d;
+          border-radius: 4px;
+          color: #c9d1d9;
+          cursor: pointer;
+        }
+        .copy-button:hover {
+          background: #30363d;
+        }
+        .code-content {
+          display: flex;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.9em;
+          line-height: 1.2;
+        }
+        .line-numbers {
+          background: #161b22;
+          color: #6e7681;
+          padding: 0.8em;
+          text-align: right;
+          user-select: none;
+          flex-shrink: 0;
+        }
+        .line-number {
+          height: 1.2em;
+        }
+        .code-separator {
+          width: 1px;
+          background: #30363d;
+          flex-shrink: 0;
+        }
+        .code-lines {
+          flex: 1;
+          overflow: auto;
+        }
+        .code-lines pre {
+          margin: 0;
+          padding: 0.8em;
+          background: rgb(13, 17, 23);
+          color: #c9d1d9;
+          font-family: inherit;
+          font-size: inherit;
+          line-height: inherit;
+        }
+        .code-lines code {
+          background: transparent;
+          padding: 0;
+          font-family: inherit;
+        }
+        .code-line {
+          height: 1.2em;
+        }
+          color: #d4d4d4 !important;
+        }
+        .code-block-container .token.property,
+        .code-block-container .token.tag,
+        .code-block-container .token.constant,
+        .code-block-container .token.symbol {
+          color: #569cd6 !important;
+        }
+        .code-block-container .token.selector,
+        .code-block-container .token.attr-name,
+        .code-block-container .token.string,
+        .code-block-container .token.char,
+        .code-block-container .token.builtin,
+        .code-block-container .token.inserted {
+          color: #ce9178 !important;
+        }
+        .code-block-container .token.operator,
+        .code-block-container .token.entity,
+        .code-block-container .token.url,
+        .code-block-container .token.variable {
+          color: #dcdcaa !important;
+        }
+        .code-block-container .token.atrule,
+        .code-block-container .token.attr-value,
+        .code-block-container .token.keyword {
+          color: #c586c0 !important;
+        }
+        .code-block-container .token.function,
+        .code-block-container .token.class-name {
+          color: #d7ba7d !important;
+        }
+        .code-block-container .token.regex,
+        .code-block-container .token.important {
+          color: #d16969 !important;
+        }
+        .code-block-container .token.deleted {
+          color: #d16969 !important;
+        }
+        .code-block-container::-webkit-scrollbar {
+          height: 10px;
+          background: ${darkMode ? '#23272e' : '#e2e8f0'};
+        }
+        .code-block-container::-webkit-scrollbar-thumb {
+          background: ${darkMode ? '#444' : '#bdbdbd'};
+          border-radius: 6px;
+        }
+        .code-block-container pre,
+        .code-block-container code {
+          font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          box-sizing: border-box;
+          background: #0d1117 !important;
+          color: #c9d1d9 !important;
+          font-size: 0.92em !important;
+          line-height: 1 !important;
+          min-height: 0 !important;
+        }
+        .code-block-container pre {
+          padding: 0.5em 0.7em !important;
+          margin: 0 !important;
+          border-radius: 0.7em !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+        /* Highlighted lines (Monaco style) */
+        .code-block-container .react-syntax-highlighter-line-highlighted {
+          background: rgba(0, 122, 204, 0.18) !important;
+          border-radius: 0.35em !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          box-shadow: 0 1px 4px 0 rgba(0,0,0,0.04);
+          line-height: 1 !important;
+          min-height: 0 !important;
+        }
+        /* Monaco-style line numbers */
+        .code-block-container .react-syntax-highlighter-line-number {
+          color: #8b949e;
+          opacity: 0.8;
+          font-size: 0.88em !important;
+          padding-right: 0.8em !important;
+          margin-right: 0.8em !important;
+          line-height: 1 !important;
+          min-height: 0 !important;
+          border-right: none !important;
+        }
+        /* Monaco-style selection */
+        .code-block-container ::selection {
+          background: ${darkMode ? 'rgba(0,122,204,0.25)' : 'rgba(0,122,204,0.18)'};
         }
         
         .code-header {
@@ -506,7 +669,7 @@ export default function MarkdownRenderer({
           background-color: ${darkMode ? '#2d2d2d' : '#f1f1f1'};
           border-radius: 0.25em;
           padding: 0.2em 0.4em;
-          font-family: monospace;
+          font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         }
         
         /* Mermaid styling */
