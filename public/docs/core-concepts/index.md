@@ -25,45 +25,45 @@ This section covers the architectural decisions and systems that make Pulsar wha
 
 ### Foundational Architecture
 
-- **[Architecture](./architecture)** - How Pulsar is structured from initialization to rendering
-- **[Subsystems](./subsystems)** - The modular subsystem framework and dependency management
-- **[Engine State](./engine-state)** - Typed context system for global state management
+- **[Architecture](./core-concepts/architecture)** - How Pulsar is structured from initialization to rendering
+- **[Subsystems](./core-concepts/subsystems)** - The modular subsystem framework and dependency management
+- **[Engine State](./core-concepts/engine-state)** - Typed context system for global state management
 
 ### Core Systems
 
-- **[Rendering Pipeline](./rendering-pipeline)** - Three-layer compositor and GPU architecture
-- **[Bevy Viewport](./bevy-viewport)** - Zero-copy GPU texture sharing for 3D viewports
-- **[Type System](./type-system)** - Strong typing and reflection for game data
-- **[Type Database Implementation](./type-database-impl)** - Runtime type information and introspection
-- **[Plugin System](./plugin-system)** - Extending the editor with dynamic libraries
-- **[Blueprint System](./blueprint-system)** - Visual scripting foundation
-- **[Blueprint Graph System](./blueprint-graph-system)** - Node-based logic editing
-- **[Profiling System](./profiling-system)** - Tracy integration and performance analysis
-- **[Translation System](./translation-system)** - Multi-language support and localization
-- **[Asset Loading](./asset-loading)** - Resource management and loading
+- **[Rendering Pipeline](./core-concepts/rendering-pipeline)** - Three-layer compositor and GPU architecture
+- **[Bevy Viewport](./core-concepts/bevy-viewport)** - Zero-copy GPU texture sharing for 3D viewports
+- **[Type System](./core-concepts/type-system)** - Strong typing and reflection for game data
+- **[Type Database Implementation](./core-concepts/type-database-impl)** - Runtime type information and introspection
+- **[Plugin System](./core-concepts/plugin-system)** - Extending the editor with dynamic libraries
+- **[Blueprint System](./core-concepts/blueprint-system)** - Visual scripting foundation
+- **[Blueprint Graph System](./core-concepts/blueprint-graph-system)** - Node-based logic editing
+- **[Profiling System](./core-concepts/profiling-system)** - Tracy integration and performance analysis
+- **[Translation System](./core-concepts/translation-system)** - Multi-language support and localization
+- **[Asset Loading](./core-concepts/asset-loading)** - Resource management and loading
 
 ### Editor UI
 
-- **[UI Framework](./ui-framework)** - GPUI and declarative interface design
-- **[Workspace, Panels & Docks](./workspace-panels-docks)** - Editor layout system
-- **[Palette System](./palette-system)** - Command palette and quick actions
-- **[Theme System](./theme-system)** - Visual customization and color schemes
-- **[File Manager](./file-manager)** - Project file browser and navigation
-- **[Code Editor](./code-editor)** - Integrated Rust code editing
-- **[Terminal Integration](./terminal-integration)** - Embedded terminal emulator
-- **[Diagnostics System](./diagnostics-system)** - Error reporting and problem tracking
-- **[History System](./history-system)** - Undo/redo implementation
+- **[UI Framework](./core-concepts/ui-framework)** - GPUI and declarative interface design
+- **[Workspace, Panels & Docks](./core-concepts/workspace-panels-docks)** - Editor layout system
+- **[Palette System](./core-concepts/palette-system)** - Command palette and quick actions
+- **[Theme System](./core-concepts/theme-system)** - Visual customization and color schemes
+- **[File Manager](./core-concepts/file-manager)** - Project file browser and navigation
+- **[Code Editor](./core-concepts/code-editor)** - Integrated Rust code editing
+- **[Terminal Integration](./core-concepts/terminal-integration)** - Embedded terminal emulator
+- **[Diagnostics System](./core-concepts/diagnostics-system)** - Error reporting and problem tracking
+- **[History System](./core-concepts/history-system)** - Undo/redo implementation
 
 ### Platform Integration
 
-- **[Rust Analyzer Integration](./rust-analyzer-integration)** - LSP and code intelligence
-- **[Discord Integration](./discord-integration)** - Rich presence and activity status
-- **[URI Registration](./uri-registration)** - Deep linking with pulsar:// scheme
+- **[Rust Analyzer Integration](./core-concepts/rust-analyzer-integration)** - LSP and code intelligence
+- **[Discord Integration](./core-concepts/discord-integration)** - Rich presence and activity status
+- **[URI Registration](./core-concepts/uri-registration)** - Deep linking with pulsar:// scheme
 
 ### Advanced Topics
 
-- **[Multiplayer Server](./multiplayer-server)** - Networked game infrastructure
-- **[Engine Filesystem](./engine-filesystem)** - Virtual filesystem abstraction
+- **[Multiplayer Server](./core-concepts/multiplayer-server)** - Networked game infrastructure
+- **[Engine Filesystem](./core-concepts/engine-filesystem)** - Virtual filesystem abstraction
 
 ## Why These Concepts Matter
 
@@ -79,11 +79,11 @@ Game engines are complex beasts. They're not just single programs—they're plat
 
 ## Starting Points
 
-If you're completely new to Pulsar, start with **[Architecture](./architecture)**. It gives you the big-picture view of how everything connects, from initialization through the subsystem framework to the event loop.
+If you're completely new to Pulsar, start with **[Architecture](./core-concepts/architecture)**. It gives you the big-picture view of how everything connects, from initialization through the subsystem framework to the event loop.
 
-If you're coming from another engine and want to understand what's different, check out **[Subsystems](./subsystems)** and **[Type System](./type-system)**. These are two areas where Pulsar diverges significantly from Unity, Unreal, or Godot.
+If you're coming from another engine and want to understand what's different, check out **[Subsystems](./core-concepts/subsystems)** and **[Type System](./core-concepts/type-system)**. These are two areas where Pulsar diverges significantly from Unity, Unreal, or Godot.
 
-If you're ready to build something, the **[UI Framework](./ui-framework)** guide will teach you how to create editor tools, while **[Plugin System](./plugin-system)** shows you how to extend the editor with custom functionality.
+If you're ready to build something, the **[UI Framework](./core-concepts/ui-framework)** guide will teach you how to create editor tools, while **[Plugin System](./core-concepts/plugin-system)** shows you how to extend the editor with custom functionality.
 
 ## A Note on Learning Curves
 
@@ -149,14 +149,14 @@ Ask questions! The Discord community is active and helpful. The core developers 
 
 Ready to dive in? Here's a suggested learning path:
 
-1. **[Architecture](./architecture)** - Get the lay of the land
-2. **[Subsystems](./subsystems)** - Understand the modular framework
-3. **[Engine State](./engine-state)** - Learn typed context management
-4. **[Rendering Pipeline](./rendering-pipeline)** - From scene to pixels
-5. **[Bevy Viewport](./bevy-viewport)** - Zero-copy GPU integration
-6. **[Plugin System](./plugin-system)** - Extend the editor
-7. **[Type System](./type-system)** - Strong typing for game data
-8. **[UI Framework](./ui-framework)** - Build editor tools
+1. **[Architecture](./core-concepts/architecture)** - Get the lay of the land
+2. **[Subsystems](./core-concepts/subsystems)** - Understand the modular framework
+3. **[Engine State](./core-concepts/engine-state)** - Learn typed context management
+4. **[Rendering Pipeline](./core-concepts/rendering-pipeline)** - From scene to pixels
+5. **[Bevy Viewport](./core-concepts/bevy-viewport)** - Zero-copy GPU integration
+6. **[Plugin System](./core-concepts/plugin-system)** - Extend the editor
+7. **[Type System](./core-concepts/type-system)** - Strong typing for game data
+8. **[UI Framework](./core-concepts/ui-framework)** - Build editor tools
 
 Or jump to whatever interests you most. Each doc is written to stand alone while linking to related concepts.
 

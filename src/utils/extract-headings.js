@@ -20,7 +20,11 @@ export function extractHeadings(content, options = {}) {
   // Matches: ## Heading, ### Heading, etc.
   const headingRegex = /^(#{1,6})\s+(.+)$/gm;
 
+  // Store heading positions for later content extraction
+  const headingPositions = [];
   let match;
+
+  // First pass: collect all headings with their positions
   while ((match = headingRegex.exec(content)) !== null) {
     const level = match[1].length;
     const text = match[2].trim();
@@ -42,12 +46,41 @@ export function extractHeadings(content, options = {}) {
     // Generate slug from text
     const slug = generateSlug(cleanText);
 
-    headings.push({
+    headingPositions.push({
       level,
       text: cleanText,
       slug,
+      position: match.index,
       children: []
     });
+  }
+
+  // Second pass: extract callouts for each heading section
+  // Match callouts in blockquotes: > [!NOTE], > [!TIP], etc.
+  const calloutRegex = /^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]/im;
+
+  for (let i = 0; i < headingPositions.length; i++) {
+    const heading = headingPositions[i];
+    const nextHeading = headingPositions[i + 1];
+
+    // Extract content between this heading and the next
+    const startPos = heading.position;
+    const endPos = nextHeading ? nextHeading.position : content.length;
+    const sectionContent = content.substring(startPos, endPos);
+
+    // Find all callouts in this section
+    const callouts = new Set();
+    const lines = sectionContent.split('\n');
+
+    for (const line of lines) {
+      const calloutMatch = line.match(calloutRegex);
+      if (calloutMatch) {
+        callouts.add(calloutMatch[1].toLowerCase());
+      }
+    }
+
+    heading.callouts = Array.from(callouts);
+    headings.push(heading);
   }
 
   return headings;
