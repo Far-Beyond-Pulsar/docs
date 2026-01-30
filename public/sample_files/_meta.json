@@ -1,0 +1,15 @@
+{
+  "title": "Sample_files",
+  "order": 1,
+  "icon": "BookOpen",
+  "description": "Documentation for sample_files",
+  "collapsed": false,
+  "items": [
+    {
+      "title": "Architecture",
+      "slug": "architecture",
+      "order": 1,
+      "type": "category"
+    }
+  ]
+}

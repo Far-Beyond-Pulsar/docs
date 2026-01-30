@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "typeKind": "struct",
+  "name": "player_data",
+  "displayName": "PlayerData",
+  "description": "Core player character data and statistics",
+  "fields": [
+    {
+      "name": "health",
+      "type": {
+        "kind": "Primitive",
+        "name": "f32"
+      },
+      "visibility": "public",
+      "doc": "Current health points"
+    },
+    {
+      "name": "max_health",
+      "type": {
+        "kind": "Primitive",
+        "name": "f32"
+      },
+      "visibility": "public",
+      "doc": "Maximum health points"
+    },
+    {
+      "name": "velocity",
+      "type": {
+        "kind": "Path",
+        "path": "Vec3"
+      },
+      "visibility": "public",
+      "doc": "Player movement velocity"
+    },
+    {
+      "name": "inventory",
+      "type": {
+        "kind": "Path",
+        "path": "Inventory"
+      },
+      "visibility": "public",
+      "doc": "Player's inventory"
+    },
+    {
+      "name": "level",
+      "type": {
+        "kind": "Primitive",
+        "name": "u32"
+      },
+      "visibility": "public",
+      "doc": "Player's current level"
+    },
+    {
+      "name": "experience",
+      "type": {
+        "kind": "Primitive",
+        "name": "u32"
+      },
+      "visibility": "public",
+      "doc": "Current experience points"
+    }
+  ],
+  "visibility": "public",
+  "meta": {
+    "derives": ["Debug", "Clone"]
+  }
+}

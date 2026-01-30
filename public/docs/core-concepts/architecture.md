@@ -796,25 +796,49 @@ The architecture ensures clean separation: UI code never directly touches subsys
 A Pulsar project is a standard Rust workspace:
 
 ```dirtree
-- my-game/
-  - Cargo.toml
-  - project.toml
-  - .pulsar/
+- blank_project/
+  - Cargo.toml -> /assets/samples/Cargo.toml
+  - Pulsar.toml -> /assets/samples/Pulsar.toml
+  - README.md
+  - .gitignore
+  -! .pulsar/
     - profiling/
+      - flamegraph/
     - layout.json
     - recent-files.json
-  - assets/
-    - models/
-    - textures/
-    - sounds/
+  - src/
+    - main.rs -> /assets/samples/main.rs
+    - engine_main.rs -> /assets/samples/engine_main.rs
+    - classes/
+      - mod.rs
+      - ExampleClass/
+      - MyBP/
+    - assets/
+      - audio/
+  - GameState/
+    - enum.json -> /assets/samples/GameState_enum.json
+  - Inventory/
+    - struct.json -> /assets/samples/Inventory_struct.json
+  - PlayerData/
+    - struct.json -> /assets/samples/PlayerData_struct.json
+  - EntityId/
+    - alias.json
+  - Drawable/
+    - trait.json
   - scenes/
-    - main.scene
+    - default.level -> /assets/samples/default.level
+    - Newlevel.level.json
+    - meshes/
+      - spaceship.obj
+      - spaceship.mtl
+      - textures/
+  - prefabs/
   - scripts/
-    - player.rs
-  - game/
-    - Cargo.toml
-    - src/
-      - main.rs
+  - docs/
+    - test.md
+  -! target/
+    - debug/
+    - .rustc_info.json
 ```
 
 Projects use standard Cargo tooling—you can build with `cargo build`, run with `cargo run`, and test with `cargo test`. Pulsar just adds editor metadata in `.pulsar/` that Git ignores.

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Folder, 
   FolderOpen,
@@ -32,6 +33,7 @@ import {
   IconBrandGit,
   IconCode,
 } from '@tabler/icons-react';
+import FilePreviewModal from './FilePreviewModal';
 
 const getFileIcon = (name) => {
   const ext = name.split('.').pop()?.toLowerCase();
@@ -153,9 +155,17 @@ function parseDirTree(content) {
       name = name.slice(0, -1);
     }
     
+    // Check for file link (only for non-folders)
+    let fileLink = null;
+    if (!isFolder && name.includes(' -> ')) {
+      const parts = name.split(' -> ');
+      name = parts[0].trim();
+      fileLink = parts[1].trim();
+    }
+    
     if (!name) continue;
     
-    const node = { name, children: [], isFolder, defaultCollapsed };
+    const node = { name, children: [], isFolder, defaultCollapsed, fileLink };
     
     // Pop stack until we find the parent
     while (stack.length > 0 && stack[stack.length - 1].depth >= depth) {
@@ -175,7 +185,7 @@ function parseDirTree(content) {
   return root.children;
 }
 
-function TreeNode({ node, level = 0 }) {
+function TreeNode({ node, level = 0, onFileClick }) {
   const [isOpen, setIsOpen] = useState(!node.defaultCollapsed);
   const hasChildren = node.children && node.children.length > 0;
   
@@ -184,7 +194,7 @@ function TreeNode({ node, level = 0 }) {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.35rem 0.5rem',
-    cursor: node.isFolder && hasChildren ? 'pointer' : 'default',
+    cursor: node.isFolder && hasChildren ? 'pointer' : (node.fileLink ? 'pointer' : 'default'),
     borderRadius: '6px',
     transition: 'background-color 0.15s ease',
     fontSize: '0.9em',
@@ -194,8 +204,12 @@ function TreeNode({ node, level = 0 }) {
   };
   
   const handleClick = () => {
+    console.log('TreeNode clicked:', node.name, 'isFolder:', node.isFolder, 'hasChildren:', hasChildren, 'fileLink:', node.fileLink);
     if (node.isFolder && hasChildren) {
       setIsOpen(!isOpen);
+    } else if (!node.isFolder && node.fileLink) {
+      console.log('Opening file:', node.fileLink, node.name);
+      onFileClick(node.fileLink, node.name);
     }
   };
   
@@ -205,7 +219,7 @@ function TreeNode({ node, level = 0 }) {
         style={itemStyle}
         onClick={handleClick}
         onMouseEnter={(e) => {
-          if (node.isFolder && hasChildren) {
+          if ((node.isFolder && hasChildren) || (!node.isFolder && node.fileLink)) {
             e.currentTarget.style.backgroundColor = 'rgba(177, 186, 196, 0.12)';
           }
         }}
@@ -238,8 +252,10 @@ function TreeNode({ node, level = 0 }) {
           )}
         </span>
         <span style={{ 
-          color: node.isFolder ? '#7c3aed' : '#e6edf3',
+          color: node.isFolder ? '#7c3aed' : (node.fileLink ? '#58a6ff' : '#e6edf3'),
           fontWeight: node.isFolder ? '500' : '400',
+          textDecoration: node.fileLink ? 'underline' : 'none',
+          textDecorationStyle: node.fileLink ? 'dotted' : 'none',
         }}>
           {node.name}
         </span>
@@ -248,7 +264,7 @@ function TreeNode({ node, level = 0 }) {
       {node.isFolder && hasChildren && isOpen && (
         <div style={{ marginLeft: '1.5rem' }}>
           {node.children.map((child, index) => (
-            <TreeNode key={index} node={child} level={level + 1} />
+            <TreeNode key={index} node={child} level={level + 1} onFileClick={onFileClick} />
           ))}
         </div>
       )}
@@ -258,6 +274,32 @@ function TreeNode({ node, level = 0 }) {
 
 export default function DirTree({ content }) {
   const tree = parseDirTree(content);
+  const [previewFiles, setPreviewFiles] = useState([]);
+  const [nextZIndex, setNextZIndex] = useState(10000);
+  
+  const handleFileClick = (fileUrl, fileName) => {
+    const newFile = { 
+      id: Date.now(), 
+      url: fileUrl, 
+      name: fileName,
+      zIndex: nextZIndex,
+    };
+    setPreviewFiles(prev => [...prev, newFile]);
+    setNextZIndex(prev => prev + 1);
+  };
+  
+  const handleClosePreview = (fileId) => {
+    setPreviewFiles(prev => prev.filter(f => f.id !== fileId));
+  };
+  
+  const handleBringToFront = (fileId) => {
+    setPreviewFiles(prev => prev.map(f => 
+      f.id === fileId 
+        ? { ...f, zIndex: nextZIndex }
+        : f
+    ));
+    setNextZIndex(prev => prev + 1);
+  };
   
   const containerStyle = {
     margin: '1.5em 0',
@@ -269,10 +311,24 @@ export default function DirTree({ content }) {
   };
   
   return (
-    <div style={containerStyle}>
-      {tree.map((node, index) => (
-        <TreeNode key={index} node={node} />
+    <>
+      <div style={containerStyle}>
+        {tree.map((node, index) => (
+          <TreeNode key={index} node={node} onFileClick={handleFileClick} />
+        ))}
+      </div>
+      
+      {typeof document !== 'undefined' && previewFiles.map(file => createPortal(
+        <FilePreviewModal 
+          key={file.id}
+          fileUrl={file.url} 
+          fileName={file.name}
+          zIndex={file.zIndex}
+          onClose={() => handleClosePreview(file.id)}
+          onBringToFront={() => handleBringToFront(file.id)}
+        />,
+        document.body
       ))}
-    </div>
+    </>
   );
 }

@@ -1,0 +1,64 @@
+{
+  "version": "1.0.0",
+  "name": "default",
+  "description": "Default starting level",
+  "entities": [
+    {
+      "id": "player_spawn",
+      "type": "PlayerSpawn",
+      "transform": {
+        "position": [0.0, 2.0, 0.0],
+        "rotation": [0.0, 0.0, 0.0],
+        "scale": [1.0, 1.0, 1.0]
+      },
+      "components": {
+        "spawn_point": {
+          "is_default": true
+        }
+      }
+    },
+    {
+      "id": "directional_light",
+      "type": "DirectionalLight",
+      "transform": {
+        "position": [10.0, 20.0, 10.0],
+        "rotation": [-45.0, 45.0, 0.0],
+        "scale": [1.0, 1.0, 1.0]
+      },
+      "components": {
+        "light": {
+          "color": [1.0, 1.0, 1.0],
+          "intensity": 1.0,
+          "cast_shadows": true
+        }
+      }
+    },
+    {
+      "id": "ground_plane",
+      "type": "StaticMesh",
+      "transform": {
+        "position": [0.0, 0.0, 0.0],
+        "rotation": [0.0, 0.0, 0.0],
+        "scale": [100.0, 1.0, 100.0]
+      },
+      "components": {
+        "mesh": {
+          "asset": "scenes/meshes/plane.obj"
+        },
+        "collider": {
+          "type": "box",
+          "friction": 0.8
+        }
+      }
+    }
+  ],
+  "ambient_light": {
+    "color": [0.3, 0.3, 0.4],
+    "intensity": 0.2
+  },
+  "skybox": {
+    "type": "gradient",
+    "top_color": [0.5, 0.7, 1.0],
+    "bottom_color": [0.8, 0.9, 1.0]
+  }
+}
