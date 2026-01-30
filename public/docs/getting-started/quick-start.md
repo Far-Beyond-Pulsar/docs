@@ -63,12 +63,12 @@ The center of the screen shows your scene viewport. This is where you'll see you
 
 On the left side, you'll find the file manager. This shows your project's file structure:
 
-```
-my-first-game/
-├── assets/       # Your game assets (models, textures, audio)
-├── scenes/       # Scene files  
-├── scripts/      # Game logic scripts
-└── project.toml  # Project configuration
+```dirtree
+- my-first-game/
+  - assets/
+  - scenes/
+  - scripts/
+  - project.toml
 ```
 
 Click on any file to open it in an appropriate editor. Pulsar knows how to handle different file types and will load the right editor automatically.

@@ -57,13 +57,13 @@ Each crate that needs translations maintains a `locales/` directory. Inside, you
 
 The YAML structure mirrors your UI hierarchy:
 
-```
-ui-crates/ui_level_editor/locales/
-├── en.yml       # English translations
-├── zh-CN.yml    # Simplified Chinese
-├── zh-HK.yml    # Traditional Chinese
-├── it.yml       # Italian
-└── pt-BR.yml    # Brazilian Portuguese
+```dirtree
+- ui-crates/ui_level_editor/locales/
+  - en.yml
+  - zh-CN.yml
+  - zh-HK.yml
+  - it.yml
+  - pt-BR.yml
 ```
 
 Each file contains only translations for that specific language, using a hierarchical key structure:

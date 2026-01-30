@@ -47,21 +47,18 @@ This embeds all SVG icons, TTF fonts, and PNG images from the `assets/` director
 
 Assets are organized by type:
 
-```
-assets/
-├── icons/
-│   ├── file.svg
-│   ├── folder.svg
-│   ├── search.svg
-│   └── ...
-├── fonts/
-│   ├── JetBrainsMono-Regular.ttf
-│   ├── JetBrainsMono-Bold.ttf
-│   └── ...
-└── images/
-    ├── logo.png
-    ├── splash.png
-    └── ...
+```dirtree
+- assets/
+  - icons/
+    - file.svg
+    - folder.svg
+    - search.svg
+  - fonts/
+    - JetBrainsMono-Regular.ttf
+    - JetBrainsMono-Bold.ttf
+  - images/
+    - logo.png
+    - splash.png
 ```
 
 ## Loading Assets

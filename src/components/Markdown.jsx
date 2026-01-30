@@ -15,6 +15,7 @@ import { defaultSchema } from 'hast-util-sanitize';
 import slugify from 'slugify';
 import ZoomableMermaid from './ZoomableMermaid';
 import CodeBlock from './CodeBlock';
+import DirTree from './DirTree';
 
 // Global queue for sequential mermaid rendering
 let renderQueue = [];
@@ -373,6 +374,11 @@ export default function MarkdownRenderer({
                 }, 0);
                 const uniqueKey = `mermaid-${contentKey}-${Math.random().toString(36).substr(2, 5)}`;
                 return <ZoomableMermaid key={uniqueKey} diagramKey={uniqueKey} content={codeContent} />;
+              }
+              
+              // Handle DirTree (file tree visualization)
+              if (language === 'dirtree') {
+                return <DirTree content={codeContent} />;
               }
               
               // Handle regular code blocks

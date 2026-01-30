@@ -271,27 +271,27 @@ This provides a consistent structure for projects. When creating an asset of a s
 
 A typical Pulsar project layout:
 
-```
-MyProject/
-├── types/
-│   ├── aliases/
-│   │   └── Vector3.alias.json
-│   ├── structs/
-│   │   └── Player/
-│   │       └── struct.json
-│   └── enums/
-│       └── GameState/
-│           └── enum.json
-├── blueprints/
-│   ├── classes/
-│   └── functions/
-├── scripts/
-│   ├── rust/
-│   └── lua/
-├── scenes/
-├── materials/
-├── shaders/
-└── config/
+```dirtree
+- MyProject/
+  - types/
+    - aliases/
+      - Vector3.alias.json
+    - structs/
+      - Player/
+        - struct.json
+    - enums/
+      - GameState/
+        - enum.json
+  - blueprints/
+    - classes/
+    - functions/
+  - scripts/
+    - rust/
+    - lua/
+  - scenes/
+  - materials/
+  - shaders/
+  - config/
 ```
 
 The filesystem scans this structure and registers all recognized assets in the type database.
