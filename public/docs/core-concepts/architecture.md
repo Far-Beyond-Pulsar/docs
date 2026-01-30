@@ -806,35 +806,35 @@ A Pulsar project is a standard Rust workspace:
       - flamegraph/
     - layout.json
     - recent-files.json
-  - src/
+  -! src/
     - main.rs -> /assets/samples/main.rs
     - engine_main.rs -> /assets/samples/engine_main.rs
-    - classes/
+    -! classes/
       - mod.rs
       - ExampleClass/
       - MyBP/
-    - assets/
+    -! assets/
       - audio/
-  - GameState/
+  -! GameState/
     - enum.json -> /assets/samples/GameState_enum.json
-  - Inventory/
+  -! Inventory/
     - struct.json -> /assets/samples/Inventory_struct.json
-  - PlayerData/
+  -! PlayerData/
     - struct.json -> /assets/samples/PlayerData_struct.json
-  - EntityId/
+  -! EntityId/
     - alias.json
-  - Drawable/
+  -! Drawable/
     - trait.json
-  - scenes/
+  -! scenes/
     - default.level -> /assets/samples/default.level
     - Newlevel.level.json
-    - meshes/
+    -! meshes/
       - spaceship.obj
       - spaceship.mtl
       - textures/
   - prefabs/
   - scripts/
-  - docs/
+  -! docs/
     - test.md
   -! target/
     - debug/

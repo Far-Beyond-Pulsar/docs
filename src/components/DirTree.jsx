@@ -204,7 +204,6 @@ function TreeNode({ node, level = 0, onFileClick }) {
   };
   
   const handleClick = () => {
-    console.log('TreeNode clicked:', node.name, 'isFolder:', node.isFolder, 'hasChildren:', hasChildren, 'fileLink:', node.fileLink);
     if (node.isFolder && hasChildren) {
       setIsOpen(!isOpen);
     } else if (!node.isFolder && node.fileLink) {
