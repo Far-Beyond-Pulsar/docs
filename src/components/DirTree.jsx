@@ -140,13 +140,13 @@ function parseDirTree(content) {
     const depth = Math.floor(leadingSpaces / 2); // 2 spaces per level
     
     // Extract the name (remove leading bullet, dash, or asterisk)
-    let name = trimmed.replace(/^[-*•]\s*/, '').trim();
+    let name = trimmed.replace(/^[-*•]\s*/, '');
     
     // Check for collapsed flag (-!)
     let defaultCollapsed = false;
-    if (name.startsWith('-!')) {
+    if (name.startsWith('!')) {
       defaultCollapsed = true;
-      name = name.substring(2).trim();
+      name = name.substring(1).trim();
     }
     
     // Check if it's a folder (ends with /)
