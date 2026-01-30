@@ -5,6 +5,20 @@ import { X } from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import { Rnd } from 'react-rnd';
 
+// CSS to isolate Monaco editor from global styles
+const monacoStyles = `
+  .monaco-editor-container .monaco-editor .line-numbers {
+    all: unset !important;
+    color: #858585 !important;
+    font-family: 'Consolas', 'Courier New', monospace !important;
+    font-size: 14px !important;
+    line-height: 19px !important;
+    text-align: right !important;
+    padding-right: 10px !important;
+    display: block !important;
+  }
+`;
+
 export default function FilePreviewModal({ fileUrl, fileName, onClose, zIndex, onBringToFront }) {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
@@ -79,9 +93,11 @@ export default function FilePreviewModal({ fileUrl, fileName, onClose, zIndex, o
   };
 
   return (
-    <Rnd
-      position={position}
-      size={size}
+    <>
+      <style>{monacoStyles}</style>
+      <Rnd
+        position={position}
+        size={size}
       onDragStop={(e, d) => {
         setPosition({ x: d.x, y: d.y });
       }}
@@ -165,7 +181,9 @@ export default function FilePreviewModal({ fileUrl, fileName, onClose, zIndex, o
           flex: 1, 
           overflow: 'hidden',
           position: 'relative',
-        }}>
+        }}
+        className="monaco-editor-container"
+        >
           {loading && (
             <div style={{ 
               padding: '20px', 
@@ -235,5 +253,6 @@ export default function FilePreviewModal({ fileUrl, fileName, onClose, zIndex, o
         </div>
       </div>
     </Rnd>
+    </>
   );
 }
