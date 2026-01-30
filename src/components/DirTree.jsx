@@ -283,6 +283,10 @@ export default function DirTree({ content }) {
       url: fileUrl, 
       name: fileName,
       zIndex: nextZIndex,
+      initialPosition: {
+        x: typeof window !== 'undefined' ? (window.innerWidth / 2 - 400 + (nextZIndex - 10000) * 30) : 100,
+        y: typeof window !== 'undefined' ? (window.innerHeight / 2 - 300 + (nextZIndex - 10000) * 30) : 100,
+      }
     };
     setPreviewFiles(prev => [...prev, newFile]);
     setNextZIndex(prev => prev + 1);
@@ -324,6 +328,7 @@ export default function DirTree({ content }) {
           fileUrl={file.url} 
           fileName={file.name}
           zIndex={file.zIndex}
+          initialPosition={file.initialPosition}
           onClose={() => handleClosePreview(file.id)}
           onBringToFront={() => handleBringToFront(file.id)}
         />,

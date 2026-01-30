@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import { Rnd } from 'react-rnd';
@@ -19,14 +19,11 @@ const monacoStyles = `
   }
 `;
 
-export default function FilePreviewModal({ fileUrl, fileName, onClose, zIndex, onBringToFront }) {
+const FilePreviewModal = React.memo(function FilePreviewModal({ fileUrl, fileName, onClose, zIndex, onBringToFront, initialPosition }) {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [position, setPosition] = useState(() => ({
-    x: typeof window !== 'undefined' ? (window.innerWidth / 2 - 400 + (zIndex - 10000) * 30) : 100,
-    y: typeof window !== 'undefined' ? (window.innerHeight / 2 - 300 + (zIndex - 10000) * 30) : 100,
-  }));
+  const [position, setPosition] = useState(initialPosition);
   const [size, setSize] = useState({ width: 800, height: 600 });
 
   useEffect(() => {
@@ -98,16 +95,16 @@ export default function FilePreviewModal({ fileUrl, fileName, onClose, zIndex, o
       <Rnd
         position={position}
         size={size}
-      onDragStop={(e, d) => {
-        setPosition({ x: d.x, y: d.y });
-      }}
-      onResize={(e, direction, ref, delta, position) => {
-        setSize({
-          width: ref.offsetWidth,
-          height: ref.offsetHeight,
-        });
-        setPosition(position);
-      }}
+        onDragStop={(e, d) => {
+          setPosition({ x: d.x, y: d.y });
+        }}
+        onResizeStop={(e, direction, ref, delta, newPosition) => {
+          setSize({
+            width: ref.offsetWidth,
+            height: ref.offsetHeight,
+          });
+          setPosition(newPosition);
+        }}
       minWidth={400}
       minHeight={300}
       dragHandleClassName="modal-header"
@@ -255,4 +252,6 @@ export default function FilePreviewModal({ fileUrl, fileName, onClose, zIndex, o
     </Rnd>
     </>
   );
-}
+});
+
+export default FilePreviewModal;
