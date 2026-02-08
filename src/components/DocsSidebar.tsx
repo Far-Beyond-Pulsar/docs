@@ -66,11 +66,37 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
     }
   }, [expandedSections]);
 
-  // Auto-expand section containing current page
+  // Auto-expand section and nested items containing current page
   useEffect(() => {
+    const expandPath = (items: NavItem[], currentPath: string): string[] => {
+      const toExpand: string[] = [];
+      
+      for (const item of items) {
+        if (item.path === currentPath || currentPath.startsWith(`${item.path}/`)) {
+          toExpand.push(item.slug);
+        }
+        if (item.children) {
+          const childExpansions = expandPath(item.children, currentPath);
+          if (childExpansions.length > 0) {
+            toExpand.push(item.slug, ...childExpansions);
+          }
+        }
+      }
+      
+      return toExpand;
+    };
+
     for (const section of navigation) {
       if (hasActivePage(section, pathname)) {
-        setExpandedSections(prev => new Set(prev).add(section.slug));
+        const itemsToExpand = [section.slug];
+        if (section.children) {
+          itemsToExpand.push(...expandPath(section.children, pathname));
+        }
+        setExpandedSections(prev => {
+          const next = new Set(prev);
+          itemsToExpand.forEach(slug => next.add(slug));
+          return next;
+        });
       }
     }
   }, [pathname, navigation]);
