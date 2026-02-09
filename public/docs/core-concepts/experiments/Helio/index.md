@@ -118,14 +118,14 @@ Helio's architecture makes it suitable for several rendering scenarios.
 
 The following sections provide deep dives into each aspect of Helio's architecture:
 
-**[Core Primitives](./Helio/core-primitives.md)** explores the `helio-core` crate in detail. Learn about `PackedVertex` format, how normal and tangent compression works, UV coordinate handling, and mesh generation algorithms. This section covers the fundamental data structures that all rendering builds upon.
+**[Core Primitives](./Helio/core-primitives)** explores the `helio-core` crate in detail. Learn about `PackedVertex` format, how normal and tangent compression works, UV coordinate handling, and mesh generation algorithms. This section covers the fundamental data structures that all rendering builds upon.
 
-**[Rendering Infrastructure](./Helio/rendering-infrastructure.md)** examines the `helio-render` crate. Understand how render pipelines are created and configured, how depth buffers are managed, how camera and transform uniforms work, and how frame coordination sequences pre-passes, main rendering, and post-processing.
+**[Rendering Infrastructure](./Helio/rendering-infrastructure)** examines the `helio-render` crate. Understand how render pipelines are created and configured, how depth buffers are managed, how camera and transform uniforms work, and how frame coordination sequences pre-passes, main rendering, and post-processing.
 
-**[Feature System](./Helio/feature-system.md)** dives deep into feature composition. See how the `Feature` trait works, how shader injection is implemented, how the registry composes shaders, and how to build your own features. This is the heart of Helio's modularity.
+**[Feature System](./Helio/feature-system)** dives deep into feature composition. See how the `Feature` trait works, how shader injection is implemented, how the registry composes shaders, and how to build your own features. This is the heart of Helio's modularity.
 
-**[Global Illumination](./Helio/global-illumination.md)** details the ray-traced GI implementation. Learn how ray queries work with blade-graphics, how GI modes differ, what light data structures represent, and performance characteristics of realtime ray tracing versus baked solutions.
+**[Global Illumination](./Helio/global-illumination)** details the ray-traced GI implementation. Learn how ray queries work with blade-graphics, how GI modes differ, what light data structures represent, and performance characteristics of realtime ray tracing versus baked solutions.
 
-**[Blade-Graphics Integration](./Helio/blade-integration.md)** explains how Helio uses blade-graphics effectively. Discover resource management patterns, command encoding best practices, cross-platform considerations, and when to use blade abstractions versus lower-level control.
+**[Blade-Graphics Integration](./Helio/blade-integration)** explains how Helio uses blade-graphics effectively. Discover resource management patterns, command encoding best practices, cross-platform considerations, and when to use blade abstractions versus lower-level control.
 
-**[Real-World Usage](./Helio/real-world-usage.md)** walks through building complete applications. See window and surface setup with winit, frame loop structure, resource lifecycle management, and performance optimization strategies. Learn from complete working examples.
+**[Real-World Usage](./Helio/real-world-usage)** walks through building complete applications. See window and surface setup with winit, frame loop structure, resource lifecycle management, and performance optimization strategies. Learn from complete working examples.
