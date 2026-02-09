@@ -167,7 +167,7 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
             }`}
             onClick={() => setIsMobileOpen(false)}
           >
-            {Icon && <Icon className="w-4 h-4" />}
+            {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
             <span className="text-sm">{item.title}</span>
           </Link>
         </div>
@@ -232,7 +232,7 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
                       }`}
                       onClick={() => setIsMobileOpen(false)}
                     >
-                      <SectionIcon className="w-5 h-5" />
+                      <SectionIcon className="w-4 h-4 flex-shrink-0" />
                       <span>{section.title}</span>
                     </Link>
                   </div>
