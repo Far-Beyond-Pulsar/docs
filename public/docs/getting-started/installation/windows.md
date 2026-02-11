@@ -31,7 +31,7 @@ You have two ways to install Pulsar Engine on Windows: using the installer or bu
 The installer is the fastest way to get started and includes everything you need:
 
 1. **Download the Installer**
-   - Visit the [Pulsar Engine downloads page](https://pulsar-engine.dev/downloads)
+   - Visit the [Pulsar Engine downloads page](https://github.com/Far-Beyond-Pulsar/Pulsar-Installer/releases/tag/v0.1.4)
    - Download the latest Windows installer (`.exe` file)
    - The installer is typically around 150MB
 
