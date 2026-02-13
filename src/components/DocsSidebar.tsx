@@ -161,7 +161,7 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
 
           {hasPath ? (
             <Link
-              href={item.path}
+              href={item.path!}
               className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
                 isActive
                   ? 'bg-blue-600 text-white font-medium'
@@ -235,7 +235,7 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
 
                     {hasIndexPage ? (
                       <Link
-                        href={sectionPath}
+                        href={sectionPath!}
                         className={`flex-1 flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${
                           isSectionActive
                             ? 'bg-blue-600 text-white'
