@@ -26,7 +26,7 @@ export default function BlogPost({ post }) {
         </div>
       )}
       <p className="mb-4 text-gray-300">{post.excerpt}</p>
-      <Link href={`/posts/${post.slug}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+      <Link href={`/posts/${post.slug}`} className="text-blue-400 hover:underline">
         Read more →
       </Link>
     </div>

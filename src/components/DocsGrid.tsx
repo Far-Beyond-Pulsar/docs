@@ -36,7 +36,7 @@ export default function DocsGrid({ docs, columns = 3, title, description }: Docs
             <h2 className="text-3xl font-bold mb-2">{title}</h2>
           )}
           {description && (
-            <p className="text-gray-600 dark:text-gray-400">{description}</p>
+            <p className="text-gray-400">{description}</p>
           )}
         </div>
       )}
@@ -48,7 +48,7 @@ export default function DocsGrid({ docs, columns = 3, title, description }: Docs
       </div>
 
       {docs.length === 0 && (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-12 text-gray-400">
           <p>No documentation found.</p>
         </div>
       )}

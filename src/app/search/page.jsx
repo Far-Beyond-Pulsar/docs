@@ -47,7 +47,7 @@ function SearchResults() {
   return (
     <>
       <div className="mb-8">
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <p className="text-gray-400 mt-2">
           {query ? `Showing results for "${query}"` : 'Enter a search term to find blog posts'}
         </p>
       </div>
@@ -63,18 +63,18 @@ function SearchResults() {
         <>
           {results.length > 0 ? (
             <>
-              <p className="mb-4 text-gray-600 dark:text-gray-400">Found {results.length} result(s)</p>
+              <p className="mb-4 text-gray-400">Found {results.length} result(s)</p>
               {results.map((post) => (
                 <BlogPost key={post.slug} post={post} />
               ))}
             </>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-gray-400 mb-4">
                 {query ? 'No results found. Try a different search term.' : 'Enter a search term to find blog posts.'}
               </p>
               {query && (
-                <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline">
+                <Link href="/" className="text-blue-400 hover:underline">
                   View all posts
                 </Link>
               )}
@@ -103,7 +103,7 @@ export default function SearchPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline mb-8 inline-block">
+        <Link href="/" className="text-blue-400 hover:underline mb-8 inline-block">
           ← Back to Home
         </Link>
         <h1 className="text-4xl font-bold mt-4">Search Results</h1>

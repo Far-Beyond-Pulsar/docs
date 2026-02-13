@@ -99,13 +99,13 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
             <h1 className="text-4xl font-bold mb-4">{doc.title}</h1>
 
             {doc.description && (
-              <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-xl text-gray-400 mb-4">
                 {doc.description}
               </p>
             )}
 
             {/* Metadata */}
-            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-4">
+            <div className="flex items-center gap-4 text-sm text-gray-400 border-b border-gray-700 pb-4">
               <span>Updated {formatDate(doc.lastUpdated)}</span>
               <span>•</span>
               <span>{doc.readingTime} min read</span>
@@ -133,7 +133,7 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
               href={`https://github.com/Far-Beyond-Pulsar/docs/edit/main/public/docs/${slug.join('/')}.md`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              className="inline-flex items-center gap-2 text-sm text-blue-400 hover:underline"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
@@ -143,23 +143,23 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
           </div>
 
           {/* Main content */}
-          <div className="prose prose-lg max-w-none dark:prose-invert">
+          <div className="prose prose-lg max-w-none">
             <Markdown content={doc.content} />
           </div>
 
           {/* Related docs */}
           {related.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+            <div className="mt-12 pt-8 border-t border-gray-700">
               <h2 className="text-2xl font-bold mb-4">Related Documentation</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {related.map((relatedDoc: any) => (
                   <Link
                     key={relatedDoc.slug}
                     href={`/docs/${relatedDoc.slug}`}
-                    className="block p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 transition-colors"
+                    className="block p-4 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors"
                   >
                     <h3 className="font-semibold mb-2">{relatedDoc.title}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                    <p className="text-sm text-gray-400 line-clamp-2">
                       {relatedDoc.description}
                     </p>
                   </Link>
@@ -169,17 +169,17 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
           )}
 
           {/* Prev/Next navigation */}
-          <nav className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+          <nav className="mt-12 pt-8 border-t border-gray-700 flex justify-between">
             {prev ? (
               <Link
                 href={`/docs/${prev.slug}`}
-                className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline"
+                className="flex items-center gap-2 text-blue-400 hover:underline"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Previous</div>
+                  <div className="text-sm text-gray-400">Previous</div>
                   <div className="font-semibold">{prev.title}</div>
                 </div>
               </Link>
@@ -190,10 +190,10 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
             {next && (
               <Link
                 href={`/docs/${next.slug}`}
-                className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline text-right"
+                className="flex items-center gap-2 text-blue-400 hover:underline text-right"
               >
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Next</div>
+                  <div className="text-sm text-gray-400">Next</div>
                   <div className="font-semibold">{next.title}</div>
                 </div>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

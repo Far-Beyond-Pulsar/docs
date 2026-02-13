@@ -163,7 +163,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
                 onClick={(e) => handleClick(e, heading.slug)}
                 className={`flex items-center gap-1.5 text-sm py-1 border-l-2 pl-3 transition-colors ${
                   isActive
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400 font-medium'
+                    ? 'border-blue-500 text-blue-400 font-medium'
                     : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
                 }`}
               >

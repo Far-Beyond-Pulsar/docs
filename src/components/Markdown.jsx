@@ -430,8 +430,8 @@ export default function MarkdownRenderer({
             
             {/* More content */}
             <div className="space-y-2 mt-8">
-              <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-4/5 animate-pulse"></div>
+              <div className="h-4 bg-gray-800 rounded w-full animate-pulse"></div>
+              <div className="h-4 bg-gray-800 rounded w-4/5 animate-pulse"></div>
             </div>
           </div>
         </div>

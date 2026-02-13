@@ -35,18 +35,18 @@ export default function DocCard({ doc }: DocCardProps) {
     >
       {/* Icon */}
       <div className="flex items-start gap-4 mb-4">
-        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors">
-          <IconComponent className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        <div className="p-3 bg-blue-900/20 rounded-lg group-hover:bg-blue-900/30 transition-colors">
+          <IconComponent className="w-6 h-6 text-blue-400" />
         </div>
         <div className="flex-1">
-          <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          <h3 className="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors">
             {doc.title}
           </h3>
         </div>
       </div>
 
       {/* Description */}
-      <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+      <p className="text-gray-400 mb-4 line-clamp-2">
         {doc.description}
       </p>
 
@@ -70,7 +70,7 @@ export default function DocCard({ doc }: DocCardProps) {
       )}
 
       {/* Metadata */}
-      <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+      <div className="flex items-center gap-3 text-sm text-gray-400">
         {doc.readingTime && (
           <>
             <span>{doc.readingTime} min read</span>
@@ -83,7 +83,7 @@ export default function DocCard({ doc }: DocCardProps) {
       </div>
 
       {/* Arrow indicator */}
-      <div className="mt-4 flex items-center text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="mt-4 flex items-center text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
         <span className="text-sm font-medium mr-2">Read more</span>
         <LucideIcons.ArrowRight className="w-4 h-4" />
       </div>
