@@ -36,7 +36,7 @@ with the default engine themes and configuration, then bring you directly to the
 > [!WARNING]
 > Buttons and features outside the scope of this guide may not work yet. Many parts of the engine are still **very much a WIP**.
 
-<img width="1280" height="720" alt="Pulsar Launcher" src="https://github.com/user-attachments/assets/9e5e92eb-6e11-490b-bf56-2878c509ae78" />
+<img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/2756f9f6-783a-41a5-b174-8aa4bf87f669" />
 
 ---
 
@@ -44,7 +44,7 @@ with the default engine themes and configuration, then bring you directly to the
 
 From the launcher, navigate to the **Templates** section.
 
-<img width="1280" height="720" alt="Templates View" src="https://github.com/user-attachments/assets/0953d513-2a8a-4d44-ae81-eb401f29a00c" />
+<img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/c84817fd-8c7e-4240-96c8-17d173979db2" />
 
 ---
 
@@ -72,7 +72,7 @@ For now, you can safely skip this step due to the limitation below.
 🎉 **Congrats — you made it!**
 Your new project should open automatically. After a short delay, the 3D rendering engine will initialize and begin drawing the game scene.
 
-<img width="1280" height="800" alt="Editor View" src="https://github.com/user-attachments/assets/8b173679-4821-4d90-9fee-78ec4e9254d8" />
+<img width="1920" height="1115" alt="image" src="https://github.com/user-attachments/assets/e77fd3e5-b115-4cac-8611-3f20ee37cbf3" />
 
 ---
 
@@ -80,7 +80,7 @@ Your new project should open automatically. After a short delay, the 3D renderin
 
 Most navigation happens through the **File Drawer** in the bottom-left corner of the editor. From here, you can open and edit game assets directly.
 
-<img width="1280" height="800" alt="File Drawer" src="https://github.com/user-attachments/assets/bc1efcb5-ccf7-4d7d-80fa-109b8a1a7cd1" />
+<img width="1920" height="1115" alt="image" src="https://github.com/user-attachments/assets/6071e703-c8ef-4740-b27c-bbe54220659f" />
 
 ---
 
