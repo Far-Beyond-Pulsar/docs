@@ -127,6 +127,7 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
     const isActive = item.path === pathname || pathname.startsWith(`${item.path}/`);
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedSections.has(item.slug);
+    const hasPath = !!item.path; // Only clickable if it has a path
 
     const Icon = item.icon && (LucideIcons as any)[item.icon]
       ? (LucideIcons as any)[item.icon]
@@ -158,18 +159,25 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
             <div className="w-6 flex-shrink-0" />
           )}
 
-          <Link
-            href={item.path || `/docs/${item.slug}`}
-            className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-              isActive
-                ? 'bg-blue-600 text-white font-medium'
-                : 'hover:bg-gray-900 text-gray-300 hover:text-white'
-            }`}
-            onClick={() => setIsMobileOpen(false)}
-          >
-            {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
-            <span className="text-sm">{item.title}</span>
-          </Link>
+          {hasPath ? (
+            <Link
+              href={item.path}
+              className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                isActive
+                  ? 'bg-blue-600 text-white font-medium'
+                  : 'hover:bg-gray-900 text-gray-300 hover:text-white'
+              }`}
+              onClick={() => setIsMobileOpen(false)}
+            >
+              {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
+              <span className="text-sm">{item.title}</span>
+            </Link>
+          ) : (
+            <div className="flex-1 flex items-center gap-2 px-3 py-2 text-gray-400 cursor-default">
+              {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
+              <span className="text-sm">{item.title}</span>
+            </div>
+          )}
         </div>
 
         {hasChildren && isExpanded && (
@@ -204,8 +212,10 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
                 ? (LucideIcons as any)[section.icon]
                 : LucideIcons.FileText;
 
-              const sectionPath = section.indexPage?.path || `/docs/${section.slug}`;
-              const isSectionActive = pathname === sectionPath || pathname.startsWith(`${sectionPath}/`);
+              // Only have a clickable path if index page exists
+              const sectionPath = section.indexPage?.path;
+              const isSectionActive = sectionPath && (pathname === sectionPath || pathname.startsWith(`${sectionPath}/`));
+              const hasIndexPage = !!section.indexPage;
 
               return (
                 <div key={section.slug}>
@@ -223,18 +233,25 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
                       )}
                     </button>
 
-                    <Link
-                      href={sectionPath}
-                      className={`flex-1 flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${
-                        isSectionActive
-                          ? 'bg-blue-600 text-white'
-                          : 'text-gray-200 hover:bg-gray-900 hover:text-white'
-                      }`}
-                      onClick={() => setIsMobileOpen(false)}
-                    >
-                      <SectionIcon className="w-4 h-4 flex-shrink-0" />
-                      <span>{section.title}</span>
-                    </Link>
+                    {hasIndexPage ? (
+                      <Link
+                        href={sectionPath}
+                        className={`flex-1 flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors ${
+                          isSectionActive
+                            ? 'bg-blue-600 text-white'
+                            : 'text-gray-200 hover:bg-gray-900 hover:text-white'
+                        }`}
+                        onClick={() => setIsMobileOpen(false)}
+                      >
+                        <SectionIcon className="w-4 h-4 flex-shrink-0" />
+                        <span>{section.title}</span>
+                      </Link>
+                    ) : (
+                      <div className="flex-1 flex items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-400 cursor-default">
+                        <SectionIcon className="w-4 h-4 flex-shrink-0" />
+                        <span>{section.title}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Section items */}
