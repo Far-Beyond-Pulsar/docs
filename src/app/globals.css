@@ -7,8 +7,8 @@ html {
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
+  --background: #000000;
+  --foreground: #ededed;
 }
 
 @theme inline {
@@ -16,13 +16,6 @@ html {
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #000000;
-    --foreground: #ededed;
-  }
 }
 
 body {
@@ -75,26 +68,24 @@ body {
 }
 
 /* Dark mode scrollbars */
-@media (prefers-color-scheme: dark) {
-  * {
-    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
-  }
+* {
+  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
+}
 
-  *::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-  }
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
 
-  *::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-  }
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
 
-  *::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.35);
-  }
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
 
-  *::-webkit-scrollbar-thumb:active {
-    background: rgba(255, 255, 255, 0.5);
-  }
+*::-webkit-scrollbar-thumb:active {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* Add these styles to your global.css file */

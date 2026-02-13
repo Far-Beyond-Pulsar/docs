@@ -4,7 +4,7 @@ import './globals.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Inter } from 'next/font/google';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import mermaid from 'mermaid';
 
@@ -32,18 +32,16 @@ const metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [darkMode, setDarkMode] = useState(false);
   const pathname = usePathname();
   const isDocsPage = pathname?.startsWith('/docs') && pathname !== '/docs';
 
   useEffect(() => {
-    // Detect user/system theme
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setDarkMode(isDark);
+    // Always use dark mode
+    document.documentElement.classList.add('dark');
 
     mermaid.initialize({
       startOnLoad: false,
-      theme: isDark ? 'dark' : 'default',
+      theme: 'dark',
     });
   }, []);
 
