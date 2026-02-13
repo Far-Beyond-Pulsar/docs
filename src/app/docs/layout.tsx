@@ -176,13 +176,13 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
               <div className="p-6 pt-8 space-y-4">
                 {/* TOC header */}
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="w-4 h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"></div>
-                  <div className="w-24 h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"></div>
+                  <div className="w-4 h-4 bg-gray-800 rounded animate-pulse"></div>
+                  <div className="w-24 h-4 bg-gray-800 rounded animate-pulse"></div>
                 </div>
                 {/* TOC items */}
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <div key={i} className="space-y-2">
-                    <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" style={{ width: `${60 + (i * 5)}%` }}></div>
+                    <div className="h-3 bg-gray-800 rounded animate-pulse" style={{ width: `${60 + (i * 5)}%` }}></div>
                   </div>
                 ))}
               </div>

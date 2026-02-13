@@ -407,26 +407,26 @@ export default function MarkdownRenderer({
           {/* Loading skeleton for markdown content */}
           <div className="space-y-4">
             {/* Title skeleton */}
-            <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-3/4 animate-pulse"></div>
+            <div className="h-8 bg-gray-800 rounded w-3/4 animate-pulse"></div>
             
             {/* Paragraph skeletons */}
             <div className="space-y-2">
-              <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-2/3 animate-pulse"></div>
+              <div className="h-4 bg-gray-800 rounded w-full animate-pulse"></div>
+              <div className="h-4 bg-gray-800 rounded w-full animate-pulse"></div>
+              <div className="h-4 bg-gray-800 rounded w-2/3 animate-pulse"></div>
             </div>
             
             {/* Heading skeleton */}
-            <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-1/2 animate-pulse mt-8"></div>
+            <div className="h-6 bg-gray-800 rounded w-1/2 animate-pulse mt-8"></div>
             
             {/* More paragraphs */}
             <div className="space-y-2">
-              <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-5/6 animate-pulse"></div>
+              <div className="h-4 bg-gray-800 rounded w-full animate-pulse"></div>
+              <div className="h-4 bg-gray-800 rounded w-5/6 animate-pulse"></div>
             </div>
             
             {/* Code block skeleton */}
-            <div className="h-32 bg-gray-200 dark:bg-gray-800 rounded animate-pulse mt-4"></div>
+            <div className="h-32 bg-gray-800 rounded animate-pulse mt-4"></div>
             
             {/* More content */}
             <div className="space-y-2 mt-8">
