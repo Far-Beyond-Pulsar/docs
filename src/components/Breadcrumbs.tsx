@@ -35,7 +35,7 @@ export default function Breadcrumbs({ customItems }: BreadcrumbsProps) {
           <div key={item.href} className="flex items-center gap-2">
             <ChevronRight className="w-4 h-4 text-gray-400" />
             {isLast ? (
-              <span className="font-medium text-gray-900 dark:text-gray-100">
+              <span className="font-medium text-gray-100">
                 {item.label}
               </span>
             ) : (

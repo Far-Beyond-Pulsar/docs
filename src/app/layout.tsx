@@ -59,7 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
 
       <body
-        className={`${inter.className} bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100`}
+        className={`${inter.className} bg-black text-gray-100`}
       >
         <Header />
         

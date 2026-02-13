@@ -116,7 +116,7 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
                     {doc.tags.slice(0, 3).map((tag: string) => (
                       <span
                         key={tag}
-                        className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs"
+                        className="px-2 py-1 bg-gray-800 rounded text-xs"
                       >
                         {tag}
                       </span>

@@ -31,7 +31,7 @@ export default function DocCard({ doc }: DocCardProps) {
   return (
     <Link
       href={href}
-      className="doc-card group block p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-lg transition-all duration-300"
+      className="doc-card group block p-6 bg-gray-900 border border-gray-700 rounded-lg hover:border-blue-500 hover:shadow-lg transition-all duration-300"
     >
       {/* Icon */}
       <div className="flex items-start gap-4 mb-4">
@@ -56,7 +56,7 @@ export default function DocCard({ doc }: DocCardProps) {
           {doc.tags.slice(0, 3).map(tag => (
             <span
               key={tag}
-              className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs text-gray-700 dark:text-gray-300"
+              className="px-2 py-1 bg-gray-800 rounded text-xs text-gray-300"
             >
               {tag}
             </span>

@@ -3,7 +3,7 @@ import { formatDate } from '../utils/date-formatter';
 
 export default function BlogPost({ post }) {
   return (
-    <div className="my-8 p-6 bg-white dark:bg-gray-950 rounded-lg shadow-md max-w-4xl center mx-auto">
+    <div className="my-8 p-6 bg-gray-950 rounded-lg shadow-md max-w-4xl center mx-auto">
       <h2 className="text-2xl font-bold mb-2">
         <Link href={`/posts/${post.slug}`} className="text-blue-600 dark:text-blue-400 hover:underline">
           {post.title}
