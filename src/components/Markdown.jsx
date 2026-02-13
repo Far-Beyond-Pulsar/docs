@@ -109,8 +109,7 @@ function extractTextFromChildren(children) {
 }
 
 export default function MarkdownRenderer({ 
-  content, 
-  darkMode = true
+  content
 }) {
   const [copied, setCopied] = useState({});
   const [isMounted, setIsMounted] = useState(false);
@@ -151,14 +150,14 @@ export default function MarkdownRenderer({
       // Initialize once with proper config
       mermaid.initialize({
         startOnLoad: false,
-        theme: darkMode ? 'dark' : 'default',
+        theme: 'dark',
         securityLevel: 'loose',
         deterministicIds: true,
         deterministicIDSeed: 'pulsar-docs',
       });
       console.log('Mermaid initialized globally');
     });
-  }, [isMounted, darkMode]);
+  }, [isMounted]);
 
 
   // Process custom containers after ReactMarkdown has rendered
@@ -313,7 +312,7 @@ export default function MarkdownRenderer({
 
   // Only render ReactMarkdown on the client side
   return (
-    <div className={`markdown-content ${darkMode ? 'dark-theme' : 'light-theme'}`}>
+    <div className="markdown-content dark-theme">
       {isMounted ? (
         <ReactMarkdown
           remarkPlugins={[
@@ -591,10 +590,10 @@ export default function MarkdownRenderer({
         }
         .code-block-container::-webkit-scrollbar {
           height: 10px;
-          background: ${darkMode ? '#23272e' : '#e2e8f0'};
+          background: #23272e;
         }
         .code-block-container::-webkit-scrollbar-thumb {
-          background: ${darkMode ? '#444' : '#bdbdbd'};
+          background: #444;
           border-radius: 6px;
         }
         .code-block-container pre,
@@ -639,7 +638,7 @@ export default function MarkdownRenderer({
         }
         /* Monaco-style selection */
         .code-block-container ::selection {
-          background: ${darkMode ? 'rgba(0,122,204,0.25)' : 'rgba(0,122,204,0.18)'};
+          background: rgba(0,122,204,0.25);
         }
         
         .code-header {
@@ -647,32 +646,32 @@ export default function MarkdownRenderer({
           justify-content: space-between;
           align-items: center;
           padding: 0.5em 1em;
-          background-color: ${darkMode ? '#343434' : '#f3f3f3'};
-          border-bottom: 1px solid ${darkMode ? '#444' : '#ddd'};
+          background-color: #343434;
+          border-bottom: 1px solid #444;
         }
         
         .language-badge {
           font-size: 0.8em;
-          color: ${darkMode ? '#bbb' : '#555'};
+          color: #bbb;
         }
         
         .copy-button {
           font-size: 0.8em;
           padding: 0.25em 0.5em;
-          background-color: ${darkMode ? '#555' : '#ddd'};
+          background-color: #555;
           border: none;
           border-radius: 0.25em;
-          color: ${darkMode ? '#eee' : '#333'};
+          color: #eee;
           cursor: pointer;
         }
         
         .copy-button:hover {
-          background-color: ${darkMode ? '#666' : '#ccc'};
+          background-color: #666;
         }
         
         /* Inline code */
         .inline-code {
-          background-color: ${darkMode ? '#2d2d2d' : '#f1f1f1'};
+          background-color: #2d2d2d;
           border-radius: 0.25em;
           padding: 0.2em 0.4em;
           font-family: 'JetBrains Mono', Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -682,7 +681,7 @@ export default function MarkdownRenderer({
         .mermaid-diagram-container {
           margin: 1.5em 0;
           text-align: center;
-          background-color: ${darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)'};
+          background-color: rgba(255, 255, 255, 0.05);
           padding: 1em;
           border-radius: 0.5em;
         }
@@ -702,23 +701,23 @@ export default function MarkdownRenderer({
         
         .custom-block.custom-block-info { 
           border-color: #3498db; 
-          background-color: ${darkMode ? 'rgba(52, 152, 219, 0.2)' : 'rgba(52, 152, 219, 0.1)'}; 
+          background-color: rgba(52, 152, 219, 0.2); 
         }
         .custom-block.custom-block-warning { 
           border-color: #f39c12; 
-          background-color: ${darkMode ? 'rgba(243, 156, 18, 0.2)' : 'rgba(243, 156, 18, 0.1)'}; 
+          background-color: rgba(243, 156, 18, 0.2); 
         }
         .custom-block.custom-block-danger { 
           border-color: #e74c3c; 
-          background-color: ${darkMode ? 'rgba(231, 76, 60, 0.2)' : 'rgba(231, 76, 60, 0.1)'}; 
+          background-color: rgba(231, 76, 60, 0.2); 
         }
         .custom-block.custom-block-tip { 
           border-color: #2ecc71; 
-          background-color: ${darkMode ? 'rgba(46, 204, 113, 0.2)' : 'rgba(46, 204, 113, 0.1)'}; 
+          background-color: rgba(46, 204, 113, 0.2); 
         }
         .custom-block.custom-block-success { 
           border-color: #2ecc71; 
-          background-color: ${darkMode ? 'rgba(46, 204, 113, 0.2)' : 'rgba(46, 204, 113, 0.1)'}; 
+          background-color: rgba(46, 204, 113, 0.2); 
         }
         .markdown-content p {
           margin-top: 1.5rem;
@@ -757,7 +756,7 @@ export default function MarkdownRenderer({
         /* NOTE (blue) */
         .markdown-alert.markdown-alert-note {
           border-color: #3b82f6;
-          background-color: ${darkMode ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)'};
+          background-color: rgba(59, 130, 246, 0.1);
         }
         .markdown-alert.markdown-alert-note .markdown-alert-title {
           color: #3b82f6;
@@ -769,7 +768,7 @@ export default function MarkdownRenderer({
         /* TIP (green) */
         .markdown-alert.markdown-alert-tip {
           border-color: #10b981;
-          background-color: ${darkMode ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.05)'};
+          background-color: rgba(16, 185, 129, 0.1);
         }
         .markdown-alert.markdown-alert-tip .markdown-alert-title {
           color: #10b981;
@@ -781,7 +780,7 @@ export default function MarkdownRenderer({
         /* IMPORTANT (purple) */
         .markdown-alert.markdown-alert-important {
           border-color: #a855f7;
-          background-color: ${darkMode ? 'rgba(168, 85, 247, 0.1)' : 'rgba(168, 85, 247, 0.05)'};
+          background-color: rgba(168, 85, 247, 0.1);
         }
         .markdown-alert.markdown-alert-important .markdown-alert-title {
           color: #a855f7;
@@ -793,7 +792,7 @@ export default function MarkdownRenderer({
         /* WARNING (yellow/orange) */
         .markdown-alert.markdown-alert-warning {
           border-color: #f59e0b;
-          background-color: ${darkMode ? 'rgba(245, 158, 11, 0.1)' : 'rgba(245, 158, 11, 0.05)'};
+          background-color: rgba(245, 158, 11, 0.1);
         }
         .markdown-alert.markdown-alert-warning .markdown-alert-title {
           color: #f59e0b;
@@ -805,7 +804,7 @@ export default function MarkdownRenderer({
         /* CAUTION (red) */
         .markdown-alert.markdown-alert-caution {
           border-color: #ef4444;
-          background-color: ${darkMode ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.05)'};
+          background-color: rgba(239, 68, 68, 0.1);
         }
         .markdown-alert.markdown-alert-caution .markdown-alert-title {
           color: #ef4444;
