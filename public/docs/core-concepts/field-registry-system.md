@@ -25,7 +25,8 @@ Traditional game engine editors build property panels through explicit UI code. 
 
 When you add a new field to a component, you must remember to update the corresponding UI code. Forget this step, and the field remains invisible in the editor. When you add an entirely new component type, you write another complete UI implementation from scratch. The UI layer becomes a mirror of your data layer, duplicating structure without adding value.
 
-> **Note:** This duplication problem intensifies with plugin architectures. Third-party code that defines custom components cannot inject UI definitions into the editor. Without reflection or a registration system, plugins have no way to describe their data to the properties panel.
+> [!NOTE]
+> This duplication problem intensifies with plugin architectures. Third-party code that defines custom components cannot inject UI definitions into the editor. Without reflection or a registration system, plugins have no way to describe their data to the properties panel.
 
 The alternative—runtime reflection—solves the extensibility problem by storing type metadata in global registries. Components register their fields at startup, describing names, types, and accessors. The UI layer queries this registry to build controls dynamically. Any component, including plugin-defined types, works automatically.
 
@@ -58,7 +59,8 @@ The `engine_backend` crate defines component types and implements field accessor
 
 Finally, `ui_level_editor` bridges the gap between abstract metadata and concrete GPUI elements. The `ComponentFieldsSection` struct queries component metadata and creates bound input fields. It handles the translation from "this component has an f32 field named 'mass'" to "render a number input labeled 'mass' at value 10.0".
 
-> **Architecture Principle:** This layering ensures UI concerns never leak into the data layer. The field registry knows nothing about GPUI. Components know nothing about how they render. The UI layer handles presentation exclusively, querying lower layers through well-defined interfaces.
+> [!IMPORTANT]
+> This layering ensures UI concerns never leak into the data layer. The field registry knows nothing about GPUI. Components know nothing about how they render. The UI layer handles presentation exclusively, querying lower layers through well-defined interfaces.
 
 This separation enables parallel development. Artists can modify component fields without understanding GPUI rendering. UI engineers can improve control styling without touching component definitions. The trait system enforces these boundaries at compile time—attempting to reference GPUI types from `engine_backend` produces an immediate compiler error.
 
@@ -121,7 +123,23 @@ pub struct Vec3 {
 
 The `#[derive(CompositeField)]` macro generates the necessary trait implementations automatically. It analyzes the struct's fields and creates accessor methods for each. The `#[field]` attribute lets you customize labels and color hints for visual styling.
 
-> **Important:** The derive macro uses `crate::` paths to reference the trait definitions. This means it only works when types are defined in the same crate as `ui_field_registry`, or when that crate is explicitly imported. For types in other crates, implement the traits manually.
+```mermaid
+graph LR
+    A[Vec3 Struct] -->|derive macro| B[FieldRenderer impl]
+    A -->|derive macro| C[CompositeField impl]
+    B -->|returns| D[Composite Representation]
+    D -->|contains| E[SubFieldDescriptor x]
+    D -->|contains| F[SubFieldDescriptor y]
+    D -->|contains| G[SubFieldDescriptor z]
+    C -->|provides| H[get_field_f32]
+    C -->|provides| I[set_field_f32]
+    
+    style A fill:#e1f5e1
+    style D fill:#f5e1e1
+```
+
+> [!IMPORTANT]
+> The derive macro uses `crate::` paths to reference the trait definitions. This means it only works when types are defined in the same crate as `ui_field_registry`, or when that crate is explicitly imported. For types in other crates, implement the traits manually.
 
 Without the derive macro, the implementation looks like this:
 
@@ -201,7 +219,26 @@ section.register_custom_renderer("gradient_editor_v2", Arc::new(|label, value_pt
 }));
 ```
 
-> **Safety Warning:** Custom renderers receive type-erased pointers and must cast them correctly. The system provides no runtime verification that the pointer matches the expected type. Incorrect casting causes undefined behavior. Always document which type a custom renderer expects.
+```mermaid
+sequenceDiagram
+    participant Type as Custom Type
+    participant Registry as Field Registry
+    participant UI as UI Layer
+    participant Renderer as Custom Renderer
+    
+    Type->>Registry: FieldRepresentation::Custom
+    Type->>Registry: custom_ui_key() = "gradient_v2"
+    UI->>Registry: Query field metadata
+    Registry->>UI: Custom { ui_key, value_ptr }
+    UI->>UI: Lookup "gradient_v2" in registry
+    UI->>Renderer: Call with (label, value_ptr, context)
+    Renderer->>Renderer: Cast pointer to concrete type
+    Renderer->>UI: Return AnyElement
+    UI->>UI: Render custom UI
+```
+
+> [!CAUTION]
+> Custom renderers receive type-erased pointers and must cast them correctly. The system provides no runtime verification that the pointer matches the expected type. Incorrect casting causes undefined behavior. Always document which type a custom renderer expects.
 
 This system gives complete flexibility for complex UI while maintaining the trait-based architecture. Types declare they need custom rendering. The UI layer provides the actual implementation. The field registry remains UI-framework-agnostic.
 
@@ -298,7 +335,31 @@ impl CompositeField for Transform {
 
 The UI layer combines `FieldRenderer` and `CompositeField` to build appropriate controls. When rendering a composite field, it queries `representation()` to get sub-field descriptors, then calls accessor methods to read initial values and apply user edits. Each descriptor's `name` field becomes the key passed to `get_field_f32` or `set_field_f32`.
 
-> **Design Rationale:** Named field access trades some convenience for safety. Array indexing (`self.values[index]`) is more concise but provides no verification that index 0 actually represents the X component. Named access makes field structure explicit and verifiable. The derive macro generates these implementations automatically, eliminating the boilerplate concern.
+```mermaid
+flowchart TD
+    A[UI Queries Vec3] --> B{Query representation}
+    B --> C[Returns Composite with SubFieldDescriptors]
+    C --> D[Descriptor: x, X, f32]
+    C --> E[Descriptor: y, Y, f32]
+    C --> F[Descriptor: z, Z, f32]
+    
+    D --> G[UI calls get_field_f32 x]
+    E --> H[UI calls get_field_f32 y]
+    F --> I[UI calls get_field_f32 z]
+    
+    G --> J[Render X input: 1.5]
+    H --> K[Render Y input: 2.0]
+    I --> L[Render Z input: -3.7]
+    
+    style A fill:#e1f5e1
+    style C fill:#f5e1e1
+    style J fill:#e1e5f5
+    style K fill:#e1e5f5
+    style L fill:#e1e5f5
+```
+
+> [!TIP]
+> Named field access trades some convenience for safety. Array indexing (`self.values[index]`) is more concise but provides no verification that index 0 actually represents the X component. Named access makes field structure explicit and verifiable. The derive macro generates these implementations automatically, eliminating the boilerplate concern.
 
 ## Component Field Metadata
 
@@ -379,6 +440,37 @@ impl Component {
 
 This explicit pattern matching provides several guarantees. The compiler verifies exhaustiveness—if you add a new component variant but forget to handle it here, compilation fails. The type system ensures you cannot wrap an `f32` in a `Bool` metadata variant. The lifetime system prevents dangling references if the component gets dropped while metadata exists.
 
+```mermaid
+graph TD
+    A[Component Enum] --> B[Material Variant]
+    A --> C[Script Variant]
+    A --> D[RigidBody Variant]
+    A --> E[Collider Variant]
+    
+    B --> F[get_field_metadata]
+    C --> F
+    D --> F
+    E --> F
+    
+    F --> G[Pattern Match on Variant]
+    G --> H[Extract Field References]
+    H --> I[Wrap in ComponentFieldMetadata]
+    
+    I --> J[F32 Metadata]
+    I --> K[Bool Metadata]
+    I --> L[String Metadata]
+    I --> M[Custom Metadata]
+    
+    J --> N[UI Layer]
+    K --> N
+    L --> N
+    M --> N
+    
+    style A fill:#e1f5e1
+    style F fill:#f5e1e1
+    style N fill:#e1e5f5
+```
+
 The UI receives a vector of metadata items describing each field's name, type, and current value. No string parsing extracts types. No downcasting recovers concrete values. The metadata enum carries exactly the information needed with complete type safety.
 
 ### Mutable Access Through Typed Getters and Setters
@@ -427,7 +519,8 @@ These methods pattern match on both the component variant and field name. Attemp
 
 The UI layer uses these methods to implement data binding. When a user types a new mass value, the UI calls `set_field_f32("mass", new_value)`. When the UI refreshes, it calls `get_field_f32("mass")` to display the current value. This explicit accessor pattern avoids reflection while remaining type-safe and efficient.
 
-> **Performance Note:** The pattern matching in these accessors compiles to jump tables or conditional branches depending on density. Either way, the cost is comparable to hand-written field access. There's no hash table lookup, no string comparison loop, just a direct conditional jump to the appropriate field.
+> [!NOTE]
+> The pattern matching in these accessors compiles to jump tables or conditional branches depending on density. Either way, the cost is comparable to hand-written field access. There's no hash table lookup, no string comparison loop, just a direct conditional jump to the appropriate field.
 
 ## Dynamic UI Rendering
 
@@ -526,7 +619,8 @@ section.register_custom_renderer("gradient_editor_v2", Arc::new(|label, value_pt
 
 When the system encounters a custom field with matching `ui_key`, it calls the registered renderer with the field label, type-erased value pointer, and GPUI context. The renderer casts the pointer back to the concrete type and returns custom UI elements.
 
-> **Implementation Detail:** The current implementation displays read-only values. Future iterations will integrate bound field entities that wrap edits in undo/redo commands and synchronize changes back to the scene database. The infrastructure for this exists—the getter/setter methods on Component—but the UI binding layer is not yet complete.
+> [!WARNING]
+> The current implementation displays read-only values. Future iterations will integrate bound field entities that wrap edits in undo/redo commands and synchronize changes back to the scene database. The infrastructure for this exists—the getter/setter methods on Component—but the UI binding layer is not yet complete.
 
 ### Composite Field Rendering
 
@@ -740,6 +834,26 @@ fn render_vec2_field(&self, label: &'static str, value: &Vec2, cx: &Context<Self
 
 This four-step process works for any new field type. Primitive types only need steps 2-4 (no `CompositeField` implementation required). Custom types that need specialized UI add a custom renderer registration instead of step 4.
 
+```mermaid
+flowchart LR
+    A[New Field Type] --> B[Step 1: Implement Traits]
+    B --> C[Step 2: Add Metadata Variant]
+    C --> D[Step 3: Component Accessors]
+    D --> E[Step 4: UI Rendering]
+    E --> F[Complete Integration]
+    
+    B -.->|Primitive| C2[Skip - Use Default]
+    C2 --> C
+    
+    E -.->|Custom| E2[Register Custom Renderer]
+    E2 --> F
+    
+    style A fill:#e1f5e1
+    style F fill:#f5e1e1
+    style C2 fill:#ffffcc
+    style E2 fill:#ffffcc
+```
+
 The compiler enforces completeness at each stage. Forget to handle a metadata variant in `render_field`, and you get a non-exhaustive match warning. Add a component variant but forget `get_field_metadata`, and the component appears in the scene but shows no fields in the properties panel—an obvious error during testing.
 
 ## Performance Characteristics
@@ -758,7 +872,8 @@ The `get_field_metadata()` method performs pattern matching to extract field ref
 
 For a component with four fields, `get_field_metadata()` executes one pattern match (checking which component variant), then allocates a vector with four entries, then copies four references. The allocation uses the system allocator once. The reference copies are pointer-sized memory moves. Total cost: perhaps 50-100 CPU cycles depending on allocator and cache state.
 
-> **Measurement Result:** Profiling the properties panel revealed that field metadata extraction consumes less than 0.1% of frame time. GPUI's layout and rendering dominate by orders of magnitude. Optimizing metadata access would yield no measurable performance improvement.
+> [!NOTE]
+> Profiling the properties panel revealed that field metadata extraction consumes less than 0.1% of frame time. GPUI's layout and rendering dominate by orders of magnitude. Optimizing metadata access would yield no measurable performance improvement.
 
 ### String Comparison in Field Access
 
@@ -780,7 +895,25 @@ When sections do rebuild, they allocate on each frame. This is intentional in GP
 
 Runtime reflection systems typically maintain a global registry mapping type names to metadata. Component registration at startup walks types, extracts fields, and inserts entries into the registry. Field access queries this registry, often involving hash lookups and string comparisons.
 
-The trait-based system eliminates all of this:
+The trait-based system eliminates all of this through compile-time abstractions:
+
+```mermaid
+graph TB
+    subgraph Reflection["Reflection-Based System"]
+        R1[Global Registry] --> R2[Hash Map Lookup]
+        R2 --> R3[String Comparison]
+        R3 --> R4[Type Downcast]
+        R4 --> R5[Field Access]
+    end
+    
+    subgraph Trait["Trait-Based System"]
+        T1[Static Dispatch] --> T2[Pattern Match]
+        T2 --> T3[Direct Field Access]
+    end
+    
+    style Reflection fill:#ffcccc
+    style Trait fill:#ccffcc
+```
 
 **No global registry:** Type metadata exists implicitly in trait implementations. No hash maps, no registry initialization, no startup cost.
 
@@ -904,6 +1037,7 @@ Adding new field types follows a predictable four-step process: implement the fi
 
 The system scales naturally to custom components and third-party extensions. Plugin code implements the same traits as built-in components. The properties panel automatically supports them without modification. The field registry becomes an extension point for the entire editor, enabling rich tooling without sacrificing Rust's compile-time guarantees.
 
-> **Key Insight:** The trait-based approach threads the needle between hardcoded UI and runtime reflection. It achieves the extensibility of reflection systems while preserving the type safety and performance of direct field access. The result feels like reflection from an API perspective but compiles to straightforward procedural code with zero runtime overhead.
+> [!IMPORTANT]
+> The trait-based approach threads the needle between hardcoded UI and runtime reflection. It achieves the extensibility of reflection systems while preserving the type safety and performance of direct field access. The result feels like reflection from an API perspective but compiles to straightforward procedural code with zero runtime overhead.
 
 This architecture forms the foundation for data-driven editor tooling in Pulsar. As the engine grows and components become more complex, the field registry ensures the properties panel remains maintainable and performant. The traits provide stable interfaces that evolve through careful addition rather than breaking changes, supporting long-term engine development without architectural rewrites.
