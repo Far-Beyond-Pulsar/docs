@@ -78,7 +78,8 @@ The top section opens with a large heading that reads **In Use / Total MiB** wit
 
 **Page File** shows how much of your configured virtual memory swap space is in use. A game that spills heavily into the page file - especially a spinning-disk page file - will have unpredictable frame times because disk access latency is orders of magnitude higher than RAM latency.
 
-> ℹ️ On Linux and macOS, the Windows-specific counters (Cached, Committed, Paged Pool, Non-Paged Pool) will show **N/A**. The remaining cards (In Use, Available, Total RAM, Page File) are populated by `sysinfo` on all platforms.
+> [!NOTE]
+> On Linux and macOS, the Windows-specific counters (Cached, Committed, Paged Pool, Non-Paged Pool) will show **N/A**. The remaining cards (In Use, Available, Total RAM, Page File) are populated by `sysinfo` on all platforms.
 
 ### Committed and Cached History Charts
 
