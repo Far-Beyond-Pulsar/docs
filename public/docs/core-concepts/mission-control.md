@@ -23,7 +23,7 @@ icon: Monitor
 
 Mission Control is Pulsar Native's built-in developer monitoring panel. It gives you a live view of every hardware resource and every byte your game is touching - CPU cores, GPU engines, RAM pools, network throughput, disk I/O, and your own engine's allocation categories - all refreshed every second without any instrumentation code on your part.
 
-You open it from the editor menu bar under **Window → Mission Control**. The panel is designed to stay open in a second monitor or a floating window while you play your game in the editor, so you can watch numbers move in real time rather than exporting a trace and analysing it after the fact.
+You open it from the editor status bar using the **Mission Control** button (on the left side of the bottom of the editor window). The panel is designed to stay open in a second monitor or a floating window while you play your game in the editor, so you can watch numbers move in real time rather than exporting a trace and analysing it after the fact.
 
 ---
 
