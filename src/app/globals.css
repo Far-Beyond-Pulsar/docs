@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@fontsource/opendyslexic";
 
 /* Smooth scroll behavior for anchor links */
 html {
@@ -22,6 +23,112 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ========================================
+   Accessibility Modes
+   ======================================== */
+
+/* Dyslexia-friendly font (OpenDyslexic) */
+.dyslexia-font body,
+.dyslexia-font .prose,
+.dyslexia-font .prose p,
+.dyslexia-font .prose li,
+.dyslexia-font .prose td,
+.dyslexia-font .prose th,
+.dyslexia-font nav,
+.dyslexia-font button,
+.dyslexia-font a {
+  font-family: 'OpenDyslexic', sans-serif !important;
+  word-spacing: 0.1em;
+  letter-spacing: 0.03em;
+}
+
+/* High contrast mode */
+.high-contrast {
+  --background: #000000;
+  --foreground: #ffffff;
+}
+.high-contrast body {
+  background: #000 !important;
+  color: #fff !important;
+}
+.high-contrast .prose {
+  --tw-prose-body: #ffffff;
+  --tw-prose-headings: #ffffff;
+  --tw-prose-lead: #e5e5e5;
+  --tw-prose-links: #ffff00;
+  --tw-prose-bold: #ffffff;
+  --tw-prose-code: #ffffff;
+  --tw-prose-pre-code: #ffffff;
+  --tw-prose-pre-bg: #111111;
+  --tw-prose-bullets: #ffffff;
+  --tw-prose-counters: #ffffff;
+  --tw-prose-hr: #ffffff;
+  --tw-prose-quote-borders: #ffffff;
+  --tw-prose-th-borders: #ffffff;
+  --tw-prose-td-borders: #aaaaaa;
+}
+.high-contrast .prose a {
+  color: #ffff00 !important;
+  text-decoration-thickness: 2px !important;
+}
+.high-contrast .bg-gray-900,
+.high-contrast .bg-gray-800,
+.high-contrast .hover\:bg-gray-900:hover,
+.high-contrast .hover\:bg-gray-800:hover {
+  background-color: #111111 !important;
+}
+.high-contrast .border-gray-800,
+.high-contrast .border-gray-700 {
+  border-color: #ffffff !important;
+}
+.high-contrast .text-gray-400,
+.high-contrast .text-gray-300 {
+  color: #d4d4d4 !important;
+}
+
+/* Increased line/letter spacing */
+.increase-spacing .prose p,
+.increase-spacing .prose li,
+.increase-spacing .prose td,
+.increase-spacing .prose th {
+  line-height: 2 !important;
+  letter-spacing: 0.06em !important;
+  word-spacing: 0.16em !important;
+}
+.increase-spacing .prose h1,
+.increase-spacing .prose h2,
+.increase-spacing .prose h3,
+.increase-spacing .prose h4 {
+  letter-spacing: 0.04em !important;
+  line-height: 1.5 !important;
+}
+
+/* Reduced motion */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Text size scales */
+.text-size-large .prose {
+  font-size: 1.1rem !important;
+}
+.text-size-large nav,
+.text-size-large button {
+  font-size: 1.05rem;
+}
+.text-size-larger .prose {
+  font-size: 1.25rem !important;
+}
+.text-size-larger nav,
+.text-size-larger button {
+  font-size: 1.1rem;
 }
 
 /* ========================================

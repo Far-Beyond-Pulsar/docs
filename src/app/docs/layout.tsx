@@ -1,12 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import DocsSidebar from '@/components/DocsSidebar';
 import TableOfContents from '@/components/TableOfContents';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import BackToTop from '@/components/BackToTop';
-import { Loader2, Menu, X } from 'lucide-react';
+import AccessibilityPanel from '@/components/AccessibilityPanel';
+import { Menu, X } from 'lucide-react';
+
+const LEFT_SIDEBAR_MIN = 180;
+const LEFT_SIDEBAR_MAX = 600;
+const RIGHT_SIDEBAR_MIN = 150;
+const RIGHT_SIDEBAR_MAX = 500;
+const LEFT_SIDEBAR_DEFAULT = 320;
+const RIGHT_SIDEBAR_DEFAULT = 256;
 
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -15,6 +23,63 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
   const [isNavigationLoading, setIsNavigationLoading] = useState(true);
   const [isHeadingsLoading, setIsHeadingsLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [leftWidth, setLeftWidth] = useState(LEFT_SIDEBAR_DEFAULT);
+  const [rightWidth, setRightWidth] = useState(RIGHT_SIDEBAR_DEFAULT);
+  const currentLeftWidth = useRef(LEFT_SIDEBAR_DEFAULT);
+  const currentRightWidth = useRef(RIGHT_SIDEBAR_DEFAULT);
+
+  // Keep refs in sync with state for use in pointer event closures
+  useEffect(() => { currentLeftWidth.current = leftWidth; }, [leftWidth]);
+  useEffect(() => { currentRightWidth.current = rightWidth; }, [rightWidth]);
+
+  // Load persisted sidebar widths
+  useEffect(() => {
+    try {
+      const savedLeft = localStorage.getItem('docs-sidebar-left-width');
+      const savedRight = localStorage.getItem('docs-sidebar-right-width');
+      if (savedLeft) {
+        const w = Number(savedLeft);
+        setLeftWidth(w);
+        currentLeftWidth.current = w;
+      }
+      if (savedRight) {
+        const w = Number(savedRight);
+        setRightWidth(w);
+        currentRightWidth.current = w;
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  const handleResizeStart = (e: React.PointerEvent, side: 'left' | 'right') => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = side === 'left' ? currentLeftWidth.current : currentRightWidth.current;
+
+    const onMove = (ev: PointerEvent) => {
+      const delta = ev.clientX - startX;
+      if (side === 'left') {
+        const w = Math.max(LEFT_SIDEBAR_MIN, Math.min(LEFT_SIDEBAR_MAX, startWidth + delta));
+        currentLeftWidth.current = w;
+        setLeftWidth(w);
+      } else {
+        const w = Math.max(RIGHT_SIDEBAR_MIN, Math.min(RIGHT_SIDEBAR_MAX, startWidth - delta));
+        currentRightWidth.current = w;
+        setRightWidth(w);
+      }
+    };
+
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      try {
+        localStorage.setItem('docs-sidebar-left-width', String(currentLeftWidth.current));
+        localStorage.setItem('docs-sidebar-right-width', String(currentRightWidth.current));
+      } catch { /* ignore */ }
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
 
   // Load navigation structure
   useEffect(() => {
@@ -127,9 +192,14 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       )}
 
       {/* Desktop Layout */}
-      <div className="hidden lg:grid fixed inset-0 top-[120px] overflow-hidden" style={{
-        gridTemplateColumns: headings.length > 0 ? '320px 1fr 256px' : '320px 1fr'
-      }}>
+      <div
+        className="hidden lg:grid fixed inset-0 top-[120px] overflow-hidden select-none"
+        style={{
+          gridTemplateColumns: headings.length > 0
+            ? `${leftWidth}px 8px 1fr 8px ${rightWidth}px`
+            : `${leftWidth}px 8px 1fr`,
+        }}
+      >
         {/* Left Sidebar Column - Navigation */}
         <aside className="border-r border-gray-800 bg-black h-full overflow-y-auto">
           {isNavigationLoading ? (
@@ -161,6 +231,18 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
           )}
         </aside>
 
+        {/* Left Resize Handle */}
+        <div
+          className="group relative flex items-center justify-center cursor-col-resize z-10 bg-transparent hover:bg-blue-500/10 transition-colors"
+          onPointerDown={(e) => handleResizeStart(e, 'left')}
+          aria-label="Resize left sidebar"
+          role="separator"
+          aria-orientation="vertical"
+          title="Drag to resize navigation sidebar"
+        >
+          <div className="w-0.5 h-10 bg-gray-700 rounded group-hover:bg-blue-400 transition-colors" aria-hidden="true" />
+        </div>
+
         {/* Middle Column - Main Content */}
         <main className="h-full overflow-y-auto">
           <div className="px-8 py-8 max-w-4xl mx-auto">
@@ -168,6 +250,20 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
             {children}
           </div>
         </main>
+
+        {/* Right Resize Handle */}
+        {headings.length > 0 && (
+          <div
+            className="group relative flex items-center justify-center cursor-col-resize z-10 bg-transparent hover:bg-blue-500/10 transition-colors"
+            onPointerDown={(e) => handleResizeStart(e, 'right')}
+            aria-label="Resize table of contents sidebar"
+            role="separator"
+            aria-orientation="vertical"
+            title="Drag to resize table of contents"
+          >
+            <div className="w-0.5 h-10 bg-gray-700 rounded group-hover:bg-blue-400 transition-colors" aria-hidden="true" />
+          </div>
+        )}
 
         {/* Right Sidebar Column - Table of Contents */}
         {headings.length > 0 && (
@@ -204,6 +300,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       <BackToTop />
+      <AccessibilityPanel />
     </div>
   );
 }
