@@ -33,6 +33,16 @@ In a traditional **forward renderer** every fragment produced by a draw call mus
 
 The shading cost becomes `O(screen_pixels × L)`, which is bounded by your resolution rather than your scene complexity. Adding a thousand extra meshes to the scene costs geometry bandwidth, but it does not make lighting slower.
 
+Expressing the two approaches formally:
+
+**Forward rendering** evaluates lighting per fragment per light:
+$$\text{Cost}_{\text{forward}} = O(N_{\text{fragments}} \times N_{\text{lights}})$$
+
+**Deferred rendering** separates the geometry and lighting passes:
+$$\text{Cost}_{\text{deferred}} = O(N_{\text{overdraw}} \times N_{\text{geo\_passes}}) + O(N_{\text{pixels}} \times N_{\text{lights}})$$
+
+With deferred, $N_{\text{overdraw}}$ in the G-buffer pass is minimised by the depth prepass (typically 1.0×–1.1× overdraw on opaque geometry). The lighting evaluation is then exactly 1 pass over the screen.
+
 > [!NOTE]
 > Deferred shading has a well-known weakness: it cannot handle **transparency** without extra work. Helio solves this by running a separate **forward transparent pass** after the deferred lighting pass, reusing the depth buffer written during the geometry phase.
 
@@ -127,6 +137,16 @@ Each `MaterialRange` represents a contiguous slice of the indirect buffer that s
 > [!NOTE]
 > The CPU cost of the G-buffer draw step is **O(unique_materials)**, not **O(N_objects)**. A scene with 10 000 meshes using 40 unique materials fires exactly 40 GPU commands from the CPU, regardless of how many instances of each material appear.
 
+With `multi_draw_indexed_indirect`, the CPU cost scales with materials rather than objects:
+
+$$\text{CPU cost} = O(N_{\text{unique\_materials}}) \text{ draw calls}$$
+
+Instead of the naive approach:
+
+$$\text{CPU cost} = O(N_{\text{objects}}) \text{ draw calls}$$
+
+For a scene with 10,000 objects using 50 unique materials: **50 draw calls** instead of 10,000.
+
 ### ShadowMatrixPass
 
 `ShadowMatrixPass` is the second pre-graph compute dispatch. It reads the light buffer and a `shadow_dirty_buffer` — a bitfield where each bit corresponds to one light — and recomputes shadow projection matrices only for lights whose dirty bit is set. This avoids recomputing CSM splits and cube-face matrices every frame when the camera and lights have not moved.
@@ -147,15 +167,15 @@ The complete pipeline executes in the following order every frame. Pre-graph pas
 ```mermaid
 flowchart TD
     subgraph PRE["Pre-Graph (CPU-submitted compute)"]
-        ID[IndirectDispatchPass\nBuild draw buffer + material ranges]
-        SM[ShadowMatrixPass\nCompute CSM + spot/point matrices]
+        ID[IndirectDispatchPass<br/>Build draw buffer + material ranges]
+        SM[ShadowMatrixPass<br/>Compute CSM + spot/point matrices]
     end
 
     subgraph GRAPH["Render Graph (topological order)"]
-        DP[depth_prepass\nEarly-Z fill]
-        HZ[hiz_build\nHiZ mip chain]
-        OC[occlusion_cull\nGPU occlusion test]
-        SL[sky_lut\nAtmosphere LUT\nonly when sky_state_changed]
+        DP[depth_prepass<br/>Early-Z fill]
+        HZ[hiz_build<br/>HiZ mip chain]
+        OC[occlusion_cull<br/>GPU occlusion test]
+        SL[sky_lut<br/>Atmosphere LUT\nonly when sky_state_changed]
         GB[gbuffer\nMRT write: albedo / normal / orm / emissive]
         DL[deferred_lighting\nFullscreen PBR + shadows + GI + tonemap]
         SK[sky\nBackground atmosphere fill]
@@ -203,6 +223,22 @@ GPUs can exploit a dedicated depth prepass through a feature called **early-Z re
 
 The depth buffer format is `Depth32Float`, providing enough precision to avoid Z-fighting at typical view distances. The view is `depth_view` for writing and a separate `depth_sample_view` using the `DepthOnly` aspect for reading in the G-buffer and deferred lighting bind groups.
 
+The depth value stored in the buffer is non-linear (hyperbolic). The NDC depth is:
+
+$$z_{\text{ndc}} = \frac{f \cdot (z - n)}{z \cdot (f - n)}$$
+
+To recover the linear view-space depth from a sampled depth value, the inverse is:
+
+$$z_{\text{linear}} = \frac{n \cdot f}{f - z_{\text{ndc}} \cdot (f - n)}$$
+
+where $n$ = near plane distance and $f$ = far plane distance. This is used by passes that need metric depth values (e.g., SSAO, Hi-Z projection):
+
+```wgsl
+fn linearize_depth(depth: f32, near: f32, far: f32) -> f32 {
+    return (near * far) / (far - depth * (far - near));
+}
+```
+
 ### Interaction with the Indirect Buffer
 
 The depth prepass uses the same `shared_indirect_buf` produced by `IndirectDispatchPass`. However, because the depth prepass pipeline has no colour attachments and uses a minimal vertex layout (position only), a **separate depth-prepass pipeline** is compiled at startup. This pipeline shares the same pool vertex and index buffers but discards all vertex attributes except position, keeping bandwidth low.
@@ -223,9 +259,9 @@ After the depth prepass, two passes work together to discard objects that are en
 ```mermaid
 graph LR
     D["Depth (1920×1080)"]
-    M1["Mip 1 (960×540)\nmax depth of 2×2 blocks"]
-    M2["Mip 2 (480×270)\nmax depth of 4×4 blocks"]
-    MN["Mip N (1×1)\nglobal max depth"]
+    M1["Mip 1 (960×540)<br/>max depth of 2×2 blocks"]
+    M2["Mip 2 (480×270)<br/>max depth of 4×4 blocks"]
+    MN["Mip N (1×1)<br/>global max depth"]
     D --> M1 --> M2 --> MN
 ```
 
@@ -363,10 +399,19 @@ This avoids a costly full-screen blend and keeps sky rendering decoupled from th
 
 The fragment shader reconstructs the world-space position from depth and the inverse view-projection matrix, then unpacks the G-buffer channels and runs a Cook-Torrance BRDF loop over all lights. Shadows are looked up from the shadow atlas using the shadow matrices computed by `ShadowMatrixPass`. Indirect GI is sampled from the radiance cascade `rc_cascade0` texture. The final HDR colour is written to `color_target` (`pre_aa_texture`).
 
-The position reconstruction from depth avoids storing position in the G-buffer (which would require a full `Rgba32Float` target):
+The position reconstruction from depth avoids storing position in the G-buffer (which would require a full `Rgba32Float` target).
 
-```glsl
-// Reconstruct world position from depth + inv_view_proj
+The reconstruction relies on reversing the perspective divide. Clip space maps to NDC as:
+
+$$\mathbf{p}_{\text{ndc}} = \frac{\mathbf{p}_{\text{clip}}}{w_{\text{clip}}}$$
+
+and NDC to screen UV as:
+
+$$\text{uv} = \mathbf{p}_{\text{ndc}}.xy \times 0.5 + 0.5$$
+
+Inverting this: given a screen UV and depth, reconstruct the world position by transforming back through the inverse view-projection matrix with a homogeneous divide:
+
+```wgsl
 fn reconstruct_world_pos(uv: vec2<f32>, depth: f32, inv_vp: mat4x4<f32>) -> vec3<f32> {
     let ndc = vec4<f32>(uv * 2.0 - 1.0, depth, 1.0);
     let world_h = inv_vp * ndc;
@@ -488,9 +533,9 @@ After `debug_draw`, the pipeline runs a sequence of optional post-processing eff
 
 ```mermaid
 flowchart LR
-    DL[Deferred Lighting\ncolor_target] --> BL
-    BL[Bloom\nif BloomFeature] --> AA
-    AA[FXAA / SMAA / TAA\naa_mode] --> SC[Swapchain]
+    DL[Deferred Lighting<br/>color_target] --> BL
+    BL[Bloom<br/>if BloomFeature] --> AA
+    AA[FXAA / SMAA / TAA<br/>aa_mode] --> SC[Swapchain]
 ```
 
 ### Bloom
@@ -538,9 +583,9 @@ Helio organises GPU resources into three bind groups with fixed slot assignments
 
 ```mermaid
 graph TD
-    G0["Group 0 — Global\n(camera + globals)\ncamera_buffer\nglobals_buffer"]
-    G1["Group 1 — Material\n(per-draw)\nbase_color_tex\nnormal_map_tex\norm_map_tex\norm_orm_tex\nemissive_tex\nsampler"]
-    G2["Group 2 — Lighting\n(scene-wide)\nlight_buffer\nshadow_atlas_array\nshadow_sampler\nenv_cube\nrc_cascade0\nrc_dynamic_buf\nshadow_matrix_buf"]
+    G0["Group 0 — Global<br/>(camera + globals)\ncamera_buffer\nglobals_buffer"]
+    G1["Group 1 — Material<br/>(per-draw)<br/>base_color_tex<br/>normal_map_tex<br/>orm_map_tex\norm_orm_tex\nemissive_tex\nsampler"]
+    G2["Group 2 — Lighting<br/>(scene-wide)<br/>light_buffer<br/>shadow_atlas_array<br/>shadow_sampler\nenv_cube\nrc_cascade0\nrc_dynamic_buf\nshadow_matrix_buf"]
 ```
 
 ### Group 0 — Global
@@ -632,26 +677,26 @@ The following diagram shows how data flows between the major systems across a co
 
 ```mermaid
 flowchart LR
-    CPU["CPU\nScene updates\nGlobalsUniform\nupload"] -->|queue.write_buffer| UB["Uniform Buffers\ncamera\nglobals\nlights"]
-    CPU -->|dispatch compute| ID["IndirectDispatchPass\nGPU compute"]
-    CPU -->|dispatch compute| SM["ShadowMatrixPass\nGPU compute"]
+    CPU["CPU<br/>Scene updates<br/>GlobalsUniform<br/>upload"] -->|queue.write_buffer| UB["Uniform Buffers<br/>camera<br/>globals<br/>lights"]
+    CPU -->|dispatch compute| ID["IndirectDispatchPass<br/>GPU compute"]
+    CPU -->|dispatch compute| SM["ShadowMatrixPass<br/>GPU compute"]
 
-    ID -->|indirect buf + ranges| GB["GBufferPass\nMRT write"]
-    ID -->|indirect buf| SH["ShadowPass\ndepth atlas"]
+    ID -->|indirect buf + ranges| GB["GBufferPass<br/>MRT write"]
+    ID -->|indirect buf| SH["ShadowPass<br/>depth atlas"]
     SM -->|shadow matrices| SH
-    SM -->|shadow matrices| DL["DeferredLightingPass\nfullscreen PBR"]
+    SM -->|shadow matrices| DL["DeferredLightingPass<br/>fullscreen PBR"]
 
     GB -->|albedo/normal/orm/emissive| DL
     SH -->|shadow atlas| DL
-    SK["SkyPass\natmosphere"] -->|sky_layer| DL
-    RC["RadianceCascades\nGI probes"] -->|rc_cascade0| DL
+    SK["SkyPass<br/>atmosphere"] -->|sky_layer| DL
+    RC["RadianceCascades<br/>GI probes"] -->|rc_cascade0| DL
 
-    DL -->|HDR color_target| TR["TransparentPass\nforward blend"]
+    DL -->|HDR color_target| TR["TransparentPass<br/>forward blend"]
     TR -->|color_target| BB["BillboardPass"]
     BB -->|color_target| DD["DebugDraw"]
     DD -->|pre_aa_texture| BL["BloomPass"]
-    BL -->|pre_aa_texture| AA["AA Pass\nFXAA/SMAA/TAA"]
-    AA -->|surface| SC["Swapchain\nPresent"]
+    BL -->|pre_aa_texture| AA["AA Pass<br/>FXAA/SMAA/TAA"]
+    AA -->|surface| SC["Swapchain<br/>Present"]
 ```
 
 This architecture keeps the CPU submission cost bounded and predictable: the CPU's per-frame work is proportional to unique materials and unique lights, not to total object count. The GPU does the per-instance classification, culling, and batching work in the pre-graph compute passes, leaving the CPU free to update game logic while the GPU renders the previous frame.

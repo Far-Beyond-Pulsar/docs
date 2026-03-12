@@ -36,11 +36,12 @@ the ambient contribution at the end.
 
 The specular reflectance for a single light is:
 
-```
-f_r(v, l) = D(h, α) · G(v, l, α) · F(v, h, F₀)
-             ─────────────────────────────────────
-                     4 (n·v)(n·l)
-```
+$$f_r(\mathbf{v}, \mathbf{l}) = \frac{D(\mathbf{h},\alpha) \cdot G(\mathbf{v},\mathbf{l},\alpha) \cdot F(\mathbf{v},\mathbf{h},F_0)}{4\,(\mathbf{n} \cdot \mathbf{v})\,(\mathbf{n} \cdot \mathbf{l})}$$
+
+Where:
+- $\mathbf{h} = \text{normalize}(\mathbf{v} + \mathbf{l})$ — half-vector between view and light
+- $\mathbf{n}$ — surface normal
+- $\alpha = \text{roughness}^2$
 
 | Term | Meaning | Helio implementation |
 |------|---------|----------------------|
@@ -49,6 +50,50 @@ f_r(v, l) = D(h, α) · G(v, l, α) · F(v, h, F₀)
 | `F`  | Fresnel reflectance | Schlick approximation |
 | `α`  | Perceptual roughness² | read from G-buffer roughness channel |
 | `F₀` | Specular colour at 0° | lerp(0.04, albedo, metallic) |
+
+#### F₀ — Base Reflectance
+
+$F_0$ is the specular colour at normal incidence ($\theta = 0°$). Dielectrics (water, glass, plastic) have $F_0 \approx 0.04$ — about 4% reflectance. Metals set $F_0$ equal to the albedo: all energy goes to specular, tinted by the surface base colour.
+
+$$F_0 = \text{lerp}(0.04,\; \text{albedo},\; \text{metallic})$$
+
+#### GGX Normal Distribution Function
+
+$D$ counts the statistical fraction of microfacets whose normal aligns with the half-vector $\mathbf{h}$:
+
+$$D(\mathbf{n},\mathbf{h},\alpha) = \frac{\alpha^2}{\pi\bigl[(\mathbf{n}\cdot\mathbf{h})^2(\alpha^2-1)+1\bigr]^2}$$
+
+where $\alpha = \text{roughness}^2$. High $\alpha$ (rough surface) produces a wide distribution and a broad highlight. Low $\alpha$ (smooth surface) produces a sharp peak at $\mathbf{n}\cdot\mathbf{h}=1$, giving mirror-like reflection.
+
+#### Smith Geometry Shadowing Function
+
+$G$ models the probability that a microfacet is visible from both the view and light directions — i.e. not self-shadowed or masked:
+
+$$G_1(\mathbf{n},\mathbf{x},k) = \frac{\mathbf{n}\cdot\mathbf{x}}{(\mathbf{n}\cdot\mathbf{x})(1-k)+k}, \quad k = \frac{(\alpha+1)^2}{8}$$
+
+$$G(\mathbf{n},\mathbf{v},\mathbf{l},k) = G_1(\mathbf{n},\mathbf{v},k)\cdot G_1(\mathbf{n},\mathbf{l},k)$$
+
+#### Schlick Fresnel Approximation
+
+$F$ gives the fraction of light reflected at a given view angle. Reflectance increases at grazing angles — surfaces look more mirror-like when viewed edge-on:
+
+$$F(\mathbf{v},\mathbf{h},F_0) = F_0 + (1-F_0)(1-\mathbf{v}\cdot\mathbf{h})^5$$
+
+#### Energy Conservation
+
+The full BRDF balances specular and diffuse so the surface cannot emit more energy than it receives. The Fresnel term $F$ determines what fraction of incoming light becomes specular; the remainder $(1-F)$ is available for diffuse. For metals (`metallic = 1`) the diffuse term is zero — all energy goes to specular with albedo-tinted $F_0$:
+
+$$f(\mathbf{v},\mathbf{l}) = k_d \frac{\text{albedo}}{\pi} + k_s \cdot f_r(\mathbf{v},\mathbf{l})$$
+
+$$k_s = F, \quad k_d = (1 - F)(1 - \text{metallic})$$
+
+```wgsl
+let ks = fresnel;
+let kd = (vec3(1.0) - ks) * (1.0 - metallic);
+let diffuse  = kd * albedo / PI;
+let specular = (D * G * F) / max(4.0 * n_dot_v * n_dot_l, 0.0001);
+let Lo = (diffuse + specular) * radiance * n_dot_l;
+```
 
 The diffuse term uses the Lambertian model multiplied by `(1 − F) · (1 − metallic)` to ensure
 energy conservation — a fully metallic surface has no diffuse contribution.
@@ -93,8 +138,16 @@ from the camera.
 A point light radiates uniformly in all directions from a single world-space position.  Helio uses
 a physically correct inverse-square attenuation windowed by the `range` field:
 
-```
-attenuation = saturate(1 − (dist / range)⁴)² / dist²
+$$\text{attenuation}(d, r) = \frac{\text{saturate}\!\left(1 - \left(\tfrac{d}{r}\right)^4\right)^2}{d^2}$$
+
+where $d$ is the distance to the light and $r$ is the light's range. The $(d/r)^4$ term creates a smooth rolloff at the boundary — attenuation reaches exactly 0 when $d = r$, eliminating harsh cutoff artefacts. The $1/d^2$ term is physically correct inverse-square falloff. Together they give physically-based behaviour near the light while guaranteeing zero contribution beyond the range.
+
+```wgsl
+fn point_attenuation(dist: f32, range: f32) -> f32 {
+    let ratio = dist / range;
+    let window = saturate(1.0 - ratio * ratio * ratio * ratio);
+    return (window * window) / max(dist * dist, 0.0001);
+}
 ```
 
 The smooth window prevents hard cutoffs while respecting the `range` bound for culling.  Point
@@ -110,6 +163,16 @@ A spot light is a point light restricted to a cone defined by two half-angles:
 Both are stored on `GpuLight` as precomputed **cosines** (`cos_inner`, `cos_outer`) to eliminate
 per-fragment trig in the shader.  The falloff between the two angles is a smooth Hermite curve,
 giving control over the penumbra without extra parameters.
+
+$$\text{falloff}(\theta) = \text{smoothstep}(\cos\theta_{\text{outer}},\; \cos\theta_{\text{inner}},\; \cos\theta_{\text{actual}})$$
+
+$\theta_{\text{inner}}$ is the half-angle of the full-brightness cone; $\theta_{\text{outer}}$ is the half-angle of the dark boundary. `smoothstep` applies a smooth Hermite curve between them — no hard edge. Note: because a larger angle corresponds to a smaller cosine, the arguments are in reverse cosine order — `cos_outer` (smaller value) is the low edge and `cos_inner` (larger value) is the high edge.
+
+```wgsl
+fn spot_falloff(cos_theta: f32, cos_inner: f32, cos_outer: f32) -> f32 {
+    return smoothstep(cos_outer, cos_inner, cos_theta);
+}
+```
 
 Spot lights allocate **one atlas layer** for shadows — a single perspective frustum aligned with
 the cone axis.
@@ -350,13 +413,16 @@ coverage far away.
 ### Split Scheme
 
 Cascade splits are computed from the camera's near and far planes using a logarithmic scheme that
-weights more layers toward the viewer:
+weights more layers toward the viewer. For $N$ cascades with near plane $z_n$ and far plane $z_f$:
 
-```
-split_i = near × (far / near)^(i / N)   (log component)
-```
+$$z_i^{\text{log}} = z_n \left(\frac{z_f}{z_n}\right)^{i/N}$$
 
-blended with a uniform component to soften the bias toward near splits in large outdoor scenes.
+$$z_i^{\text{uni}} = z_n + (z_f - z_n)\frac{i}{N}$$
+
+$$z_i = \lambda \cdot z_i^{\text{log}} + (1-\lambda) \cdot z_i^{\text{uni}}$$
+
+Pure logarithmic splits ($z_i^{\text{log}}$) allocate more cascade precision near the camera where detail is needed most. Uniform splits ($z_i^{\text{uni}}$) distribute coverage evenly across the view range. The blend factor $\lambda$ (PSSM correction factor, typically 0.5–0.9) mixes the two to avoid extremely thin near cascades on large outdoor scenes while preserving close-range shadow detail.
+
 The four resulting world-space depths are uploaded every frame in `GlobalsUniform.csm_splits`:
 
 ```rust
@@ -473,6 +539,28 @@ The `matrix_hash` is an FNV-1a hash of the raw shadow matrix bytes.  When the ha
 frame-over-frame, the shadow pass can skip re-rendering that light entirely, relying on the atlas
 contents from the previous frame.  This gives static lights essentially free shadows after the
 first frame.
+
+FNV-1a is a 64-bit non-cryptographic hash well suited to small fixed-size inputs like a 64-byte transform matrix:
+
+$$h_0 = 14695981039346656037$$
+
+$$h_{i+1} = (h_i \oplus b_i) \times 1099511628211$$
+
+where $b_i$ is byte $i$ of the input data and $\oplus$ is bitwise XOR. The $2^{64}$ hash space makes false positives negligible in practice — if the output hash matches the cached hash, the matrices are unchanged and shadow rasterisation is skipped entirely for that light.
+
+```rust
+const FNV_OFFSET: u64 = 14_695_981_039_346_656_037;
+const FNV_PRIME:  u64 = 1_099_511_628_211;
+
+fn fnv1a_64(data: &[u8]) -> u64 {
+    let mut hash = FNV_OFFSET;
+    for &byte in data {
+        hash ^= byte as u64;
+        hash = hash.wrapping_mul(FNV_PRIME);
+    }
+    hash
+}
+```
 
 ### Range Cull — 5× Extension
 

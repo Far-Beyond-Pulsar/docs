@@ -34,9 +34,15 @@ The same physics explains sunsets. When the sun is near the horizon, sunlight mu
 
 Rayleigh scattering has an angular distribution described by the **Rayleigh phase function**:
 
-```
-P_R(θ) = (3 / 16π) × (1 + cos²θ)
-```
+$$P_R(\theta) = \frac{3}{16\pi}\left(1 + \cos^2\theta\right)$$
+
+Here $\theta$ is the angle between the incoming and outgoing light directions. The $(1+\cos^2\theta)$ factor means Rayleigh scattering is stronger forward (towards viewer) and backward (away from viewer), and weakest at 90°. This is why the sky appears bright near the sun and also behind you. The $3/16\pi$ normalises the function so it integrates to 1 over the sphere.
+
+The wavelength-dependent scattering coefficient $\beta_R(\lambda)$ scales this phase function according to an exponential density profile:
+
+$$\beta_R(\lambda, h) = \beta_R(\lambda, 0) \cdot e^{-h/H_R}$$
+
+where $h$ is altitude, $H_R \approx 8$ km is the Rayleigh scale height, and $\beta_R(\lambda,0) = [5.8\times10^{-3},\; 13.5\times10^{-3},\; 33.1\times10^{-3}]$ km$^{-1}$ for R/G/B. The $\lambda^{-4}$ dependence of Rayleigh scattering is baked into these RGB coefficients — blue ($\approx450$ nm) is scattered $\approx5.7\times$ more than red ($\approx700$ nm).
 
 This produces a mostly isotropic distribution with a slight forward and backward preference — there is no strong "glow" around the sun from Rayleigh alone.
 
@@ -46,29 +52,58 @@ Mie scattering involves particles comparable to or larger than the wavelength of
 
 The angular distribution is described by the **Henyey-Greenstein phase function**:
 
-```
-P_HG(θ, g) = (1 - g²) / (4π × (1 + g² - 2g cosθ)^(3/2))
-```
+$$P_{HG}(\theta, g) = \frac{1 - g^2}{4\pi\left(1 + g^2 - 2g\cos\theta\right)^{3/2}}$$
+
+The asymmetry parameter $g \in (-1, 1)$ controls the forward/backward balance:
+- $g = 0$: isotropic (equal in all directions)
+- $g > 0$: forward-scattering (aerosols, fog — bright halo around sun)
+- $g < 0$: backward-scattering (rare)
+- $g \approx 0.76$: typical hazy atmosphere (Helio default `mie_g`)
+- $g \approx 0.85$–$0.95$: strong forward-scattering (dense fog)
 
 The `g` parameter (the asymmetry factor) ranges from -1 (full back-scatter) through 0 (isotropic) to +1 (full forward-scatter). In a clear Earth atmosphere, aerosols typically produce `g ≈ 0.76`, which concentrates most of the scattered energy within a roughly 30° cone around the sun direction.
+
+Mie scattering from large particles (dust, water droplets) is much stronger than Rayleigh but roughly wavelength-independent — that is why clouds and fog look white.
+
+```rust
+// Helio SkyAtmosphere defaults:
+// mie_g = 0.76   — moderate forward scattering
+// Mie coefficient: βM ≈ 2.1e-3 km⁻¹ (grey, wavelength-independent)
+pub struct SkyAtmosphere {
+    pub mie_g: f32,       // asymmetry factor, typically 0.76
+    pub mie_scatter: f32, // Mie scattering coefficient (wavelength-independent)
+    // ...
+}
+```
 
 ### How These Combine
 
 Helio evaluates both scattering types along rays cast through the atmosphere using the Nishita single-scatter model. The total in-scattered luminance toward the camera is the integral of contributions from every point along the ray, weighted by extinction (how much light has been absorbed or scattered out along both the inbound solar path and the outbound camera path).
 
-```
-L(ray) = ∫ [ T_sun(x) × (β_R × P_R(θ) + β_M × P_HG(θ,g)) × T_cam(x) ] ds
-```
+$$L(\mathbf{d}) = \int_0^{t_{\max}} T(\text{cam} \to s) \cdot \left[ \beta_R(h_s)\, P_R(\theta) + \beta_M(h_s)\, P_{HG}(\theta, g) \right] \cdot T(\text{sun} \to s) \cdot E_{\text{sun}} \; ds$$
+
+- $T(\text{cam} \to s)$: transmittance from camera to sample point $s$ — how much scatter along the view ray attenuates the contribution
+- $\beta_R P_R + \beta_M P_{HG}$: combined in-scatter at the sample point (Rayleigh + Mie)
+- $T(\text{sun} \to s)$: transmittance from the sun to $s$ — how much sunlight is attenuated before reaching $s$
+- $E_{\text{sun}}$: solar irradiance at top of atmosphere
 
 Where `T_sun(x)` is the transmittance from the sun to point `x`, `T_cam(x)` is the transmittance from `x` to the camera, `β_R` and `β_M` are the Rayleigh and Mie scattering coefficients, and `s` is distance along the ray. Computing this integral for every sky pixel every frame would be prohibitively expensive; Helio uses a look-up table to amortize the cost.
 
 ### Transmittance and Optical Depth
 
-A subtle but important quantity in the integration is **optical depth** — the accumulated extinction along a path. The transmittance `T` from point A to B is:
+A subtle but important quantity in the integration is **optical depth** — the accumulated extinction along a path. The optical depth $\tau$ and transmittance $T$ from point A to B are:
 
-```
-T(A→B) = exp(-∫_A^B (β_R(h) + β_M(h)) ds)
-```
+$$\tau(A \to B) = \int_A^B \left(\beta_R(h(s)) + \beta_M(h(s))\right) ds$$
+
+$$T(A \to B) = e^{-\tau(A \to B)}$$
+
+$\tau$ is the total amount of scattering/absorption along the ray — the atmosphere is transparent when $\tau = 0$ and optically thick when $\tau \gg 1$ (heavy fog at sunrise). $T$ is the fraction of light that survives the journey without being scattered away.
+
+Both Rayleigh and Mie coefficients decay exponentially with altitude:
+
+$$\beta(h) = \beta_0 \cdot e^{-h/H}$$
+
+where $H$ is the scale height ($H_R \approx 8$ km for Rayleigh, $H_M \approx 1.2$ km for Mie).
 
 Where `β_R(h)` and `β_M(h)` are the scattering coefficients at altitude `h`, following exponential density profiles controlled by `rayleigh_h_scale` and `mie_h_scale` respectively. A ray traveling nearly horizontally near the horizon accumulates far more optical depth than a vertical ray, which is why both Rayleigh (blue sky) and Mie (sun glow) are most intense near the horizon and at sunset.
 
@@ -119,6 +154,18 @@ pub struct SkyAtmosphere {
 
 `rayleigh_scatter` is a three-component vector giving the per-wavelength scattering coefficient in units of km⁻¹, one entry for each of the red, green, and blue channels. The Earth defaults — `[5.8e-3, 13.5e-3, 33.1e-3]` — encode the wavelength-to-the-minus-fourth relationship: the blue coefficient is approximately 5.7× the red coefficient, which is why the sky strongly favors blue. Increasing all three components uniformly makes the atmosphere denser and produces a deeper blue at the same sun angle. Deliberately biasing toward red/green (for example, `[33.1e-3, 13.5e-3, 5.8e-3]`) flips the scattering, yielding an orange-heavy alien sky.
 
+The $\lambda^{-4}$ law is baked directly into the Earth default coefficients:
+
+$$\beta_R(\lambda) \propto \frac{1}{\lambda^4}$$
+
+| Channel | $\lambda$ (nm) | $\beta$ (km⁻¹) | Relative |
+|---------|---------------|----------------|----------|
+| R | ~700 | $5.8\times10^{-3}$ | 1.0× |
+| G | ~550 | $13.5\times10^{-3}$ | 2.3× |
+| B | ~450 | $33.1\times10^{-3}$ | 5.7× |
+
+The ratio $33.1 / 5.8 \approx 5.7$ matches $(700/450)^4 \approx 5.8$ — confirming the $\lambda^{-4}$ law.
+
 `rayleigh_h_scale` is the normalized scale height for the Rayleigh density profile — the altitude (expressed as a fraction of the atmosphere thickness) at which the density has fallen to 1/e of its sea-level value. The default of 0.08 corresponds to Earth's approximately 8 km scale height over a 60 km thick atmosphere. Increasing this value distributes molecules higher into the atmosphere and reduces the saturation of the blue sky.
 
 ### Mie Scattering Parameters
@@ -145,7 +192,13 @@ pub struct SkyAtmosphere {
 
 `sun_intensity` controls the raw luminance of the sun disc itself (separate from the scattered sky brightness). The default of 22.0 is calibrated to look physically plausible against the default `exposure` of 4.0. Reducing it makes the sun appear less blinding; useful for stylized scenes or overcast conditions where the sun disc should be visible but not dominating.
 
-`sun_disk_angle` is the sun's angular diameter in radians. The real Sun subtends approximately 0.009 radians (half-degree radius), and the default of 0.0045 is the radius component. Increasing this produces a larger, more fantastical sun. Setting it to 0 disables the disc entirely while preserving all scattering.
+`sun_disk_angle` is the sun's angular diameter in radians. The real Sun subtends approximately 0.009 radians (half-degree radius), and the default of 0.0045 is the radius component. The sun disc is rendered when the dot product of the view direction and sun direction exceeds the cosine threshold:
+
+$$\text{sun\_half\_angle} = 0.265° = 4.6\times10^{-3} \text{ rad}$$
+
+$$\cos\theta_{\text{threshold}} = \cos(0.265°) \approx 0.9999894$$
+
+Increasing this produces a larger, more fantastical sun. Setting it to 0 disables the disc entirely while preserving all scattering.
 
 ### Planetary Geometry
 
@@ -273,10 +326,21 @@ Evaluating the full Nishita scattering integral naively — raymarching through 
 
 The LUT encodes sky luminance as a function of two parameters:
 
-- **U axis (256 texels):** the horizontal angle of the view ray relative to the sun direction
-- **V axis (64 texels):** the elevation angle of the view ray above the horizon
+- **U axis (256 texels):** the cosine of the sun's angle from the zenith, $\cos\theta_{\text{sun}} \in [-1, 1]$, remapped to $[0, 1]$
+- **V axis (64 texels):** the sine of the view ray's elevation above the horizon, $\sin\theta_{\text{view}} \in [0, 1]$
 
 Because the atmosphere is rotationally symmetric around the sun direction, these two parameters fully describe any sky pixel. At render time, the sky shader simply reconstructs the view ray from the inverse view-projection matrix, computes its angle relative to the sun, and looks up the pre-integrated luminance. The entire sky renders as a single full-screen pass with no raymarching — just a texture sample and a few phase-function evaluations.
+
+```wgsl
+fn sky_lut_uv(sun_dir: vec3<f32>, view_dir: vec3<f32>) -> vec2<f32> {
+    let cos_sun_zenith = dot(sun_dir, vec3<f32>(0.0, 1.0, 0.0));
+    let sin_view_elev  = view_dir.y; // 0 = horizon, 1 = straight up
+    return vec2<f32>(
+        cos_sun_zenith * 0.5 + 0.5, // remap [-1,1] → [0,1]
+        sin_view_elev,               // already [0,1] for sky hemisphere
+    );
+}
+```
 
 ```
 LUT dimensions:  256 × 64

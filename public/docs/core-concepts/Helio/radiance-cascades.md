@@ -90,12 +90,28 @@ Reading these side-by-side:
 | 2 | 4×4×4 | 64 | 16×16 | 256 | 2.0 m |
 | 3 | 2×2×2 | 8 | 32×32 | 1 024 | 1 000 m |
 
+#### T_MAX Doubling Progression
+
+Cascades 0–2 follow a geometric $\times 2$ progression; cascade 3 jumps to sky distance:
+
+$$T_{\max}[i] = \{0.5,\; 1.0,\; 2.0,\; 1{,}000.0\} \text{ metres}$$
+
+Each cascade covers twice the ray distance of the previous, so short-range probes capture sharp contact-light detail while long-range probes capture the sky dome and distant bounce light. Cascade 3's jump to 1 000 m is intentional — it needs to reach the sky regardless of scene scale, and at only 8 probes the ray budget for that cascade remains small.
+
 Cascade 0 has the finest spatial resolution: 4 096 probes packed into whatever AABB the feature is configured with. Each probe only looks 0.5 metres away, but with 16 uniformly distributed hemisphere bins it can capture sharp, local bounce light — the kind that darkens corners and softens contact shadows. Cascade 3 has only 8 probes in total, but each probe samples the entire scene out to 1 000 metres using 1 024 direction bins, providing wide-angle sky illumination that cascades down through levels 2, 1, and 0.
 
 The doubling of `DIR_DIM` at each level and halving of `PROBE_DIM` is not arbitrary. As probes become coarser spatially (fewer probes cover the same volume), they need finer directional resolution to avoid blurring the sky signal across a wide solid angle. Conversely, cascade 0 needs dense spatial coverage more than it needs directional precision, so 16 direction bins are enough — the cascade-3 data provides the missing long-range directional detail via the merge step.
 
+#### Probe Spacing Per Cascade
+
+For a world AABB of size $\mathbf{S} = \mathbf{w}_{\max} - \mathbf{w}_{\min}$, the probe grid spacing for cascade $i$ is:
+
+$$\Delta_i = \frac{\mathbf{S}}{\text{PROBE\_DIMS}[i]}$$
+
+Cascade 0 has the finest probe spacing (most probes, smallest region per probe); cascade 3 has the coarsest (fewest probes, each covering the widest volume slice and firing rays out to 1 000 m).
+
 > [!IMPORTANT]
-> The probe spacing in cascade 0 is `(world_max - world_min) / 16` per axis. If your AABB is 32 m wide, probes are spaced every 2 m, which is appropriate for typical architectural or gameplay-scale scenes. For very large outdoor areas (>100 m) consider increasing `T_MAXS[0]` and using `with_camera_follow` so the AABB stays centred on the player.
+> The probe spacing in cascade 0 is `(world_max - world_min) / 16` per axis.If your AABB is 32 m wide, probes are spaced every 2 m, which is appropriate for typical architectural or gameplay-scale scenes. For very large outdoor areas (>100 m) consider increasing `T_MAXS[0]` and using `with_camera_follow` so the AABB stays centred on the player.
 
 ---
 
@@ -113,6 +129,18 @@ pub const DIR_DIMS: [u32; CASCADE_COUNT] = [4, 8, 16, 32];
 Cascade 0 has a 4×4 grid of direction bins — 16 bins covering the full sphere (upper and lower hemisphere combined, split by the equator). This means each direction bin subtends roughly 1/16th of the sphere, or about 25° of solid angle. That is coarse, but for the short-range (0.5 m) probes of cascade 0 this resolution is sufficient: contact-shadow and colour-bleed features are spatially high-frequency but directionally low-frequency.
 
 At cascade 3, 32×32 = 1 024 bins give approximately 0.4° of solid angle per bin, which is fine enough to resolve distinct directional light contributions from multiple sky features even at the coarsest spatial resolution.
+
+#### Octahedral Direction Encoding
+
+Each cascade's DIR_DIM × DIR_DIM grid of direction bins maps to the sphere using octahedral projection. For a 2D bin coordinate $(u, v) \in [0,1]^2$:
+
+$$\mathbf{d} = \text{oct\_decode}(2u-1,\; 2v-1)$$
+
+The octahedral map has no singularities (unlike polar/spherical coordinates) and distributes directions nearly uniformly across the sphere:
+
+$$\text{oct\_decode}(x, z) = \operatorname{normalize}\!\left(\begin{cases} (x,\; 1-|x|-|z|,\; z) & \text{if } |x|+|z| \leq 1 \\ (\operatorname{sign}(x)(1-|z|),\; -(1-|x|-|z|),\; \operatorname{sign}(z)(1-|x|)) & \text{otherwise}\end{cases}\right)$$
+
+The upper hemisphere corresponds to $|x|+|z| \leq 1$ (the octant where $y \geq 0$); the lower hemisphere folds into the four triangular corners. This is why `dir_dim` starts at 4 — a 4×4 grid gives exactly 16 bins covering both hemispheres with no wasted texels.
 
 ```mermaid
 graph LR
@@ -149,6 +177,36 @@ The invariant `PROBE_DIM × DIR_DIM = 64` holds for every cascade:
 - Cascade 1: 8 × 8 = 64 ✓
 - Cascade 2: 4 × 16 = 64 ✓
 - Cascade 3: 2 × 32 = 64 ✓
+
+#### Cascade Atlas Invariant
+
+For every cascade $i$, the atlas width is constant:
+
+$$\text{ATLAS\_W} = \text{PROBE\_DIMS}[i] \times \text{DIR\_DIMS}[i] = 64$$
+
+| Cascade | PROBE_DIM | DIR_DIM | Product |
+|---------|-----------|---------|---------|
+| 0 | 16 | 4 | 64 |
+| 1 | 8 | 8 | 64 |
+| 2 | 4 | 16 | 64 |
+| 3 | 2 | 32 | 64 |
+
+The atlas width is constant so all cascades pack into the same texture width. The atlas height varies because it encodes the full probe grid:
+
+$$\text{ATLAS\_HEIGHT}[i] = \text{PROBE\_DIMS}[i]^2 \times \text{DIR\_DIMS}[i]$$
+
+Memory per cascade (Rgba16Float = 8 bytes/pixel):
+
+$$M_i = 64 \times \text{ATLAS\_HEIGHT}[i] \times 8 \text{ bytes}$$
+
+| Cascade | Height | Memory |
+|---------|--------|--------|
+| 0 | 1024 | 512 KB |
+| 1 | 512 | 256 KB |
+| 2 | 256 | 128 KB |
+| 3 | 128 | 64 KB |
+
+Total (output + history double-buffer): ~2 MB for all four cascades.
 
 The height is `PROBE_DIM² × DIR_DIM`. For cascade 0: 16² × 4 = 256 × 4 = 1 024. This encodes all 4 096 probes (16×16×16 = 4 096, packed as a 16² = 256 row-of-probes × 4 direction-row-slices).
 
@@ -197,10 +255,10 @@ pub struct CascadeStatic {
 
 ```mermaid
 graph TD
-    C3["CascadeStatic[3]\nprobe_dim=2, dir_dim=32\nt_max=1000m\nparent_probe_dim=0\nparent_dir_dim=0"] -->|"borrows from"| NONE["(no parent — top of hierarchy)"]
-    C2["CascadeStatic[2]\nprobe_dim=4, dir_dim=16\nt_max=2.0m\nparent_probe_dim=2\nparent_dir_dim=32"] -->|"borrows from"| C3
-    C1["CascadeStatic[1]\nprobe_dim=8, dir_dim=8\nt_max=1.0m\nparent_probe_dim=4\nparent_dir_dim=16"] -->|"borrows from"| C2
-    C0["CascadeStatic[0]\nprobe_dim=16, dir_dim=4\nt_max=0.5m\nparent_probe_dim=8\nparent_dir_dim=8"] -->|"borrows from"| C1
+    C3["CascadeStatic[3]\nprobe_dim=2, dir_dim=32\nt_max=1000m\nparent_probe_dim=0\nparent_dir_dim=0"] -->|borrows from| NONE["(no parent — top of hierarchy)"]
+    C2["CascadeStatic[2]\nprobe_dim=4, dir_dim=16\nt_max=2.0m\nparent_probe_dim=2\nparent_dir_dim=32"] -->|borrows from| C3
+    C1["CascadeStatic[1]\nprobe_dim=8, dir_dim=8\nt_max=1.0m\nparent_probe_dim=4\nparent_dir_dim=16"] -->|borrows from| C2
+    C0["CascadeStatic[0]\nprobe_dim=16, dir_dim=4\nt_max=0.5m\nparent_probe_dim=8\nparent_dir_dim=8"] -->|borrows from| C1
 ```
 
 > [!NOTE]
@@ -320,6 +378,14 @@ pub struct RadianceCascadesFeature {
 ```
 
 The blend weight is typically in the range 0.05–0.1 per frame, meaning the history texture contributes 90–95% of the final signal. This creates a running exponential moving average over roughly 10–20 frames, which is enough to fully converge a static scene to a noise-free result in under half a second.
+
+#### History Blending
+
+The history blend weight $w_h$ controls temporal stability versus lag:
+
+$$C_{\text{out}} = (1 - w_h) \cdot C_{\text{current}} + w_h \cdot C_{\text{history}}$$
+
+For radiance cascades a typical $w_h$ of 0.9 means each frame retains 90% of prior GI. Static scenes converge in approximately 10 frames $(1 - 0.9^{10} \approx 65\%)$ and are effectively fully converged by 20 frames $(1 - 0.9^{20} \approx 88\%)$. Moving light sources cause a temporal lag proportional to $(1 - w_h)^{-1}$ — at $w_h = 0.9$ the effective lag is about 10 frames.
 
 > [!TIP]
 > In scenes where the probe grid is static (fixed AABB, no moving lights), the GI converges in about 10–20 frames and then costs almost nothing in terms of perceived noise. The GPU still executes the full trace-merge-blend pipeline every frame, but the output is visually stable. Consider disabling or cheapening RC in cut-scenes where the camera moves continuously and convergence never completes.

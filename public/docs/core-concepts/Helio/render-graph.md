@@ -142,7 +142,17 @@ impl ResourceHandle {
 }
 ```
 
-Passes declare their resources using string names like `"gbuffer"`, `"shadow_atlas"`, or `"color_target"`, and `ResourceHandle::named()` hashes those strings with FNV-1a to produce a stable, compact identifier. The FNV-1a hash is deterministic across runs — there are no random seeds — so the same name always maps to the same handle regardless of registration order or program state. This means two passes in completely different modules can independently declare `ResourceHandle::named("gbuffer")` and the graph will correctly recognize that they refer to the same resource and build a dependency edge between them.
+Passes declare their resources using string names like `"gbuffer"`, `"shadow_atlas"`, or `"color_target"`, and `ResourceHandle::named()` hashes those strings with FNV-1a to produce a stable, compact identifier. The FNV-1a hash is deterministic across runs — there are no random seeds — so the same name always maps to the same handle regardless of registration order or program state.
+
+Resource handles are computed as 64-bit FNV-1a hashes of the resource name string:
+
+$$\text{handle}(\text{name}) = \text{FNV-1a}_{64}(\text{name as UTF-8 bytes})$$
+
+$$h_0 = 14\,695\,981\,039\,346\,656\,037, \quad h_{i+1} = (h_i \oplus b_i) \times 1\,099\,511\,628\,211$$
+
+This gives a stable, collision-resistant identifier without a global registry. Two passes that both reference `ResourceHandle::named("shadow_atlas")` produce the same handle value and are correctly linked as producer/consumer.
+
+This means two passes in completely different modules can independently declare `ResourceHandle::named("gbuffer")` and the graph will correctly recognize that they refer to the same resource and build a dependency edge between them.
 
 The tradeoff is that hash collisions are theoretically possible. In practice, the set of resource names in any given renderer is small (Helio uses fewer than twenty), so collisions are not a practical concern. If a collision occurred, the symptom would be an incorrect dependency edge — a pass incorrectly believing it depends on a resource it does not — which would likely be caught immediately during development.
 
@@ -269,7 +279,41 @@ sequenceDiagram
 
 Note that `creates` declarations contribute to `all_writers` just like `writes` declarations — the difference between them is semantic (one creates the resource, one modifies it), but both establish a "this pass must run before any pass that reads this resource" relationship in the dependency graph. The separate tracking in `PassNode` is for documentation and future tooling purposes.
 
-**Topological sort.** The sort uses Kahn's algorithm with a FIFO queue (a `VecDeque`). Kahn's algorithm starts by computing the in-degree of every node — how many dependency edges point at it. All nodes with in-degree zero (no dependencies) are enqueued. The algorithm then processes nodes one at a time: it dequeues a node, appends it to the execution order, and decrements the in-degree of every node that depends on it. Any node whose in-degree reaches zero is enqueued. Because the queue is FIFO, nodes of equal priority (same number of remaining dependencies) are processed in the order they were registered, which gives predictable and stable pass ordering.
+**Topological sort.** The sort uses Kahn's algorithm with a FIFO queue (a `VecDeque`). Given the directed acyclic graph $G = (V, E)$ where $(u, v) \in E$ means "pass $u$ must run before pass $v$", Kahn's algorithm proceeds as follows:
+
+1. Compute in-degree for each node: $\deg^-(v) = |\{u : (u,v) \in E\}|$
+2. Initialise queue $Q = \{v \in V : \deg^-(v) = 0\}$
+3. While $Q \neq \emptyset$: dequeue $u$ → append to execution order; for each $(u, v) \in E$: decrement $\deg^-(v)$; if $\deg^-(v) = 0$, enqueue $v$
+4. If $|\text{execution order}| < |V|$: cycle detected → error
+
+$$\text{Time complexity: } O(|V| + |E|)$$
+
+FIFO ordering (not priority-based) gives deterministic results. The cycle detection is a correctness check — if a cycle exists, some passes would never reach in-degree 0 and stay stuck in the counter table.
+
+Kahn's algorithm starts by computing the in-degree of every node — how many dependency edges point at it. All nodes with in-degree zero (no dependencies) are enqueued. The algorithm then processes nodes one at a time: it dequeues a node, appends it to the execution order, and decrements the in-degree of every node that depends on it. Any node whose in-degree reaches zero is enqueued. Because the queue is FIFO, nodes of equal priority (same number of remaining dependencies) are processed in the order they were registered, which gives predictable and stable pass ordering.
+
+```rust
+fn topological_sort(passes: &[Pass], edges: &[(usize, usize)]) -> Result<Vec<usize>> {
+    let n = passes.len();
+    let mut in_degree = vec![0usize; n];
+    let mut adj: Vec<Vec<usize>> = vec![vec![]; n];
+    for &(u, v) in edges {
+        adj[u].push(v);
+        in_degree[v] += 1;
+    }
+    let mut queue: VecDeque<usize> = in_degree.iter().enumerate()
+        .filter(|(_, &d)| d == 0).map(|(i, _)| i).collect();
+    let mut order = Vec::with_capacity(n);
+    while let Some(u) = queue.pop_front() {
+        order.push(u);
+        for &v in &adj[u] {
+            in_degree[v] -= 1;
+            if in_degree[v] == 0 { queue.push_back(v); }
+        }
+    }
+    if order.len() == n { Ok(order) } else { Err("cycle detected") }
+}
+```
 
 After the sort, cycle detection is trivial: if the length of the resulting `execution_order` vector is not equal to the number of passes, the graph contains a cycle and `build()` returns `Err(Graph("Cyclic dependency"))`.
 

@@ -50,11 +50,50 @@ pub struct GpuInstanceData {
 
 The 128-byte size is deliberate. A typical CPU cache line is 64 bytes and a GPU L1 cache line is often 128 bytes. Packing the struct to exactly 128 bytes means that fetching any `GpuInstanceData` from the instance buffer requires exactly one GPU cache-line read, regardless of which field the shader accesses first. There is no wasted bandwidth from partial-line fetches and no cross-line spill for a single object.
 
+The struct's field sizes add up as follows:
+
+$$\underbrace{4 \times 4 \times 4}_{\text{transform: 64B}} + \underbrace{3 \times 4 \times 4}_{\text{normal\_mat: 48B}} + \underbrace{3 \times 4}_{\text{bounds\_center: 12B}} + \underbrace{4}_{\text{bounds\_radius: 4B}} = 128 \text{ bytes}$$
+
+Cache-line size on x86/ARM = 64 bytes. Two cache lines per instance means the GPU can fetch any instance in exactly 2 cache-line reads with no false-sharing between adjacent instances.
+
 **`transform` (64 bytes)** is the model-to-world matrix stored column-major as sixteen `f32` values. This matches the WGSL/GLSL memory layout for `mat4x4<f32>` — columns are contiguous in memory so shader reads are maximally coalesced when adjacent threads read adjacent slots.
 
 **`normal_mat` (48 bytes)** is the inverse-transpose of the upper-left 3×3 of the transform, padded to three `vec4` rows. This is the matrix required for transforming surface normals correctly in the presence of non-uniform scale — a step that is expensive enough (matrix inverse) to be worth precomputing once on the CPU rather than repeating in every vertex shader invocation.
 
+For a model matrix $\mathbf{M}$, the normal matrix is:
+
+$$\mathbf{N}_{\text{mat}} = (\mathbf{M}^{-1})^T$$
+
+Only the upper-left 3×3 submatrix is needed (translation doesn't affect normals). In `GpuInstanceData` this is stored as 12 floats (a mat3×4 with padding): $\mathbf{N}_{\text{mat}} \in \mathbb{R}^{3 \times 3}$.
+
+Why not just use $\mathbf{M}$ itself? When a mesh is scaled non-uniformly (e.g., squeezed in X), normals transformed by $\mathbf{M}$ would tilt incorrectly. The inverse-transpose restores perpendicularity. For uniform scale and rotation-only transforms, $(\mathbf{M}^{-1})^T = \mathbf{M}$ so the operation is a no-op in the common case.
+
+```rust
+// Compute normal matrix from transform
+fn normal_matrix(m: &glam::Mat4) -> [[f32; 3]; 3] {
+    let inv = m.inverse();
+    let t = inv.transpose();
+    // Extract upper-left 3×3
+    [
+        [t.x_axis.x, t.x_axis.y, t.x_axis.z],
+        [t.y_axis.x, t.y_axis.y, t.y_axis.z],
+        [t.z_axis.x, t.z_axis.y, t.z_axis.z],
+    ]
+}
+```
+
 **`bounds_center` and `bounds_radius` (16 bytes)** encode a world-space bounding sphere. This data enables GPU-side frustum and occlusion culling without any CPU readback. The constructor `GpuInstanceData::from_transform` computes both fields automatically: it transforms the mesh-space bounds center by the full transform matrix and scales the radius by `max(sx, sy, sz)` extracted from the transform, producing a conservative sphere that is never smaller than the actual transformed mesh.
+
+Given a local bounding sphere $(c_{\text{local}}, r_{\text{local}})$ and model transform $\mathbf{M}$, the world-space sphere is:
+
+$$\mathbf{c}_{\text{world}} = \mathbf{M} \cdot \mathbf{c}_{\text{local}}$$
+$$r_{\text{world}} = r_{\text{local}} \cdot \max(s_x, s_y, s_z)$$
+
+where the scale factors are the column magnitudes of $\mathbf{M}$:
+
+$$s_x = \|\mathbf{M}_{\text{col}_0}\|, \quad s_y = \|\mathbf{M}_{\text{col}_1}\|, \quad s_z = \|\mathbf{M}_{\text{col}_2}\|$$
+
+Taking the maximum of the three scale factors guarantees the world sphere is a conservative overestimate — no part of the mesh protrudes outside it. This is used for frustum culling; conservative bounds are safe for culling because false positives (keeping an object that is actually off-screen) are merely suboptimal, never incorrect.
 
 ```rust
 impl GpuInstanceData {
@@ -215,18 +254,33 @@ if hash != self.transform_hashes[slot] {
 
 ### FNV-1a Hash Implementation
 
-The FNV-1a (Fowler–Noll–Vo) hash is used specifically because it is extremely fast for small, fixed-size inputs — the 64 bytes of a transform matrix. The hash function operates byte-by-byte with two operations per byte (XOR and multiply), making it faster than CRC32 on inputs too small to benefit from SIMD and faster than xxHash on inputs this small due to lower setup overhead:
+The FNV-1a (Fowler–Noll–Vo) hash is used specifically because it is extremely fast for small, fixed-size inputs — the 64 bytes of a transform matrix. The hash function operates byte-by-byte with two operations per byte (XOR and multiply), making it faster than CRC32 on inputs too small to benefit from SIMD and faster than xxHash on inputs this small due to lower setup overhead.
+
+The 64-bit FNV-1a algorithm is defined by:
+
+$$h_0 = 14\,695\,981\,039\,346\,656\,037$$
+$$h_{i+1} = (h_i \oplus b_i) \times 1\,099\,511\,628\,211 \pmod{2^{64}}$$
+
+where $b_i$ is the $i$-th byte of the input and $\oplus$ is bitwise XOR. All arithmetic is unsigned 64-bit with wrapping overflow. Applied to the full 64 bytes of a transform matrix: if $h_{\text{new}} = h_{\text{cached}}$ the transform is unchanged — skip the GPU upload. The birthday bound for a false positive over $N$ frames is $N^2 / 2^{64}$ — essentially zero for any real application.
 
 ```rust
-fn fnv1a_hash(bytes: &[u8]) -> u64 {
-    const OFFSET: u64 = 14695981039346656037;
-    const PRIME: u64  = 1099511628211;
-    let mut hash = OFFSET;
-    for &byte in bytes {
-        hash ^= byte as u64;
-        hash = hash.wrapping_mul(PRIME);
+const FNV_OFFSET: u64 = 14_695_981_039_346_656_037;
+const FNV_PRIME:  u64 = 1_099_511_628_211;
+
+fn fnv1a_64(bytes: &[u8]) -> u64 {
+    let mut hash = FNV_OFFSET;
+    for &b in bytes {
+        hash ^= b as u64;
+        hash = hash.wrapping_mul(FNV_PRIME);
     }
     hash
+}
+
+// Usage: check if transform changed
+let new_hash = fnv1a_64(bytemuck::bytes_of(&transform));
+if new_hash != self.transform_hashes[slot] {
+    self.transform_hashes[slot] = new_hash;
+    self.dirty.insert(slot);
 }
 ```
 
@@ -237,7 +291,13 @@ For a 64-byte transform (sixteen `f32` values), this is 64 iterations — roughl
 
 ### Dirty Range Merging
 
-After the hash check, dirty slot indices are collected and merged into contiguous ranges before issuing `write_buffer` calls. This matters because `write_buffer` has a fixed per-call overhead (descriptor allocation, synchronisation fence check, staging buffer management) that is paid regardless of how many bytes are written. Writing 100 adjacent slots as one 12,800-byte call is dramatically cheaper than writing them as 100 individual 128-byte calls:
+After the hash check, dirty slot indices are collected and merged into contiguous ranges before issuing `write_buffer` calls. This matters because `write_buffer` has a fixed per-call overhead (descriptor allocation, synchronisation fence check, staging buffer management) that is paid regardless of how many bytes are written. Writing 100 adjacent slots as one 12,800-byte call is dramatically cheaper than writing them as 100 individual 128-byte calls.
+
+Given a set of dirty slots $D = \{s_1, s_2, \ldots, s_k\}$ (sorted), each slot is 128 bytes. Adjacent or near-adjacent slots are merged into contiguous ranges for a single `write_buffer` call:
+
+$$\text{ranges} = \{[s_i \cdot 128,\; s_j \cdot 128 + 128) \mid s_{j+1} - s_j > \text{GAP}\}$$
+
+Merging slots that are within a configurable gap threshold avoids $N$ individual `queue.write_buffer()` calls at the cost of uploading a few unchanged bytes between them. The optimal gap threshold depends on the cost model of the wgpu backend.
 
 ```rust
 // Pseudocode for dirty range merging in flush():

@@ -115,7 +115,7 @@ flowchart LR
         WS2["Tab 2\nWebSocket client"]
     end
 
-    RT -->|"mpsc::Sender\n(non-blocking send)"| BT
+    RT -->|mpsc send| BT
     AX -->|"ws frame JSON"| WS1
     AX -->|"ws frame JSON"| WS2
 ```
@@ -402,9 +402,9 @@ The outer `Option` is the *change flag* — `None` means "no diff". The inner `O
 ```mermaid
 flowchart TD
     A["camera field in delta"]
-    A -->|"None"| B["No camera change\nClient keeps existing state"]
-    A -->|"Some(None)"| C["Camera removed\nClient clears frustum indicator"]
-    A -->|"Some(Some(cam))"| D["Camera updated\nClient re-renders frustum"]
+    A -->|None| B["No camera change\nClient keeps existing state"]
+    A -->|Some-None| C["Camera removed\nClient clears frustum indicator"]
+    A -->|Some-Some-cam| D["Camera updated\nClient re-renders frustum"]
 ```
 
 ## `compute_scene_delta` — Diffing the Scene

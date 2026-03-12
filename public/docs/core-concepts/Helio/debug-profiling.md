@@ -731,8 +731,8 @@ graph LR
     R[Renderer] --> DV[DebugVizSystem]
     R --> DP[DebugDrawPass]
     R --> GP[GpuProfiler]
-    DV --> |collect_shapes| DS[Vec&lt;DebugShape&gt;]
-    R --> |debug_line/sphere/…| DS
+    DV --> |collect_shapes| DS["Vec&lt;DebugShape&gt;"]
+    R --> |debug_line / sphere / ...| DS
     DS --> |build_batch| DP
     GP --> |timings| LP[LivePortal]
     GP --> |timings| UI[Debug UI]

@@ -102,11 +102,57 @@ flowchart TD
 
 The **extract** step runs a pixel shader over the full-resolution colour buffer. For every texel whose luminance (computed as `dot(colour.rgb, vec3(0.2126, 0.7152, 0.0722))`) exceeds `BLOOM_THRESHOLD`, the texel's colour is written into `bloom_tex_0`; otherwise black is written. This hard cut can be softened to a smooth knee in the WGSL, but the default is a sharp threshold.
 
+#### Rec. 709 Perceptual Luminance
+
+The luminance coefficient vector comes from the ITU-R Rec. 709 (sRGB primaries) standard:
+
+$$Y = 0.2126\, R + 0.7152\, G + 0.0722\, B$$
+
+The human eye is most sensitive to green (~550 nm), less to red, and least to blue. These coefficients convert linear RGB to perceptual brightness. A pixel "blooms" when its *perceived* brightness exceeds the threshold — not just any single channel — which prevents, for example, a fully-saturated blue pixel from triggering bloom even though it reads as dark to a human observer.
+
+```wgsl
+fn luminance(colour: vec3<f32>) -> f32 {
+    return dot(colour, vec3<f32>(0.2126, 0.7152, 0.0722));
+}
+fn bloom_extract(colour: vec3<f32>, threshold: f32) -> vec3<f32> {
+    let lum = luminance(colour);
+    return colour * max(lum - threshold, 0.0) / max(lum, 0.0001);
+}
+```
+
+The `bloom_extract` variant scales the colour proportionally to how far it exceeds the threshold — a smooth soft-knee lift rather than a binary cut. The `max(lum, 0.0001)` guard prevents a divide-by-zero on black pixels.
+
 The **downsample chain** applies 5–6 half-resolution passes. Each downsample takes a 2×2 box filter plus a set of diagonal samples to produce a gentle pre-blur that prevents aliasing during the upsample phase.
+
+#### Kawase Dual-Filter Downsample
+
+Each downsample step takes four bilinear samples at half-pixel offsets and averages them:
+
+$$C_{\text{down}}(x,y) = \frac{1}{4}\sum_{i \in \{+0.5,\,-0.5\}} \sum_{j \in \{+0.5,\,-0.5\}} C_{\text{src}}\!\left(\frac{x+i}{W_{\text{src}}},\; \frac{y+j}{H_{\text{src}}}\right)$$
+
+Hardware bilinear filtering at the half-pixel offset implicitly averages a 2×2 neighbourhood, so each GPU texture fetch is already a 4-tap box filter. Sampling four such points gives an effective 8×8 coverage footprint per downsample pass for the cost of four texture reads.
+
+```wgsl
+fn downsample(tex: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec3<f32> {
+    let inv_size = 1.0 / vec2<f32>(textureDimensions(tex));
+    let o = inv_size * 0.5; // half-pixel offset
+    var c = textureSample(tex, s, uv + vec2( o.x,  o.y)).rgb;
+    c    += textureSample(tex, s, uv + vec2(-o.x,  o.y)).rgb;
+    c    += textureSample(tex, s, uv + vec2( o.x, -o.y)).rgb;
+    c    += textureSample(tex, s, uv + vec2(-o.x, -o.y)).rgb;
+    return c * 0.25;
+}
+```
 
 The **upsample chain** works in reverse, reading from each smaller mip and additively accumulating into the next-larger mip. By the time the result reaches `bloom_tex_0` again, it contains a naturally wide Gaussian-shaped spread of the original bright regions.
 
 The **composite** step in `deferred_lighting.wgsl` reads `bloom_tex_0` and adds it to the colour output, scaled by `BLOOM_INTENSITY`. Because this blend is additive, a value of `0.0` produces no bloom at all regardless of threshold, and a value of `2.0` produces a very aggressive, overexposed glow.
+
+#### Bloom Composite (Additive)
+
+$$C_{\text{final}} = C_{\text{scene}} + \text{intensity} \cdot C_{\text{bloom\_up}}$$
+
+where $C_{\text{bloom\_up}}$ is the fully upsampled bloom pyramid result. The operation is purely additive — it never darkens the scene. This mirrors the physical process of light scatter in a lens: extra photons arrive at adjacent pixels, but none are removed from the source pixel.
 
 A WGSL extract pass looks approximately like this, with the override constants substituted at pipeline-specialisation time:
 
@@ -322,6 +368,14 @@ pub struct SmaaPass {
 
 **Pass 1 — Edge Detection.** The edge shader scans the colour buffer for luminance discontinuities (similar to FXAA's first step) and writes a binary edge mask into `edge_texture`. This mask identifies which pixel edges are candidates for anti-aliasing.
 
+#### SMAA Detection Threshold
+
+Edge detection uses the absolute luminance gradient between adjacent pixels:
+
+$$\text{edge}(x,y) = \lvert Y(x,y) - Y(x-1,y) \rvert + \lvert Y(x,y) - Y(x,y-1) \rvert > T_{\text{edge}}$$
+
+where $T_{\text{edge}} \approx 0.1$. Pixels whose combined horizontal and vertical luminance delta exceeds $T_{\text{edge}}$ are marked as edge pixels and receive anti-aliasing treatment in the subsequent passes. The threshold prevents noise and low-contrast texture detail from being misclassified as geometric edges.
+
 **Pass 2 — Blending Weights.** This is SMAA's distinguishing feature. Using pre-computed look-up textures (the *area LUT* and *search LUT*, both loaded at renderer initialisation), the blending weight pass examines the shapes of edges in the mask and computes how much of each neighbouring pixel should be blended at each edge endpoint. Recognising L-shaped, Z-shaped, and U-shaped edge patterns is what separates SMAA from simpler algorithms.
 
 **Pass 3 — Neighbourhood Blending.** The final pass uses the weight texture computed in Pass 2 to blend each edge pixel with its neighbours, producing the anti-aliased output on the surface.
@@ -362,6 +416,12 @@ pub struct TaaPass {
 
 **Jitter.** Each frame, TAA applies a sub-pixel offset — the *jitter* — to the projection matrix before the geometry passes run. This shifts the sample position by a fraction of a pixel, so that over a sequence of frames the samples collectively cover the full pixel area. The jitter follows a low-discrepancy sequence (Halton or similar) to ensure good coverage with minimal repetition.
 
+The jitter sequence shifts the projection matrix by a sub-pixel offset each frame, sampling different sub-pixel positions over time:
+
+$$\mathbf{P}_{\text{jittered}} = \mathbf{P} + \frac{1}{2}\begin{pmatrix} j_x / W \\ j_y / H \end{pmatrix} \text{ (in NDC)}$$
+
+where $(j_x, j_y)$ cycles through a Halton or Hammersley low-discrepancy sequence. The factor of $\frac{1}{2}$ converts from pixel-space to NDC half-steps. Over a sequence of frames these offsets tile the unit pixel area densely, so temporal accumulation converges to sub-pixel precision.
+
 The jitter is applied to the projection matrix in clip space, not to the viewport transform. This means the jitter is correctly accounted for by the depth buffer — a jittered depth value corresponds to the correct world-space depth for that sub-pixel position. The `jitter_index` field on `TaaPass` advances by one each frame and wraps around after the sequence length (typically 8 or 16 samples), providing repeating but well-distributed sub-pixel coverage.
 
 ```rust
@@ -384,6 +444,15 @@ let history_weight = clamp(
 );
 let output = mix(current_sample, history_sample, history_weight);
 ```
+
+#### TAA Temporal Blend
+
+$$C_{\text{out}} = \operatorname{lerp}(C_{\text{current}},\; C_{\text{history}},\; \alpha)$$
+$$\alpha = \operatorname{clamp}(\alpha_{\text{computed}},\; \alpha_{\min},\; \alpha_{\max})$$
+
+with $\alpha_{\min} = 0.88$ and $\alpha_{\max} = 0.97$ by default.
+
+$\alpha$ is the **history weight** — how much of the accumulated past frames to keep. High $\alpha$ (→ 0.97) means more averaging across many frames, producing a smooth result but increasing ghosting behind fast-moving objects. Low $\alpha$ (→ 0.88) produces a sharper, more responsive result at the cost of more temporal noise on static geometry. The clamp prevents the blend factor from leaving the stable convergence range.
 
 | `feedback_max` | Effect |
 |---------------|--------|
@@ -457,6 +526,16 @@ pub struct SsaoConfig {
 | `bias` | `0.025` | Depth offset applied to samples to prevent a surface from occluding itself due to floating-point precision. Too small → self-occlusion noise; too large → missed near-surface occlusion. |
 | `power` | `2.0` | Exponent applied to the raw AO factor after accumulation. Higher values increase contrast, darkening occluded areas more aggressively. `1.0` is linear; `3.0+` is very contrasty. |
 | `samples` | `16` | Number of hemisphere samples per pixel. More samples → smoother AO at higher cost. `8` is low quality; `32` approaches noise-free on typical scenes. |
+
+#### SSAO Hemisphere Sampling
+
+SSAO samples $N$ random directions in the hemisphere aligned with the surface normal and counts how many sample points lie inside nearby geometry:
+
+$$\text{AO} = \frac{1}{N}\sum_{i=1}^{N} \mathbf{1}\!\left[z_{\text{sample}_i} > z_{\text{depth\_buffer}}\right]$$
+
+$$\text{AO}_{\text{final}} = \text{AO}^{\text{power}}$$
+
+The indicator function $\mathbf{1}[\cdot]$ is $1$ when a sample point is occluded (its reconstructed depth is behind the depth buffer) and $0$ when it is not. The `power` exponent (default 2.0) applies a gamma curve to increase contrast in occluded regions. The `bias` term (default 0.025) offsets each sample slightly above the surface before depth comparison, preventing self-occlusion artefacts at grazing angles where floating-point depth precision is lowest.
 
 The SSAO pass writes a single-channel `R8` texture (`ao_texture`) that represents the ambient occlusion factor at each pixel, where `1.0` means fully unoccluded and `0.0` means fully occluded. The deferred lighting pass would multiply the ambient light contribution by this factor.
 

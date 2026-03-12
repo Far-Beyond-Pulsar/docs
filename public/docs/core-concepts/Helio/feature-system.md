@@ -832,8 +832,8 @@ where lights are being counted during scene traversal.
 
 ```mermaid
 graph LR
-    GT["Game Thread"] -->|lock draw_list| DL["Arc<Mutex<Vec<DrawCall>>>"]
-    GT -->|AtomicU32| LC["Arc<AtomicU32> light_count"]
+    GT["Game Thread"] -->|lock draw_list| DL["Arc-Mutex-Vec-DrawCall"]
+    GT -->|AtomicU32| LC["Arc-AtomicU32 light_count"]
     RT["Render Thread"] -->|read draw_list| DL
     RT -->|read light_count| LC
     RT -->|write_buffer| LB["GPU Light Buffer"]

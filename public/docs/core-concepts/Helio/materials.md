@@ -26,16 +26,62 @@ Helio uses the **Cook-Torrance microfacet BRDF** as its shading model, which is 
 
 The reflectance equation evaluated per-fragment is:
 
-```
-f(l, v) = f_diffuse + f_specular
-        = (albedo / π) + (D · F · G) / (4 · (n·l) · (n·v))
-```
+$$f_r(\mathbf{v}, \mathbf{l}) = \frac{\text{albedo}}{\pi}(1 - F)(1 - \text{metallic}) + \frac{D(\mathbf{h}, \alpha) \cdot G(\mathbf{v}, \mathbf{l}, \alpha) \cdot F(\mathbf{v}, \mathbf{h}, F_0)}{4(\mathbf{n} \cdot \mathbf{v})(\mathbf{n} \cdot \mathbf{l})}$$
+
+**Symbol guide:** $\mathbf{v}$ = view direction, $\mathbf{l}$ = light direction, $\mathbf{h} = \frac{\mathbf{v}+\mathbf{l}}{|\mathbf{v}+\mathbf{l}|}$ = half-vector, $\mathbf{n}$ = surface normal, $\alpha$ = roughness², $F_0$ = base reflectance at normal incidence. The left term is the **Lambertian diffuse** lobe (divided by $\pi$ for energy conservation, suppressed for metals via the $(1-F)(1-\text{metallic})$ factor). The right term is the **Cook-Torrance specular** lobe built from three microfacet functions $D$, $G$, $F$ in the numerator and a geometric normalisation factor $4(\mathbf{n}\cdot\mathbf{v})(\mathbf{n}\cdot\mathbf{l})$ in the denominator.
 
 where:
 
 - **D** is the GGX/Trowbridge-Reitz **normal distribution function** — controls how "sharp" or "blurry" specular highlights appear. Driven by `roughness`.
+
+$$D(\mathbf{n}, \mathbf{h}, \alpha) = \frac{\alpha^2}{\pi \left[(\mathbf{n} \cdot \mathbf{h})^2(\alpha^2 - 1) + 1\right]^2}$$
+
+  $\alpha = \text{roughness}^2$; $\mathbf{n}\cdot\mathbf{h}$ is the cosine between the surface normal and the half-vector. The formula describes the statistical fraction of microfacet normals aligned with $\mathbf{h}$. High roughness ($\alpha \to 1$) flattens and widens the lobe; low roughness ($\alpha \to 0$) produces a tight, mirror-like highlight.
+
+  ```wgsl
+  fn distribution_ggx(n_dot_h: f32, roughness: f32) -> f32 {
+      let a  = roughness * roughness;
+      let a2 = a * a;
+      let d  = n_dot_h * n_dot_h * (a2 - 1.0) + 1.0;
+      return a2 / (PI * d * d);
+  }
+  ```
+
 - **F** is the **Fresnel term** (Schlick approximation) — describes how reflectivity increases at grazing angles. Driven by `metallic` and `base_color`.
+
+$$F(\mathbf{v}, \mathbf{h}, F_0) = F_0 + (1 - F_0)(1 - \mathbf{v} \cdot \mathbf{h})^5$$
+
+$$F_0 = \text{lerp}(0.04,\; \text{albedo},\; \text{metallic})$$
+
+  $F_0$ is the reflectance at normal incidence — $0.04$ (4%) for dielectrics, equal to `albedo` for metals. As the view grazes the surface ($\mathbf{v}\cdot\mathbf{h} \to 0$) the $(1 - \mathbf{v}\cdot\mathbf{h})^5$ term approaches 1 and $F \to 1$: everything becomes a mirror at 90°.
+
+  ```wgsl
+  fn fresnel_schlick(v_dot_h: f32, f0: vec3<f32>) -> vec3<f32> {
+      return f0 + (vec3(1.0) - f0) * pow(1.0 - v_dot_h, 5.0);
+  }
+  // F0 setup:
+  let f0 = mix(vec3<f32>(0.04), albedo.rgb, metallic);
+  ```
+
 - **G** is the **geometry/shadow-masking function** (Smith combined) — accounts for microfacets occluding each other. Also driven by `roughness`.
+
+$$G(\mathbf{n}, \mathbf{v}, \mathbf{l}, \alpha) = G_1(\mathbf{n}, \mathbf{v}, \alpha) \cdot G_1(\mathbf{n}, \mathbf{l}, \alpha)$$
+
+$$G_1(\mathbf{n}, \mathbf{x}, \alpha) = \frac{\mathbf{n} \cdot \mathbf{x}}{(\mathbf{n} \cdot \mathbf{x})(1 - k) + k}, \quad k = \frac{(\alpha + 1)^2}{8}$$
+
+  The function is factored into two Schlick-GGX terms — one for the view direction ($G_1(\mathbf{n},\mathbf{v},\alpha)$, self-shadowing) and one for the light direction ($G_1(\mathbf{n},\mathbf{l},\alpha)$, masking). The remapping $k = (\alpha+1)^2/8$ reduces over-darkening on rough surfaces. $k = 0$ gives no shadowing; $k = 1$ gives full shadowing.
+
+  ```wgsl
+  fn geometry_schlick_ggx(n_dot_v: f32, roughness: f32) -> f32 {
+      let r = roughness + 1.0;
+      let k = (r * r) / 8.0;
+      return n_dot_v / (n_dot_v * (1.0 - k) + k);
+  }
+  fn geometry_smith(n_dot_v: f32, n_dot_l: f32, roughness: f32) -> f32 {
+      return geometry_schlick_ggx(n_dot_v, roughness)
+           * geometry_schlick_ggx(n_dot_l, roughness);
+  }
+  ```
 
 Dielectric materials (plastics, stone, wood) have an `F0` (reflectance at normal incidence) of roughly 0.04, meaning 4% of light is reflected even at straight-on angles. Metals absorb rather than transmit the refracted portion, so their `F0` is taken directly from `base_color`, and their diffuse contribution is zero. The `metallic` parameter linearly blends between these two behaviours.
 
@@ -349,6 +395,20 @@ The 32-byte size is deliberate: modern GPUs fetch vertex data in cache lines of 
 
 Normals and tangents are stored as four signed 8-bit integers packed into a single `u32`. Each component is compressed from the `[-1, 1]` float range into `[-127, 127]`:
 
+$$\text{packed} = \text{round}(v \times 127.0), \quad v \in [-1, 1]$$
+$$\text{unpacked} = \frac{\text{packed}}{127.0}$$
+
+This **SNORM8** encoding saves 75% memory compared to a raw `f32` component (1 byte vs 4 bytes) with a worst-case angular error of $\approx 0.46°$ for unit normals — imperceptible in typical lighting calculations.
+
+```rust
+fn pack_snorm8(v: f32) -> i8 {
+    (v.clamp(-1.0, 1.0) * 127.0).round() as i8
+}
+fn unpack_snorm8(b: i8) -> f32 {
+    (b as f32) / 127.0
+}
+```
+
 ```rust
 fn pack_snorm8x4(x: f32, y: f32, z: f32, w: f32) -> u32 {
     let pack = |v: f32| -> u32 {
@@ -368,8 +428,14 @@ The fourth component (`w`) in the normal field is unused padding (set to 0). In 
 
 The bitangent (also called binormal) is not stored in the vertex — it is reconstructed in the shader as:
 
+$$\mathbf{B} = (\mathbf{N} \times \mathbf{T}) \cdot s$$
+
+where $s \in \{+1, -1\}$ is the `bitangent_sign` stored in the `w` component of the packed tangent. The cross product $\mathbf{N} \times \mathbf{T}$ yields the vector perpendicular to both the normal and tangent; the sign $s$ corrects for UV mirroring in left-handed UV spaces. This avoids storing the bitangent explicitly, saving 4 bytes per vertex with zero loss of precision.
+
 ```wgsl
-let bitangent = cross(normal, tangent) * bitangent_sign;
+let N = normalize(vertex.normal);
+let T = normalize(vertex.tangent.xyz);
+let B = cross(N, T) * vertex.tangent.w; // w = bitangent_sign
 ```
 
 The sign is either `+1.0` or `-1.0` and encodes the handedness of the tangent frame. This sign is required because UV maps sometimes use left-handed or right-handed coordinate systems depending on how the geometry was unwrapped. Storing it as a full `f32` rather than a bit keeps the struct aligned to 4-byte boundaries throughout.
@@ -447,6 +513,26 @@ pub struct GpuMesh {
 Every `GpuMesh` stores both a **bounding sphere** (`bounds_center` + `bounds_radius`) and an **AABB** (`aabb_min` / `aabb_max`) in local object space. These are computed automatically by the mesh upload path by iterating over the provided vertices.
 
 The bounding sphere is used for fast approximate frustum culling — a sphere-plane test requires just six dot products. The AABB is used for tighter culling when the sphere test passes, and also by the shadow atlas allocation code to estimate shadow cascade coverage.
+
+When an object's world transform changes, both bounding volumes must be re-fitted in world space. Helio uses the **Arvo method** to transform an AABB without enumerating all eight corners. For a matrix $M$ applied to an AABB $[\mathbf{min}, \mathbf{max}]$, each output axis $i$ is computed as:
+
+$$[\text{newMin}_i,\; \text{newMax}_i] = \sum_j \left[\min(M_{ij} \cdot \text{min}_j,\; M_{ij} \cdot \text{max}_j),\; \max(M_{ij} \cdot \text{min}_j,\; M_{ij} \cdot \text{max}_j)\right]$$
+
+Each output dimension depends only on the corresponding column of $M$ and the input interval for that axis. This replaces 24 multiplications (8 corners × 3 components) with 9 min/max pairs (3 columns × 3 output axes), starting from the translation component of $M$ as the initial min/max.
+
+```rust
+fn transform_aabb(m: &Mat4, min: Vec3, max: Vec3) -> (Vec3, Vec3) {
+    let mut new_min = m.w_axis.truncate(); // translation column
+    let mut new_max = new_min;
+    for i in 0..3 {
+        let col = m.col(i).truncate();
+        let (lo, hi) = (col * min[i], col * max[i]);
+        new_min += lo.min(hi);
+        new_max += lo.max(hi);
+    }
+    (new_min, new_max)
+}
+```
 
 ### The Buffer Pool and `pool_allocated`
 
@@ -577,8 +663,65 @@ impl Frustum {
 
 The six frustum planes are extracted from the combined view-projection matrix using the **Gribb-Hartmann method**. Each row of the VP matrix encodes a half-space; summing row pairs produces the six clip planes in world space without requiring an explicit frustum decomposition. The planes are stored in the form `(nx, ny, nz, d)` where `nx, ny, nz` is the plane normal and `d` is the signed distance from the origin.
 
+Given a combined view-projection matrix $M$ with rows $p_0, p_1, p_2, p_3$:
+
+$$\text{left:}   \quad \mathbf{n} = p_3 + p_0, \quad d = p_{3w} + p_{0w}$$
+$$\text{right:}  \quad \mathbf{n} = p_3 - p_0, \quad d = p_{3w} - p_{0w}$$
+$$\text{bottom:} \quad \mathbf{n} = p_3 + p_1, \quad d = p_{3w} + p_{1w}$$
+$$\text{top:}    \quad \mathbf{n} = p_3 - p_1, \quad d = p_{3w} - p_{1w}$$
+$$\text{near:}   \quad \mathbf{n} = p_3 + p_2, \quad d = p_{3w} + p_{2w}$$
+$$\text{far:}    \quad \mathbf{n} = p_3 - p_2, \quad d = p_{3w} - p_{2w}$$
+
+Each resulting $(\mathbf{n}, d)$ pair defines a half-space where $\mathbf{n} \cdot \mathbf{x} + d \geq 0$ means the point $\mathbf{x}$ is on the inside (visible side) of the plane.
+
+```rust
+fn extract_planes(vp: &Mat4) -> [Vec4; 6] {
+    let cols = vp.to_cols_array_2d();
+    let r = |i: usize| Vec4::from(cols[i]);
+    let p3 = r(3);
+    [
+        p3 + r(0),  // left
+        p3 - r(0),  // right
+        p3 + r(1),  // bottom
+        p3 - r(1),  // top
+        p3 + r(2),  // near
+        p3 - r(2),  // far
+    ]
+}
+```
+
 > [!NOTE]
 > The planes stored by `Frustum` are **not pre-normalised**. The `test_sphere()` method divides the signed distance by the normal magnitude to obtain the correct signed distance for the sphere radius comparison. The `test_aabb()` method uses the positive vertex trick (selecting the component of `aabb_max` or `aabb_min` that contributes maximally in the normal direction) and does not require normalisation.
+
+### Sphere–Plane Distance Test
+
+For a sphere with centre $\mathbf{c}$ and radius $r$ against a plane $(\hat{\mathbf{n}}, d)$:
+
+$$\text{dist} = \hat{\mathbf{n}} \cdot \mathbf{c} + d$$
+$$\text{outside if } \text{dist} < -r$$
+
+If the signed distance from the plane to the sphere centre is less than $-r$, the entire sphere is on the negative (outside) side of the plane. The sphere is culled if this holds for **any** of the six frustum planes.
+
+```rust
+fn sphere_outside_plane(center: Vec3, radius: f32, plane: Vec4) -> bool {
+    plane.xyz().dot(center) + plane.w < -radius
+}
+fn sphere_in_frustum(center: Vec3, radius: f32, planes: &[Vec4; 6]) -> bool {
+    planes.iter().all(|p| !sphere_outside_plane(center, radius, *p))
+}
+```
+
+### AABB Positive-Vertex Test
+
+For a tighter cull, the AABB positive-vertex test checks the AABB corner most extreme in the plane's normal direction. For a plane normal $\hat{\mathbf{n}}$, the positive vertex $\mathbf{p}$ is selected per axis:
+
+$$p_x = \begin{cases} \text{aabb.max}_x & \text{if } n_x \geq 0 \\ \text{aabb.min}_x & \text{otherwise} \end{cases}$$
+
+(identically for $y$ and $z$). The AABB is outside the plane if:
+
+$$\hat{\mathbf{n}} \cdot \mathbf{p} + d < 0$$
+
+This reduces the 8-corner test to a single dot product per plane by exploiting the fact that only the most extreme corner can falsify the inside test.
 
 ### Sphere Test
 
@@ -661,8 +804,8 @@ This is particularly efficient in scenes with many moving objects, since each en
 
 ```mermaid
 flowchart LR
-    LA["Local AABB<br/>(aabb_min, aabb_max)"] -->|Aabb::transform(model_matrix)| WA["World AABB"]
-    WA -->|Frustum::test_aabb| V{Visible?}
+    LA["Local AABB<br/>(aabb_min, aabb_max)"] -->|transform| WA["World AABB"]
+    WA -->|test_aabb| V{Visible?}
     V -->|yes| DC[Submit DrawCall]
     V -->|no| SKIP[Skip]
 ```
@@ -757,8 +900,8 @@ fn render_frame(renderer: &mut Renderer, scene: &Scene, camera: &Camera) {
 
 ```mermaid
 graph TD
-    CPU_MAT["Material (CPU)<br/>scalars + optional TextureData"] -->|renderer.create_material| GPU_MAT["GpuMaterial<br/>BindGroup + MaterialUniform"]
-    CPU_VERTS["PackedVertex[] + u32[]"] -->|renderer.create_mesh| GPU_MESH["GpuMesh<br/>Buffers + AABB + BoundingSphere"]
+    CPU_MAT["Material (CPU)<br/>scalars + optional TextureData"] -->|create_material| GPU_MAT["GpuMaterial<br/>BindGroup + MaterialUniform"]
+    CPU_VERTS["PackedVertex[] + u32[]"] -->|create_mesh| GPU_MESH["GpuMesh<br/>Buffers + AABB + BoundingSphere"]
     GPU_MAT --> DC["DrawCall"]
     GPU_MESH --> DC
     INST["instance_slot<br/>(transform index)"] --> DC
