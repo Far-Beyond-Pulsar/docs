@@ -94,6 +94,36 @@ function generateSlug(text) {
   });
 }
 
+// KaTeX display-math zoom wrapper component
+function KaTeXZoomWrapper({ children, className, ...props }) {
+  const [expanded, setExpanded] = React.useState(false);
+  return (
+    <span
+      className={`katex-zoom-wrapper${expanded ? ' katex-zoom-expanded' : ''} ${className || ''}`}
+      {...props}
+    >
+      {children}
+      <button
+        className="katex-zoom-btn"
+        aria-label={expanded ? 'Collapse math' : 'Expand math'}
+        onClick={() => setExpanded(e => !e)}
+      >
+        {expanded ? (
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/>
+            <line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/>
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+            <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+          </svg>
+        )}
+      </button>
+    </span>
+  );
+}
+
 // Extract text from React children (handles nested elements)
 function extractTextFromChildren(children) {
   if (typeof children === 'string') {
@@ -113,6 +143,7 @@ export default function MarkdownRenderer({
 }) {
   const [copied, setCopied] = useState({});
   const [isMounted, setIsMounted] = useState(false);
+  const contentRef = React.useRef(null);
   
   // Set isMounted to true when component is mounted on client
   useEffect(() => {
@@ -141,6 +172,54 @@ export default function MarkdownRenderer({
       });
     }
   }, []);
+
+  // Wrap display math blocks with a zoom button after render.
+  // We target .katex-display first, falling back to any .katex whose parent
+  // is a block-level element (i.e. display math without the outer wrapper).
+  useEffect(() => {
+    if (!isMounted) return;
+    const timer = setTimeout(() => {
+      const root = contentRef.current;
+      if (!root) return;
+
+      // Collect display-math candidates: .katex-display, or top-level .katex not inside .katex-display
+      const candidates = [
+        ...root.querySelectorAll('.katex-display:not([data-zoom-wrapped])'),
+        ...Array.from(root.querySelectorAll('.katex:not([data-zoom-wrapped])')).filter(
+          el => !el.closest('.katex-display')
+        ),
+      ];
+
+      candidates.forEach(el => {
+        el.setAttribute('data-zoom-wrapped', 'true');
+
+        // Outer wrapper — position:relative, no overflow, button lives here
+        const wrapper = document.createElement('span');
+        wrapper.className = 'katex-zoom-wrapper';
+        el.parentNode.insertBefore(wrapper, el);
+
+        // Inner scroller — overflow-x:auto lives here so button doesn't scroll away
+        const scroller = document.createElement('span');
+        scroller.className = 'katex-zoom-scroller';
+        wrapper.appendChild(scroller);
+        scroller.appendChild(el);
+
+        const btn = document.createElement('button');
+        btn.className = 'katex-zoom-btn';
+        btn.setAttribute('aria-label', 'Expand math');
+        const expandIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
+        const collapseIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>`;
+        btn.innerHTML = expandIcon;
+        btn.onclick = () => {
+          const expanded = wrapper.classList.toggle('katex-zoom-expanded');
+          btn.setAttribute('aria-label', expanded ? 'Collapse math' : 'Expand math');
+          btn.innerHTML = expanded ? collapseIcon : expandIcon;
+        };
+        wrapper.appendChild(btn);
+      });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [isMounted, content]);
 
   // Initialize mermaid once globally when component mounts
   useEffect(() => {
@@ -312,7 +391,7 @@ export default function MarkdownRenderer({
 
   // Only render ReactMarkdown on the client side
   return (
-    <div className="markdown-content dark-theme">
+    <div ref={contentRef} className="markdown-content dark-theme">
       {isMounted ? (
         <ReactMarkdown
           remarkPlugins={[
@@ -450,6 +529,67 @@ export default function MarkdownRenderer({
           overflow-y: hidden;
           padding: 1em 0;
           margin: 1.2em 0 !important;
+        }
+
+        /* Zoomable KaTeX wrapper */
+        .katex-zoom-wrapper {
+          position: relative;
+          display: block;
+        }
+
+        /* Inner scroll container — no overflow by default, only when expanded */
+        .katex-zoom-scroller {
+          display: block;
+          overflow: hidden;
+        }
+
+        .katex-zoom-btn {
+          position: absolute;
+          top: 0.5em;
+          right: 0.5em;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 28px;
+          height: 28px;
+          background: rgba(21, 26, 34, 0.95);
+          border: 1px solid #30363d;
+          border-radius: 6px;
+          color: #8b949e;
+          cursor: pointer;
+          backdrop-filter: blur(4px);
+          z-index: 10;
+          transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .katex-zoom-btn:hover {
+          color: #c9b0ff;
+          background: rgba(124, 58, 237, 0.2);
+          border-color: #7c3aed;
+        }
+
+        /* Expanded state — styled on wrapper, scrolls on inner scroller */
+        .katex-zoom-expanded {
+          width: 100%;
+          background: rgba(13, 17, 23, 0.7);
+          border: 1px solid #30363d;
+          border-radius: 10px;
+          /* only top padding so the button doesn't overlap the math */
+          padding-top: 2.5em;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+          margin: 1em 0;
+        }
+
+        .katex-zoom-expanded .katex-zoom-scroller {
+          overflow-x: auto;
+          padding: 0.8em 1em 1em 1em;
+        }
+
+        /* zoom reflows layout unlike transform:scale so nothing gets clipped */
+        .katex-zoom-expanded .katex,
+        .katex-zoom-expanded .katex-display {
+          zoom: 1.6;
+          display: block;
         }
         
         .dark-theme .katex {
