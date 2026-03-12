@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import DocsSidebar from '@/components/DocsSidebar';
 import TableOfContents from '@/components/TableOfContents';
@@ -16,8 +16,42 @@ const RIGHT_SIDEBAR_MAX = 500;
 const LEFT_SIDEBAR_DEFAULT = 320;
 const RIGHT_SIDEBAR_DEFAULT = 256;
 
+// banner hooks copied from root layout
+function useBannerVisibility() {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    if (!visible) return;
+    const handler = () => setVisible(false);
+    document.addEventListener('scroll', handler, { capture: true, passive: true });
+    return () => document.removeEventListener('scroll', handler, { capture: true });
+  }, [visible]);
+  return visible;
+}
+function useHeaderOffset(bannerVisible) {
+  const [offset, setOffset] = useState(0);
+  useLayoutEffect(() => {
+    const headerEl = document.querySelector('header');
+    const bannerEl = document.querySelector('[data-notice-banner]');
+    const update = () => {
+      const h = headerEl?.offsetHeight || 0;
+      const b = bannerVisible && bannerEl ? bannerEl.offsetHeight : 0;
+      setOffset(h + b);
+    };
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, { passive: true });
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update);
+    };
+  }, [bannerVisible]);
+  return offset;
+}
+
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const bannerVisible = useBannerVisibility();
+  const topOffset = useHeaderOffset(bannerVisible);
   const [navigation, setNavigation] = useState<any[]>([]);
   const [headings, setHeadings] = useState<any[]>([]);
   const [isNavigationLoading, setIsNavigationLoading] = useState(true);
@@ -169,7 +203,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
   if (isDocsHome) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen" style={{ paddingTop: `${topOffset}px` }}>
         {children}
         <BackToTop />
       </div>
@@ -181,7 +215,9 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       {/* Mobile Menu Button - Fixed at top */}
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed top-[72px] left-4 z-50 p-2 bg-gray-900 border border-gray-800 rounded-lg hover:bg-gray-800 transition-colors"
+        className="lg:hidden fixed z-50 p-2 bg-gray-900 border border-gray-800 rounded-lg hover:bg-gray-800 transition-colors"
+        style={{ top: `${topOffset - 48}px`, left: '1rem' }}
+        // 48 = header height (approx) so button sits just below header
         aria-label="Toggle menu"
       >
         {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -191,10 +227,12 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       {mobileMenuOpen && (
         <>
           <div 
-            className="lg:hidden fixed inset-0 top-[120px] bg-black/50 backdrop-blur-sm z-40"
+            className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            style={{ top: `${topOffset}px` }}
             onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="lg:hidden fixed left-0 top-[120px] bottom-0 w-80 max-w-[85vw] border-r border-gray-800 bg-black z-50 overflow-y-scroll">
+          <aside className="lg:hidden fixed left-0 bottom-0 w-80 max-w-[85vw] border-r border-gray-800 bg-black z-50 overflow-y-scroll"
+                 style={{ top: `${topOffset}px` }}>
             {isNavigationLoading ? (
               <div className="p-6 pt-8 space-y-6">
                 {/* Logo skeleton */}
@@ -228,8 +266,9 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
       {/* Desktop Layout */}
       <div
-        className="hidden lg:grid fixed inset-0 top-[120px] overflow-hidden overflow-x-hidden select-none overscroll-none min-w-0"
+        className="hidden lg:grid fixed inset-0 overflow-hidden overflow-x-hidden select-none overscroll-none min-w-0"
         style={{
+          top: `${topOffset}px`,
           gridTemplateColumns: headings.length > 0
             ? `${leftWidth}px 8px 1fr 8px ${rightWidth}px`
             : `${leftWidth}px 8px 1fr`,
@@ -325,7 +364,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       {/* Mobile Layout - Single Column */}
-      <div className="lg:hidden fixed inset-0 top-[120px] overflow-hidden overflow-x-hidden min-w-0">
+      <div className="lg:hidden fixed inset-0 overflow-hidden overflow-x-hidden min-w-0" style={{ top: `${topOffset}px` }}>
         <main className="h-full overflow-y-scroll overflow-x-hidden overscroll-contain min-w-0">
           <div className="px-4 py-6">
             <Breadcrumbs />

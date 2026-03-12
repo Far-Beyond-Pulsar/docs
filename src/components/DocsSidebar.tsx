@@ -192,7 +192,7 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
   };
 
   const sidebarContent = (
-    <nav className="h-full overflow-y-scroll bg-black px-6 pt-8 pb-6">
+    <nav className="h-full bg-black px-6 pt-8 pb-6">
       {/* Logo/Title */}
       <Link
         href="/docs"
