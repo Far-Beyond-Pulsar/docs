@@ -27,14 +27,14 @@ function useBannerVisibility() {
   }, [visible]);
   return visible;
 }
-function useHeaderOffset(bannerVisible) {
+function useHeaderOffset(bannerVisible: boolean) {
   const [offset, setOffset] = useState(0);
   useLayoutEffect(() => {
     const headerEl = document.querySelector('header');
     const bannerEl = document.querySelector('[data-notice-banner]');
     const update = () => {
       const h = headerEl?.offsetHeight || 0;
-      const b = bannerVisible && bannerEl ? bannerEl.offsetHeight : 0;
+      const b = bannerVisible && bannerEl ? (bannerEl as HTMLElement).offsetHeight : 0;
       setOffset(h + b);
     };
     update();

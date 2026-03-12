@@ -44,7 +44,7 @@ function useHeaderHeight() {
   const [height, setHeight] = useState(0);
   useLayoutEffect(() => {
     const el = document.querySelector("header");
-    const update = () => setHeight(el?.offsetHeight || 0);
+    const update = () => setHeight(el ? (el as HTMLElement).offsetHeight : 0);
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
@@ -64,8 +64,8 @@ function useHeaderOffset(bannerVisible: boolean) {
     const bannerEl = document.querySelector("[data-notice-banner]");
 
     const update = () => {
-      const h = headerEl?.offsetHeight || 0;
-      const b = bannerVisible && bannerEl ? bannerEl.offsetHeight : 0;
+      const h = headerEl ? (headerEl as HTMLElement).offsetHeight : 0;
+      const b = bannerVisible && bannerEl ? (bannerEl as HTMLElement).offsetHeight : 0;
       setOffset(h + b);
     };
 
