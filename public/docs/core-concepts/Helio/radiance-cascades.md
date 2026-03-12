@@ -92,7 +92,7 @@ Reading these side-by-side:
 
 #### T_MAX Doubling Progression
 
-Cascades 0–2 follow a geometric  progression; cascade 3 jumps to sky distance:
+Cascades 0–2 follow a geometric ×2 progression; cascade 3 jumps to sky distance:
 
 $$T_{\max}[i] = \{0.5,\; 1.0,\; 2.0,\; 1{,}000.0\} \text{ metres}$$
 
@@ -104,7 +104,7 @@ The doubling of `DIR_DIM` at each level and halving of `PROBE_DIM` is not arbitr
 
 #### Probe Spacing Per Cascade
 
-For a world AABB of size , the probe grid spacing for cascade  is:
+For a world AABB of size **S = w_max − w_min**, the probe grid spacing for cascade **i** is:
 
 $$\Delta_i = \frac{\mathbf{S}}{\text{PROBE\_DIMS}[i]}$$
 
@@ -132,7 +132,7 @@ At cascade 3, 32×32 = 1 024 bins give approximately 0.4° of solid angle per bi
 
 #### Octahedral Direction Encoding
 
-Each cascade's DIR_DIM × DIR_DIM grid of direction bins maps to the sphere using octahedral projection. For a 2D bin coordinate :
+Each cascade's DIR_DIM × DIR_DIM grid of direction bins maps to the sphere using octahedral projection. For a 2D bin coordinate **(u, v) ∈ [0,1]²**:
 
 $$\mathbf{d} = \text{oct\_decode}(2u-1,\; 2v-1)$$
 
@@ -140,7 +140,7 @@ The octahedral map has no singularities (unlike polar/spherical coordinates) and
 
 $$\text{oct\_decode}(x, z) = \operatorname{normalize}\!\left(\begin{cases} (x,\; 1-|x|-|z|,\; z) & \text{if } |x|+|z| \leq 1 \\ (\operatorname{sign}(x)(1-|z|),\; -(1-|x|-|z|),\; \operatorname{sign}(z)(1-|x|)) & \text{otherwise}\end{cases}\right)$$
 
-The upper hemisphere corresponds to  (the octant where ); the lower hemisphere folds into the four triangular corners. This is why `dir_dim` starts at 4 — a 4×4 grid gives exactly 16 bins covering both hemispheres with no wasted texels.
+The upper hemisphere corresponds to **|x| + |z| ≤ 1** (the octant where **y ≥ 0**); the lower hemisphere folds into the four triangular corners. This is why `dir_dim` starts at 4 — a 4×4 grid gives exactly 16 bins covering both hemispheres with no wasted texels.
 
 ```mermaid
 graph LR
@@ -180,7 +180,7 @@ The invariant `PROBE_DIM × DIR_DIM = 64` holds for every cascade:
 
 #### Cascade Atlas Invariant
 
-For every cascade , the atlas width is constant:
+For every cascade **i**, the atlas width is constant:
 
 $$\text{ATLAS\_W} = \text{PROBE\_DIMS}[i] \times \text{DIR\_DIMS}[i] = 64$$
 
@@ -381,11 +381,11 @@ The blend weight is typically in the range 0.05–0.1 per frame, meaning the his
 
 #### History Blending
 
-The history blend weight  controls temporal stability versus lag:
+The history blend weight **w_h** controls temporal stability versus lag:
 
 $$C_{\text{out}} = (1 - w_h) \cdot C_{\text{current}} + w_h \cdot C_{\text{history}}$$
 
-For radiance cascades a typical  of 0.9 means each frame retains 90% of prior GI. Static scenes converge in approximately 10 frames  and are effectively fully converged by 20 frames . Moving light sources cause a temporal lag proportional to  — at  the effective lag is about 10 frames.
+For radiance cascades a typical **w_h** of 0.9 means each frame retains 90% of prior GI. Static scenes converge in approximately 10 frames **(1/(1−0.9) = 10)** and are effectively fully converged by 20 frames. Moving light sources cause a temporal lag proportional to **w_h** — at **w_h = 0.9** the effective lag is about 10 frames.
 
 > [!TIP]
 > In scenes where the probe grid is static (fixed AABB, no moving lights), the GI converges in about 10–20 frames and then costs almost nothing in terms of perceived noise. The GPU still executes the full trace-merge-blend pipeline every frame, but the output is visually stable. Consider disabling or cheapening RC in cut-scenes where the camera moves continuously and convergence never completes.

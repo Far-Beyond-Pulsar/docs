@@ -28,7 +28,7 @@ The reflectance equation evaluated per-fragment is:
 
 $$f_r(\mathbf{v}, \mathbf{l}) = \frac{\text{albedo}}{\pi}(1 - F)(1 - \text{metallic}) + \frac{D(\mathbf{h}, \alpha) \cdot G(\mathbf{v}, \mathbf{l}, \alpha) \cdot F(\mathbf{v}, \mathbf{h}, F_0)}{4(\mathbf{n} \cdot \mathbf{v})(\mathbf{n} \cdot \mathbf{l})}$$
 
-**Symbol guide:**  = view direction,  = light direction,  = half-vector,  = surface normal,  = roughness²,  = base reflectance at normal incidence. The left term is the **Lambertian diffuse** lobe (divided by  for energy conservation, suppressed for metals via the  factor). The right term is the **Cook-Torrance specular** lobe built from three microfacet functions , ,  in the numerator and a geometric normalisation factor  in the denominator.
+**Symbol guide:** **v** = view direction, **l** = light direction, **h** = normalize(v+l) half-vector, **n** = surface normal, **α** = roughness², **F₀** = base reflectance at normal incidence. The left term is the **Lambertian diffuse** lobe (divided by π for energy conservation, suppressed for metals via the `(1−F)(1−metallic)` factor). The right term is the **Cook-Torrance specular** lobe built from three microfacet functions **D**, **G**, **F** in the numerator and a geometric normalisation factor `4(n·v)(n·l)` in the denominator.
 
 where:
 
@@ -36,7 +36,7 @@ where:
 
 $$D(\mathbf{n}, \mathbf{h}, \alpha) = \frac{\alpha^2}{\pi \left[(\mathbf{n} \cdot \mathbf{h})^2(\alpha^2 - 1) + 1\right]^2}$$
 
-  ;  is the cosine between the surface normal and the half-vector. The formula describes the statistical fraction of microfacet normals aligned with . High roughness () flattens and widens the lobe; low roughness () produces a tight, mirror-like highlight.
+  `α = roughness²`; **n·h** is the cosine between the surface normal and the half-vector. The formula describes the statistical fraction of microfacet normals aligned with **h**. High roughness (**α → 1**) flattens and widens the lobe; low roughness (**α → 0**) produces a tight, mirror-like highlight.
 
   ```wgsl
   fn distribution_ggx(n_dot_h: f32, roughness: f32) -> f32 {
@@ -53,7 +53,7 @@ $$F(\mathbf{v}, \mathbf{h}, F_0) = F_0 + (1 - F_0)(1 - \mathbf{v} \cdot \mathbf{
 
 $$F_0 = \text{lerp}(0.04,\; \text{albedo},\; \text{metallic})$$
 
-   is the reflectance at normal incidence —  (4%) for dielectrics, equal to `albedo` for metals. As the view grazes the surface () the  term approaches 1 and : everything becomes a mirror at 90°.
+   **F₀** is the reflectance at normal incidence — **0.04** (4%) for dielectrics, equal to `albedo` for metals. As the view grazes the surface (**v·h → 0**) the `(1 − v·h)⁵` term approaches 1 and **F → 1**: everything becomes a mirror at 90°.
 
   ```wgsl
   fn fresnel_schlick(v_dot_h: f32, f0: vec3<f32>) -> vec3<f32> {
@@ -69,7 +69,7 @@ $$G(\mathbf{n}, \mathbf{v}, \mathbf{l}, \alpha) = G_1(\mathbf{n}, \mathbf{v}, \a
 
 $$G_1(\mathbf{n}, \mathbf{x}, \alpha) = \frac{\mathbf{n} \cdot \mathbf{x}}{(\mathbf{n} \cdot \mathbf{x})(1 - k) + k}, \quad k = \frac{(\alpha + 1)^2}{8}$$
 
-  The function is factored into two Schlick-GGX terms — one for the view direction (, self-shadowing) and one for the light direction (, masking). The remapping  reduces over-darkening on rough surfaces.  gives no shadowing;  gives full shadowing.
+  The function is factored into two Schlick-GGX terms — one for the view direction (**G₁(n,v,α)**, self-shadowing) and one for the light direction (**G₁(n,l,α)**, masking). The remapping `k = (α+1)²/8` reduces over-darkening on rough surfaces. **k = 0** gives no shadowing; **k = 1** gives full shadowing.
 
   ```wgsl
   fn geometry_schlick_ggx(n_dot_v: f32, roughness: f32) -> f32 {
@@ -398,7 +398,7 @@ Normals and tangents are stored as four signed 8-bit integers packed into a sing
 $$\text{packed} = \text{round}(v \times 127.0), \quad v \in [-1, 1]$$
 $$\text{unpacked} = \frac{\text{packed}}{127.0}$$
 
-This **SNORM8** encoding saves 75% memory compared to a raw `f32` component (1 byte vs 4 bytes) with a worst-case angular error of  for unit normals — imperceptible in typical lighting calculations.
+This **SNORM8** encoding saves 75% memory compared to a raw `f32` component (1 byte vs 4 bytes) with a worst-case angular error of **≈ 0.45°** for unit normals — imperceptible in typical lighting calculations.
 
 ```rust
 fn pack_snorm8(v: f32) -> i8 {
@@ -430,7 +430,7 @@ The bitangent (also called binormal) is not stored in the vertex — it is recon
 
 $$\mathbf{B} = (\mathbf{N} \times \mathbf{T}) \cdot s$$
 
-where  is the `bitangent_sign` stored in the `w` component of the packed tangent. The cross product  yields the vector perpendicular to both the normal and tangent; the sign  corrects for UV mirroring in left-handed UV spaces. This avoids storing the bitangent explicitly, saving 4 bytes per vertex with zero loss of precision.
+where **s** is the `bitangent_sign` stored in the `w` component of the packed tangent. The cross product **(N × T)** yields the vector perpendicular to both the normal and tangent; the sign **s** corrects for UV mirroring in left-handed UV spaces. This avoids storing the bitangent explicitly, saving 4 bytes per vertex with zero loss of precision.
 
 ```wgsl
 let N = normalize(vertex.normal);
@@ -514,11 +514,11 @@ Every `GpuMesh` stores both a **bounding sphere** (`bounds_center` + `bounds_rad
 
 The bounding sphere is used for fast approximate frustum culling — a sphere-plane test requires just six dot products. The AABB is used for tighter culling when the sphere test passes, and also by the shadow atlas allocation code to estimate shadow cascade coverage.
 
-When an object's world transform changes, both bounding volumes must be re-fitted in world space. Helio uses the **Arvo method** to transform an AABB without enumerating all eight corners. For a matrix  applied to an AABB , each output axis  is computed as:
+When an object's world transform changes, both bounding volumes must be re-fitted in world space. Helio uses the **Arvo method** to transform an AABB without enumerating all eight corners. For a matrix **M** applied to an AABB **[min, max]**, each output axis **i** is computed as:
 
 $$[\text{newMin}_i,\; \text{newMax}_i] = \sum_j \left[\min(M_{ij} \cdot \text{min}_j,\; M_{ij} \cdot \text{max}_j),\; \max(M_{ij} \cdot \text{min}_j,\; M_{ij} \cdot \text{max}_j)\right]$$
 
-Each output dimension depends only on the corresponding column of  and the input interval for that axis. This replaces 24 multiplications (8 corners × 3 components) with 9 min/max pairs (3 columns × 3 output axes), starting from the translation component of  as the initial min/max.
+Each output dimension depends only on the corresponding column of **M** and the input interval for that axis. This replaces 24 multiplications (8 corners × 3 components) with 9 min/max pairs (3 columns × 3 output axes), starting from the translation component of **M** as the initial min/max.
 
 ```rust
 fn transform_aabb(m: &Mat4, min: Vec3, max: Vec3) -> (Vec3, Vec3) {
@@ -663,7 +663,7 @@ impl Frustum {
 
 The six frustum planes are extracted from the combined view-projection matrix using the **Gribb-Hartmann method**. Each row of the VP matrix encodes a half-space; summing row pairs produces the six clip planes in world space without requiring an explicit frustum decomposition. The planes are stored in the form `(nx, ny, nz, d)` where `nx, ny, nz` is the plane normal and `d` is the signed distance from the origin.
 
-Given a combined view-projection matrix  with rows :
+Given a combined view-projection matrix **VP** with rows **p₀, p₁, p₂, p₃**:
 
 $$\text{left:}   \quad \mathbf{n} = p_3 + p_0, \quad d = p_{3w} + p_{0w}$$
 $$\text{right:}  \quad \mathbf{n} = p_3 - p_0, \quad d = p_{3w} - p_{0w}$$
@@ -672,7 +672,7 @@ $$\text{top:}    \quad \mathbf{n} = p_3 - p_1, \quad d = p_{3w} - p_{1w}$$
 $$\text{near:}   \quad \mathbf{n} = p_3 + p_2, \quad d = p_{3w} + p_{2w}$$
 $$\text{far:}    \quad \mathbf{n} = p_3 - p_2, \quad d = p_{3w} - p_{2w}$$
 
-Each resulting  pair defines a half-space where  means the point  is on the inside (visible side) of the plane.
+Each resulting **(n, d)** pair defines a half-space where **n·p + d ≥ 0** means the point **p** is on the inside (visible side) of the plane.
 
 ```rust
 fn extract_planes(vp: &Mat4) -> [Vec4; 6] {
@@ -695,12 +695,12 @@ fn extract_planes(vp: &Mat4) -> [Vec4; 6] {
 
 ### Sphere–Plane Distance Test
 
-For a sphere with centre  and radius  against a plane :
+For a sphere with centre **c** and radius **r** against a plane **(n̂, d)**:
 
 $$\text{dist} = \hat{\mathbf{n}} \cdot \mathbf{c} + d$$
 $$\text{outside if } \text{dist} < -r$$
 
-If the signed distance from the plane to the sphere centre is less than , the entire sphere is on the negative (outside) side of the plane. The sphere is culled if this holds for **any** of the six frustum planes.
+If the signed distance from the plane to the sphere centre is less than **−r**, the entire sphere is on the negative (outside) side of the plane. The sphere is culled if this holds for **any** of the six frustum planes.
 
 ```rust
 fn sphere_outside_plane(center: Vec3, radius: f32, plane: Vec4) -> bool {
@@ -713,11 +713,11 @@ fn sphere_in_frustum(center: Vec3, radius: f32, planes: &[Vec4; 6]) -> bool {
 
 ### AABB Positive-Vertex Test
 
-For a tighter cull, the AABB positive-vertex test checks the AABB corner most extreme in the plane's normal direction. For a plane normal , the positive vertex  is selected per axis:
+For a tighter cull, the AABB positive-vertex test checks the AABB corner most extreme in the plane's normal direction. For a plane normal **n**, the positive vertex **p** is selected per axis:
 
 $$p_x = \begin{cases} \text{aabb.max}_x & \text{if } n_x \geq 0 \\ \text{aabb.min}_x & \text{otherwise} \end{cases}$$
 
-(identically for  and ). The AABB is outside the plane if:
+(identically for **p_y** and **p_z**). The AABB is outside the plane if:
 
 $$\hat{\mathbf{n}} \cdot \mathbf{p} + d < 0$$
 

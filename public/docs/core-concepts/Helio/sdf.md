@@ -26,11 +26,11 @@ This page is a complete reference for every concept in the `sdf` module: primiti
 
 A **signed distance field** (SDF) is a scalar field defined over 3-D space. At every point **p** in that space, the field stores a single number: the signed shortest distance from **p** to the nearest surface of some shape. Negative values mean **p** is *inside* the shape; positive values mean it is *outside*; zero means **p** is exactly on the surface. The set of all points where the SDF equals zero forms an *implicit surface* — a perfectly smooth surface defined by a mathematical condition rather than by a polygon mesh.
 
-Formally, for a surface , the signed distance field at point  is:
+Formally, for a surface **S**, the signed distance field at point **p** is:
 
 $$f(\mathbf{p}) = \begin{cases} -d(\mathbf{p}, \mathcal{S}) & \text{if } \mathbf{p} \text{ is inside } \mathcal{S} \\ 0 & \text{if } \mathbf{p} \in \mathcal{S} \\ +d(\mathbf{p}, \mathcal{S}) & \text{if } \mathbf{p} \text{ is outside } \mathcal{S} \end{cases}$$
 
-where  is the shortest Euclidean distance from  to any point on the surface. The **sign** encodes inside/outside. The **magnitude** is the distance to the nearest surface. The **zero level set** — all points where  — is the surface itself.
+where **d(p, S)** is the shortest Euclidean distance from **p** to any point on the surface. The **sign** encodes inside/outside. The **magnitude** is the distance to the nearest surface. The **zero level set** — all points where **f(p) = 0** — is the surface itself.
 
 The power of SDFs in real-time rendering comes from two properties:
 
@@ -106,7 +106,7 @@ The `SdfShapeParams::data` array is sent verbatim to the GPU inside `GpuSdfEdit`
 
 The analytical SDF for each primitive, evaluated in the primitive's local space (before the `SdfEdit::transform` is applied).
 
-**Sphere** — centre at origin, radius :
+**Sphere** — centre at origin, radius **r**:
 
 $$f_{\text{sphere}}(\mathbf{p}) = \|\mathbf{p}\| - r$$
 
@@ -118,11 +118,11 @@ fn sdf_sphere(p: vec3<f32>, radius: f32) -> f32 {
 }
 ```
 
-**Box** — centred at origin, half-extents :
+**Box** — centred at origin, half-extents **b = (b_x, b_y, b_z)**:
 
 $$f_{\text{box}}(\mathbf{p}, \mathbf{b}) = \left\|\max\!\left(\lvert\mathbf{p}\rvert - \mathbf{b},\; \mathbf{0}\right)\right\| + \min\!\left(\max(|p_x|-b_x,\; |p_y|-b_y,\; |p_z|-b_z),\; 0\right)$$
 
-The  term computes the per-axis overshoot outside the box faces and takes its length for the exterior distance. The  term handles the interior, returning the negative distance to the nearest face when  is inside. Together they give exact Euclidean distance both inside and outside.
+The `max(|p| − b, 0)` term computes the per-axis overshoot outside the box faces and takes its length for the exterior distance. The `min(..., 0)` term handles the interior, returning the negative distance to the nearest face when **p** is inside. Together they give exact Euclidean distance both inside and outside.
 
 ```wgsl
 fn sdf_box(p: vec3<f32>, b: vec3<f32>) -> f32 {
@@ -131,13 +131,13 @@ fn sdf_box(p: vec3<f32>, b: vec3<f32>) -> f32 {
 }
 ```
 
-**Capsule** — endpoints , , radius :
+**Capsule** — endpoints **a**, **b**, radius **r**:
 
 $$t = \operatorname{clamp}\!\left(\frac{(\mathbf{p}-\mathbf{a})\cdot(\mathbf{b}-\mathbf{a})}{\|\mathbf{b}-\mathbf{a}\|^2},\; 0,\; 1\right)$$
 
 $$f_{\text{capsule}}(\mathbf{p}) = \|\mathbf{p} - \bigl(\mathbf{a} + t(\mathbf{b}-\mathbf{a})\bigr)\| - r$$
 
- is the scalar projection of  onto the line segment , clamped to . The SDF is the distance from  to the nearest point on the segment, minus the tube radius.
+**t** is the scalar projection of **(p − a)** onto the line segment **(b − a)**, clamped to [0, 1]. The SDF is the distance from **p** to the nearest point on the segment, minus the tube radius.
 
 ```wgsl
 fn sdf_capsule(p: vec3<f32>, a: vec3<f32>, b: vec3<f32>, r: f32) -> f32 {
@@ -147,11 +147,11 @@ fn sdf_capsule(p: vec3<f32>, a: vec3<f32>, b: vec3<f32>, r: f32) -> f32 {
 }
 ```
 
-**Torus** — major radius  (ring), minor radius  (tube), centred at origin in the XZ plane:
+**Torus** — major radius **R** (ring), minor radius **r** (tube), centred at origin in the XZ plane:
 
 $$f_{\text{torus}}(\mathbf{p}, R, r) = \sqrt{\!\left(\sqrt{p_x^2 + p_z^2} - R\right)^{\!2} + p_y^2} - r$$
 
-The inner  is the signed distance from 's XZ projection to the ring circle of radius . Treating that value and  as a 2-D point gives the distance to the ring centreline, and subtracting  produces the tube surface.
+The inner term is the signed distance from **p**'s XZ projection to the ring circle of radius **R**. Treating that value and **p.y** as a 2-D point gives the distance to the ring centreline, and subtracting **r** produces the tube surface.
 
 ```wgsl
 fn sdf_torus(p: vec3<f32>, R: f32, r: f32) -> f32 {
@@ -160,7 +160,7 @@ fn sdf_torus(p: vec3<f32>, R: f32, r: f32) -> f32 {
 }
 ```
 
-**Cylinder** — half-height , radius , centred at origin, Y-axis aligned:
+**Cylinder** — half-height **h**, radius **r**, centred at origin, Y-axis aligned:
 
 $$f_{\text{cylinder}}(\mathbf{p}, h, r) = \max\!\left(\sqrt{p_x^2 + p_z^2} - r,\; |p_y| - h\right)$$
 
@@ -236,13 +236,13 @@ At each sample point, the GPU holds the accumulated SDF value `a` (the field so 
 | `SmoothSubtraction` | polynomial blend of `max(a, -b)` | Subtraction with rounded concave edge |
 | `SmoothIntersection` | polynomial blend of `max(a, b)` | Intersection with rounded convex edge |
 
-The sharp boolean operations have exact set-theoretic interpretations. Given accumulated field  and new primitive :
+The sharp boolean operations have exact set-theoretic interpretations. Given accumulated field **d1** and new primitive **d2**:
 
 $$f_{A \cup B}(\mathbf{p}) = \min(f_A(\mathbf{p}),\; f_B(\mathbf{p}))$$
 
 $$f_{A \setminus B}(\mathbf{p}) = \max(f_A(\mathbf{p}),\; -f_B(\mathbf{p}))$$
 
-Negating  flips its inside/outside sense; taking the max then selects points that are inside  but outside .
+Negating **d2** flips its inside/outside sense; taking the max then selects points that are inside **d1** but outside **d2**.
 
 $$f_{A \cap B}(\mathbf{p}) = \max(f_A(\mathbf{p}),\; f_B(\mathbf{p}))$$
 
@@ -254,13 +254,13 @@ fn op_intersect(d1: f32, d2: f32) -> f32 { return max(d1, d2); }
 
 The smooth variants use Inigo Quilez's polynomial smooth-min / smooth-max functions, parameterised by `SdfEdit::smoothing`. A smoothing value of `0.0` degrades to the sharp boolean. A value of `1.0` blends the two shapes together over a one-metre radius, producing a seamless organic junction.
 
-The polynomial smooth-min  is defined as:
+The polynomial smooth-min **smin(d1, d2, k)** is defined as:
 
 $$h = \max\!\left(\frac{k - |a-b|}{k},\; 0\right)$$
 
 $$\text{smin}_{\text{poly}}(a,\, b,\, k) = \min(a, b) - \frac{h^2\, k}{4}$$
 
-When  (the two primitives are further apart than the blend radius),  and this reduces to the sharp . When  (within the blend zone), the  term subtracts a smooth correction that rounds the junction. The parameter  is `SdfEdit::smoothing` — the blend radius in metres.
+When **|d1 − d2| > k** (the two primitives are further apart than the blend radius), **h = 0** or **h = 1** and this reduces to the sharp `min`. When **|d1 − d2| ≤ k** (within the blend zone), the `h²·k/4` term subtracts a smooth correction that rounds the junction. The parameter **k** is `SdfEdit::smoothing` — the blend radius in metres.
 
 ```wgsl
 fn smooth_union(d1: f32, d2: f32, k: f32) -> f32 {
@@ -389,13 +389,13 @@ Each level is stored as a `wgpu::Texture` with format `R8Unorm` — a single 8-b
 | 128 | Zero crossing (surface) |
 | 255 | Maximum positive (far outside solid) |
 
-The mapping from a raw SDF value  to a stored byte is:
+The mapping from a raw SDF value **d** to a stored byte is:
 
 $$f_{\text{clamped}} = \operatorname{clamp}\!\left(f(\mathbf{p}),\; -d_{\max},\; +d_{\max}\right)$$
 
 $$\text{stored} = \left\lfloor\frac{f_{\text{clamped}} - (-d_{\max})}{2\,d_{\max}} \times 255 + 0.5\right\rfloor$$
 
-where  is the maximum representable distance for that clip level (typically half the level's world-space extent). Byte 0 maps to  (deepest interior), byte 128 maps to the zero crossing (surface), and byte 255 maps to  (furthest exterior).
+where **d_max** is the maximum representable distance for that clip level (typically half the level's world-space extent). Byte 0 maps to **−d_max** (deepest interior), byte 128 maps to the zero crossing (surface), and byte 255 maps to **+d_max** (furthest exterior).
 
 The quantisation range is set by the level's `level_size` so that the ±1.0 normalised range spans the entire world-space extent of that level. This gives adequate precision near the surface for ray marching convergence.
 
@@ -535,17 +535,17 @@ flowchart LR
 
 ### Sphere Tracing Algorithm
 
-Given a ray  (origin , unit direction ), sphere tracing advances the ray by the SDF value at each step:
+Given a ray **r(t) = o + t·d** (origin **o**, unit direction **d**), sphere tracing advances the ray by the SDF value at each step:
 
 $$t_{i+1} = t_i + f\!\left(\mathbf{r}(t_i)\right)$$
 
-This is always safe: because  is a **lower bound** on the true distance to the surface, stepping by  can never overshoot it. The march terminates with:
+This is always safe: because **f(p)** is a **lower bound** on the true distance to the surface, stepping by **f(p)** can never overshoot it. The march terminates with:
 
 $$\text{hit if } f\!\left(\mathbf{r}(t_i)\right) < \varepsilon_{\text{surface}}$$
 
 $$\text{miss if } t_i > t_{\max}$$
 
-The efficiency gain over uniform ray-casting comes from the fact that far from any surface  is large, enabling large steps through empty space. Only near surfaces (where ) does the step size shrink, concentrating samples precisely where needed.
+The efficiency gain over uniform ray-casting comes from the fact that far from any surface **f(p)** is large, enabling large steps through empty space. Only near surfaces (where **f(p) → 0**) does the step size shrink, concentrating samples precisely where needed.
 
 ```wgsl
 const MAX_STEPS: i32 = 128;
@@ -570,7 +570,7 @@ fn ray_march(ray_origin: vec3<f32>, ray_dir: vec3<f32>, t_max: f32) -> f32 {
 
 **Level selection** during marching works coarse-to-fine: the marcher advances through clip level 3 in large steps until the sample value drops below a threshold, then switches to finer levels for the precise surface crossing. This prevents wasting fine-level samples in empty space far from surfaces.
 
-**Normal estimation** is done by computing the gradient of the SDF. Because the gradient of any SDF has unit length at the surface ( — the *eikonal equation*), normalising the finite-difference approximation gives the surface normal directly:
+**Normal estimation** is done by computing the gradient of the SDF. Because the gradient of any SDF has unit length at the surface (**|∇f| = 1** — the *eikonal equation*), normalising the finite-difference approximation gives the surface normal directly:
 
 $$\mathbf{N}(\mathbf{p}) = \nabla f(\mathbf{p}) \approx \operatorname{normalize}\!\left(\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z}\right)$$
 
@@ -587,11 +587,11 @@ fn estimate_normal(p: vec3<f32>) -> vec3<f32> {
 }
 ```
 
-An alternative is the **tetrahedron technique** (Inigo Quilez), which achieves the same quality with only 4 SDF evaluations instead of 6 by using four tetrahedral sample offsets :
+An alternative is the **tetrahedron technique** (Inigo Quilez), which achieves the same quality with only 4 SDF evaluations instead of 6 by using four tetrahedral sample offsets **k₀, k₁, k₂, k₃**:
 
 $$\mathbf{N}(\mathbf{p}) \approx \operatorname{normalize}\!\left(\sum_{i=1}^{4} k_i \cdot f(\mathbf{p} + k_i\,\varepsilon)\right)$$
 
-where , , , .
+where **k₀ = (1,−1,−1)**, **k₁ = (−1,−1,1)**, **k₂ = (−1,1,−1)**, **k₃ = (1,1,1)**.
 
 ```wgsl
 const EPS: f32 = 0.001;

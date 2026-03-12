@@ -152,7 +152,7 @@ The **composite** step in `deferred_lighting.wgsl` reads `bloom_tex_0` and adds 
 
 $$C_{\text{final}} = C_{\text{scene}} + \text{intensity} \cdot C_{\text{bloom\_up}}$$
 
-where  is the fully upsampled bloom pyramid result. The operation is purely additive — it never darkens the scene. This mirrors the physical process of light scatter in a lens: extra photons arrive at adjacent pixels, but none are removed from the source pixel.
+where **C_bloom_up** is the fully upsampled bloom pyramid result. The operation is purely additive — it never darkens the scene. This mirrors the physical process of light scatter in a lens: extra photons arrive at adjacent pixels, but none are removed from the source pixel.
 
 A WGSL extract pass looks approximately like this, with the override constants substituted at pipeline-specialisation time:
 
@@ -374,7 +374,7 @@ Edge detection uses the absolute luminance gradient between adjacent pixels:
 
 $$\text{edge}(x,y) = \lvert Y(x,y) - Y(x-1,y) \rvert + \lvert Y(x,y) - Y(x,y-1) \rvert > T_{\text{edge}}$$
 
-where . Pixels whose combined horizontal and vertical luminance delta exceeds  are marked as edge pixels and receive anti-aliasing treatment in the subsequent passes. The threshold prevents noise and low-contrast texture detail from being misclassified as geometric edges.
+where **T_edge ≈ 0.1**. Pixels whose combined horizontal and vertical luminance delta exceeds **T_edge** are marked as edge pixels and receive anti-aliasing treatment in the subsequent passes. The threshold prevents noise and low-contrast texture detail from being misclassified as geometric edges.
 
 **Pass 2 — Blending Weights.** This is SMAA's distinguishing feature. Using pre-computed look-up textures (the *area LUT* and *search LUT*, both loaded at renderer initialisation), the blending weight pass examines the shapes of edges in the mask and computes how much of each neighbouring pixel should be blended at each edge endpoint. Recognising L-shaped, Z-shaped, and U-shaped edge patterns is what separates SMAA from simpler algorithms.
 
@@ -420,7 +420,7 @@ The jitter sequence shifts the projection matrix by a sub-pixel offset each fram
 
 $$\mathbf{P}_{\text{jittered}} = \mathbf{P} + \frac{1}{2}\begin{pmatrix} j_x / W \\ j_y / H \end{pmatrix} \text{ (in NDC)}$$
 
-where  cycles through a Halton or Hammersley low-discrepancy sequence. The factor of  converts from pixel-space to NDC half-steps. Over a sequence of frames these offsets tile the unit pixel area densely, so temporal accumulation converges to sub-pixel precision.
+where **(j_x, j_y)** cycles through a Halton or Hammersley low-discrepancy sequence. The factor of **1/2** converts from pixel-space to NDC half-steps. Over a sequence of frames these offsets tile the unit pixel area densely, so temporal accumulation converges to sub-pixel precision.
 
 The jitter is applied to the projection matrix in clip space, not to the viewport transform. This means the jitter is correctly accounted for by the depth buffer — a jittered depth value corresponds to the correct world-space depth for that sub-pixel position. The `jitter_index` field on `TaaPass` advances by one each frame and wraps around after the sequence length (typically 8 or 16 samples), providing repeating but well-distributed sub-pixel coverage.
 
@@ -450,9 +450,9 @@ let output = mix(current_sample, history_sample, history_weight);
 $$C_{\text{out}} = \operatorname{lerp}(C_{\text{current}},\; C_{\text{history}},\; \alpha)$$
 $$\alpha = \operatorname{clamp}(\alpha_{\text{computed}},\; \alpha_{\min},\; \alpha_{\max})$$
 
-with  and  by default.
+with **α_min = 0.88** and **α_max = 0.97** by default.
 
- is the **history weight** — how much of the accumulated past frames to keep. High  (→ 0.97) means more averaging across many frames, producing a smooth result but increasing ghosting behind fast-moving objects. Low  (→ 0.88) produces a sharper, more responsive result at the cost of more temporal noise on static geometry. The clamp prevents the blend factor from leaving the stable convergence range.
+**α** is the **history weight** — how much of the accumulated past frames to keep. High **α** (→ 0.97) means more averaging across many frames, producing a smooth result but increasing ghosting behind fast-moving objects. Low **α** (→ 0.88) produces a sharper, more responsive result at the cost of more temporal noise on static geometry. The clamp prevents the blend factor from leaving the stable convergence range.
 
 | `feedback_max` | Effect |
 |---------------|--------|
@@ -529,13 +529,13 @@ pub struct SsaoConfig {
 
 #### SSAO Hemisphere Sampling
 
-SSAO samples  random directions in the hemisphere aligned with the surface normal and counts how many sample points lie inside nearby geometry:
+SSAO samples **N** random directions in the hemisphere aligned with the surface normal and counts how many sample points lie inside nearby geometry:
 
 $$\text{AO} = \frac{1}{N}\sum_{i=1}^{N} \mathbf{1}\!\left[z_{\text{sample}_i} > z_{\text{depth\_buffer}}\right]$$
 
 $$\text{AO}_{\text{final}} = \text{AO}^{\text{power}}$$
 
-The indicator function  is  when a sample point is occluded (its reconstructed depth is behind the depth buffer) and  when it is not. The `power` exponent (default 2.0) applies a gamma curve to increase contrast in occluded regions. The `bias` term (default 0.025) offsets each sample slightly above the surface before depth comparison, preventing self-occlusion artefacts at grazing angles where floating-point depth precision is lowest.
+The indicator function **1[...]** is **1** when a sample point is occluded (its reconstructed depth is behind the depth buffer) and **0** when it is not. The `power` exponent (default 2.0) applies a gamma curve to increase contrast in occluded regions. The `bias` term (default 0.025) offsets each sample slightly above the surface before depth comparison, preventing self-occlusion artefacts at grazing angles where floating-point depth precision is lowest.
 
 The SSAO pass writes a single-channel `R8` texture (`ao_texture`) that represents the ambient occlusion factor at each pixel, where `1.0` means fully unoccluded and `0.0` means fully occluded. The deferred lighting pass would multiply the ambient light contribution by this factor.
 

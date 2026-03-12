@@ -41,7 +41,7 @@ $$\text{Cost}_{\text{forward}} = O(N_{\text{fragments}} \times N_{\text{lights}}
 **Deferred rendering** separates the geometry and lighting passes:
 $$\text{Cost}_{\text{deferred}} = O(N_{\text{overdraw}} \times N_{\text{geo\_passes}}) + O(N_{\text{pixels}} \times N_{\text{lights}})$$
 
-With deferred,  in the G-buffer pass is minimised by the depth prepass (typically 1.0×–1.1× overdraw on opaque geometry). The lighting evaluation is then exactly 1 pass over the screen.
+With deferred, **N_overdraw** in the G-buffer pass is minimised by the depth prepass (typically 1.0×–1.1× overdraw on opaque geometry). The lighting evaluation is then exactly 1 pass over the screen.
 
 > [!NOTE]
 > Deferred shading has a well-known weakness: it cannot handle **transparency** without extra work. Helio solves this by running a separate **forward transparent pass** after the deferred lighting pass, reusing the depth buffer written during the geometry phase.
@@ -231,7 +231,7 @@ To recover the linear view-space depth from a sampled depth value, the inverse i
 
 $$z_{\text{linear}} = \frac{n \cdot f}{f - z_{\text{ndc}} \cdot (f - n)}$$
 
-where  = near plane distance and  = far plane distance. This is used by passes that need metric depth values (e.g., SSAO, Hi-Z projection):
+where **n** = near plane distance and **f** = far plane distance. This is used by passes that need metric depth values (e.g., SSAO, Hi-Z projection):
 
 ```wgsl
 fn linearize_depth(depth: f32, near: f32, far: f32) -> f32 {
