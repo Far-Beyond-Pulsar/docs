@@ -36,7 +36,7 @@ export const Header = () => {
             <a href="#" className="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-2">
               <Users className="w-4 h-4" /> Community
             </a>
-            <a href="https://github.com/Far-Beyond-Pulsar/Pulsar-Engine" target='_blank' className="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-2">
+            <a href="https://github.com/Far-Beyond-Pulsar/Pulsar-Native" target='_blank' className="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-2">
               <Github className="w-4 h-4" /> GitHub
             </a>
           </nav>
