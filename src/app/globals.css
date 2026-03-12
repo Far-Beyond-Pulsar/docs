@@ -559,6 +559,10 @@ pre[class*="language-"] {
 /* Add to your globals.css */
 .katex {
   font-size: 1.1em !important;
+  /* prevent formulas from forcing container width */
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .math-inline .katex {
@@ -566,7 +570,8 @@ pre[class*="language-"] {
 }
 
 .math-display {
-  overflow-x: auto;
+  /* horizontal overflow can cause scrollbars which shift layout; hide them and allow clipping */
+  overflow-x: clip;
   margin: 1em 0;
   padding: 0.5em 0;
 }

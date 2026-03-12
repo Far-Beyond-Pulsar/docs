@@ -1,25 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowUp } from 'lucide-react';
 
 export default function BackToTop() {
   const [isVisible, setIsVisible] = useState(false);
+  const isVisibleRef = React.useRef(isVisible);
+  React.useEffect(() => { isVisibleRef.current = isVisible; }, [isVisible]);
 
   useEffect(() => {
+    const container: HTMLElement | null = document.querySelector('main');
     const toggleVisibility = () => {
-      // Show button when page is scrolled down 300px
-      if (window.pageYOffset > 300) {
+      const scrollTop = container ? container.scrollTop : window.pageYOffset;
+      const visible = isVisibleRef.current;
+      if (scrollTop > 300 && !visible) {
         setIsVisible(true);
-      } else {
+      } else if (scrollTop <= 300 && visible) {
         setIsVisible(false);
       }
     };
 
-    window.addEventListener('scroll', toggleVisibility);
+    const target = container || window;
+    target.addEventListener('scroll', toggleVisibility);
 
     return () => {
-      window.removeEventListener('scroll', toggleVisibility);
+      target.removeEventListener('scroll', toggleVisibility);
     };
   }, []);
 

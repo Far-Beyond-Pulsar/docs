@@ -129,6 +129,41 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  // Prevent the <body> from scrolling; only scrollable regions within the layout
+  useEffect(() => {
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+    };
+  }, []);
+
+  // DEBUG: watch for unexpected scroll on body or main
+  useEffect(() => {
+    const main = document.querySelector('main');
+    let lastBody = document.body.scrollTop || document.documentElement.scrollTop;
+    let lastMain = main ? main.scrollTop : 0;
+
+    const check = () => {
+      const curBody = document.body.scrollTop || document.documentElement.scrollTop;
+      if (curBody !== lastBody) {
+        console.warn('BODY scroll changed', lastBody, '->', curBody);
+        lastBody = curBody;
+      }
+      const curMain = main ? main.scrollTop : 0;
+      if (curMain !== lastMain) {
+        console.log('MAIN scroll', lastMain, '->', curMain);
+        lastMain = curMain;
+      }
+    };
+
+    const interval = setInterval(check, 100);
+    return () => clearInterval(interval);
+  }, []);
+
   // Check if this is the docs home page
   const isDocsHome = pathname === '/docs';
 
@@ -159,7 +194,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
             className="lg:hidden fixed inset-0 top-[120px] bg-black/50 backdrop-blur-sm z-40"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="lg:hidden fixed left-0 top-[120px] bottom-0 w-80 max-w-[85vw] border-r border-gray-800 bg-black z-50 overflow-y-auto">
+          <aside className="lg:hidden fixed left-0 top-[120px] bottom-0 w-80 max-w-[85vw] border-r border-gray-800 bg-black z-50 overflow-y-scroll">
             {isNavigationLoading ? (
               <div className="p-6 pt-8 space-y-6">
                 {/* Logo skeleton */}
@@ -193,7 +228,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
       {/* Desktop Layout */}
       <div
-        className="hidden lg:grid fixed inset-0 top-[120px] overflow-hidden select-none"
+        className="hidden lg:grid fixed inset-0 top-[120px] overflow-hidden overflow-x-hidden select-none overscroll-none min-w-0"
         style={{
           gridTemplateColumns: headings.length > 0
             ? `${leftWidth}px 8px 1fr 8px ${rightWidth}px`
@@ -201,7 +236,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         }}
       >
         {/* Left Sidebar Column - Navigation */}
-        <aside className="border-r border-gray-800 bg-black h-full overflow-y-auto">
+        <aside className="border-r border-gray-800 bg-black h-full overflow-y-scroll overflow-x-hidden overscroll-contain">
           {isNavigationLoading ? (
             <div className="p-6 pt-8 space-y-6">
               {/* Logo skeleton */}
@@ -244,7 +279,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         {/* Middle Column - Main Content */}
-        <main className="h-full overflow-y-auto">
+        <main className="h-full overflow-y-scroll overflow-x-hidden overscroll-contain min-w-0">
           <div className="px-8 py-8 max-w-4xl mx-auto">
             <Breadcrumbs />
             {children}
@@ -267,7 +302,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
         {/* Right Sidebar Column - Table of Contents */}
         {headings.length > 0 && (
-          <aside className="border-l border-gray-800 h-full overflow-y-auto">
+          <aside className="border-l border-gray-800 h-full overflow-y-scroll overflow-x-hidden overscroll-contain">
             {isHeadingsLoading ? (
               <div className="p-6 pt-8 space-y-4">
                 {/* TOC header */}
@@ -290,8 +325,8 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       {/* Mobile Layout - Single Column */}
-      <div className="lg:hidden min-h-screen pt-[120px]">
-        <main className="overflow-y-auto">
+      <div className="lg:hidden fixed inset-0 top-[120px] overflow-hidden overflow-x-hidden min-w-0">
+        <main className="h-full overflow-y-scroll overflow-x-hidden overscroll-contain min-w-0">
           <div className="px-4 py-6">
             <Breadcrumbs />
             {children}

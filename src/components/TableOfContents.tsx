@@ -55,7 +55,8 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string>('');
   const activeItemRef = React.useRef<HTMLLIElement>(null);
 
-  // Auto-scroll to active item with extra space below
+  // Auto-scrolling was causing janky movement in the sidebar; disable it.
+  /*
   useEffect(() => {
     if (activeItemRef.current) {
       activeItemRef.current.scrollIntoView({
@@ -64,19 +65,29 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
       });
     }
   }, [activeId]);
+  */
 
   useEffect(() => {
     // Find the scrollable main content container
-    const mainContent = document.querySelector('main[class*="overflow-y-auto"]');
-    
+    const mainContent = document.querySelector('main');
     if (!mainContent) return;
+
+    // Track the last active id and throttle timestamp
+    const activeIdRef = { current: activeId };
+    let lastUpdate = 0;
 
     // Set up IntersectionObserver for scroll spy
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
+            const id = entry.target.id;
+            const now = Date.now();
+            if (id !== activeIdRef.current && now - lastUpdate > 150) {
+              lastUpdate = now;
+              activeIdRef.current = id;
+              setActiveId(id);
+            }
           }
         });
       },
@@ -89,7 +100,6 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
 
     // Observe all heading elements
     const headingElements = headings.map(({ slug }) => document.getElementById(slug)).filter(Boolean);
-
     headingElements.forEach((element) => {
       if (element) observer.observe(element);
     });
@@ -106,7 +116,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
     const element = document.getElementById(slug);
     if (element) {
       // Find the scrollable main content container
-      const mainContent = document.querySelector('main[class*="overflow-y-auto"]');
+      const mainContent = document.querySelector('main');
       
       if (mainContent) {
         // Get element position relative to the scrollable container
@@ -140,7 +150,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
   }
 
   return (
-    <div className="h-full overflow-y-auto p-6 pt-8">
+    <div className="h-full overflow-y-scroll p-6 pt-8">
       <h3 className="text-sm font-semibold text-gray-100 mb-4 uppercase tracking-wider flex items-center gap-2">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
