@@ -84,15 +84,18 @@ function useHeaderOffset(bannerVisible: boolean) {
 /**
  * The yellow notice banner shown at the top of the site.
  */
-function NoticeBanner({ visible }: { visible?: boolean }) {
-  const headerHeight = useHeaderHeight();
+function NoticeBanner({ visible, headerHeight }: { visible?: boolean; headerHeight: number }) {
   return (
     <div
       data-notice-banner
-      className={`fixed w-full z-40 bg-yellow-500/10 border-b border-yellow-500/20 transition-transform duration-300 ease-out ${
-        visible ? 'translate-y-0' : '-translate-y-full'
-      }`}
-      style={{ top: `${headerHeight}px` }}
+      className="fixed w-full z-40 bg-yellow-500/10 border-b border-yellow-500/20"
+      style={{
+        top: `${headerHeight}px`,
+        transform: visible
+          ? 'translateY(0)'
+          : `translateY(calc(-100% - ${headerHeight}px))`,
+        transition: 'transform 300ms ease-out',
+      }}
     >
       <div className="max-w-7xl mx-auto px-6 py-3">
         <div className="flex items-start gap-3">
@@ -139,6 +142,7 @@ export default function RootLayout({
   const isDocsPage = pathname?.startsWith("/docs") && pathname !== "/docs";
 
   const bannerVisible = useBannerVisibility();
+  const headerHeight = useHeaderHeight();
   const offsetTop = useHeaderOffset(bannerVisible);
 
   useEffect(() => {
@@ -161,7 +165,7 @@ export default function RootLayout({
 
       <body className={`${inter.className} bg-black text-gray-100`}>
         <Header />
-        <NoticeBanner visible={bannerVisible} />
+        <NoticeBanner visible={bannerVisible} headerHeight={headerHeight} />
 
         {isDocsPage ? (
           <div

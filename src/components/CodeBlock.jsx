@@ -166,12 +166,15 @@ export default function CodeBlock({ language, code, showLineNumbers = true }) {
     token: { color: '#e6edf3' },
   };
 
+  // Subtle noise texture — base64 inline SVG, consistent across renders
+  const noiseSvg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E")`;
+
   const containerStyle = {
     margin: '1.5em 0',
     borderRadius: '12px',
     overflow: 'hidden',
     border: '1px solid #30363d',
-    background: '#0d1117',
+    background: `${noiseSvg}, #0d1117`,
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
     fontSize: '0.9em',
   };
@@ -181,7 +184,7 @@ export default function CodeBlock({ language, code, showLineNumbers = true }) {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '0.5rem 1rem',
-    background: 'linear-gradient(90deg, #161b22 0%, #1c2128 100%)',
+    background: `${noiseSvg}, linear-gradient(90deg, #161b22 0%, #1c2128 100%)`,
     borderBottom: '1px solid #30363d',
   };
 
@@ -216,7 +219,7 @@ export default function CodeBlock({ language, code, showLineNumbers = true }) {
   };
 
   const lineNumbersStyle = {
-    background: 'linear-gradient(180deg, #161b22 0%, #0f1419 100%)',
+    background: `${noiseSvg}, linear-gradient(180deg, #161b22 0%, #0f1419 100%)`,
     color: '#6e7681',
     padding: '0.8rem 0.6rem',
     textAlign: 'right',
