@@ -26,11 +26,11 @@ This page is a complete reference for every concept in the `sdf` module: primiti
 
 A **signed distance field** (SDF) is a scalar field defined over 3-D space. At every point **p** in that space, the field stores a single number: the signed shortest distance from **p** to the nearest surface of some shape. Negative values mean **p** is *inside* the shape; positive values mean it is *outside*; zero means **p** is exactly on the surface. The set of all points where the SDF equals zero forms an *implicit surface* — a perfectly smooth surface defined by a mathematical condition rather than by a polygon mesh.
 
-Formally, for a surface $\mathcal{S}$, the signed distance field at point $\mathbf{p}$ is:
+Formally, for a surface $$$1$$, the signed distance field at point $$$1$$ is:
 
 $$f(\mathbf{p}) = \begin{cases} -d(\mathbf{p}, \mathcal{S}) & \text{if } \mathbf{p} \text{ is inside } \mathcal{S} \\ 0 & \text{if } \mathbf{p} \in \mathcal{S} \\ +d(\mathbf{p}, \mathcal{S}) & \text{if } \mathbf{p} \text{ is outside } \mathcal{S} \end{cases}$$
 
-where $d(\mathbf{p}, \mathcal{S}) = \min_{\mathbf{q} \in \mathcal{S}} \|\mathbf{p} - \mathbf{q}\|$ is the shortest Euclidean distance from $\mathbf{p}$ to any point on the surface. The **sign** encodes inside/outside. The **magnitude** is the distance to the nearest surface. The **zero level set** — all points where $f(\mathbf{p}) = 0$ — is the surface itself.
+where $$$1$$ is the shortest Euclidean distance from $$$1$$ to any point on the surface. The **sign** encodes inside/outside. The **magnitude** is the distance to the nearest surface. The **zero level set** — all points where $$$1$$ — is the surface itself.
 
 The power of SDFs in real-time rendering comes from two properties:
 
@@ -50,16 +50,16 @@ The following diagram shows how data flows from the CPU-side edit list through t
 
 ```mermaid
 flowchart TD
-    A[SdfEditList\ncpu edits] -->|generation bump| B[SdfFeature::prepare\nupload to GPU]
-    B --> C[edit_buffer\nGpuSdfEdit array]
-    B --> D[params_buffer\nSdfGridParams]
-    E[EditBVH\nAABB tree] -->|O log N cull| F[SdfClipUpdatePass\nGPU compute]
+    A["SdfEditList<br/>cpu edits"] -->|generation bump| B["SdfFeature.prepare<br/>upload to GPU"]
+    B --> C["edit_buffer<br/>GpuSdfEdit array"]
+    B --> D["params_buffer<br/>SdfGridParams"]
+    E["EditBVH<br/>AABB tree"] -->|O log N cull| F["SdfClipUpdatePass<br/>GPU compute"]
     C --> F
     D --> F
-    F -->|write SDF values| G[Clip Map\n4 × 3-D R8Unorm volumes]
-    G -->|trilinear sample| H[SdfRayMarchPass\nfullscreen]
-    I[Depth Buffer\nopaque geo] -->|early exit| H
-    J[Lighting BindGroup\nPBR] --> H
+    F -->|write SDF values| G["Clip Map<br/>4 × 3-D R8Unorm volumes"]
+    G -->|trilinear sample| H["SdfRayMarchPass<br/>fullscreen"]
+    I["Depth Buffer<br/>opaque geo"] -->|early exit| H
+    J["Lighting BindGroup<br/>PBR"] --> H
     H --> K[Color + Depth Output]
 ```
 
@@ -106,7 +106,7 @@ The `SdfShapeParams::data` array is sent verbatim to the GPU inside `GpuSdfEdit`
 
 The analytical SDF for each primitive, evaluated in the primitive's local space (before the `SdfEdit::transform` is applied).
 
-**Sphere** — centre at origin, radius $r$:
+**Sphere** — centre at origin, radius $$$1$$:
 
 $$f_{\text{sphere}}(\mathbf{p}) = \|\mathbf{p}\| - r$$
 
@@ -118,11 +118,11 @@ fn sdf_sphere(p: vec3<f32>, radius: f32) -> f32 {
 }
 ```
 
-**Box** — centred at origin, half-extents $\mathbf{b} = (b_x, b_y, b_z)$:
+**Box** — centred at origin, half-extents $$$1$$:
 
 $$f_{\text{box}}(\mathbf{p}, \mathbf{b}) = \left\|\max\!\left(\lvert\mathbf{p}\rvert - \mathbf{b},\; \mathbf{0}\right)\right\| + \min\!\left(\max(|p_x|-b_x,\; |p_y|-b_y,\; |p_z|-b_z),\; 0\right)$$
 
-The $\max(\lvert\mathbf{p}\rvert - \mathbf{b},\; \mathbf{0})$ term computes the per-axis overshoot outside the box faces and takes its length for the exterior distance. The $\min(\ldots, 0)$ term handles the interior, returning the negative distance to the nearest face when $\mathbf{p}$ is inside. Together they give exact Euclidean distance both inside and outside.
+The $$$1$$ term computes the per-axis overshoot outside the box faces and takes its length for the exterior distance. The $$$1$$ term handles the interior, returning the negative distance to the nearest face when $$$1$$ is inside. Together they give exact Euclidean distance both inside and outside.
 
 ```wgsl
 fn sdf_box(p: vec3<f32>, b: vec3<f32>) -> f32 {
@@ -131,13 +131,13 @@ fn sdf_box(p: vec3<f32>, b: vec3<f32>) -> f32 {
 }
 ```
 
-**Capsule** — endpoints $\mathbf{a}$, $\mathbf{b}$, radius $r$:
+**Capsule** — endpoints $$$1$$, $$$1$$, radius $$$1$$:
 
 $$t = \operatorname{clamp}\!\left(\frac{(\mathbf{p}-\mathbf{a})\cdot(\mathbf{b}-\mathbf{a})}{\|\mathbf{b}-\mathbf{a}\|^2},\; 0,\; 1\right)$$
 
 $$f_{\text{capsule}}(\mathbf{p}) = \|\mathbf{p} - \bigl(\mathbf{a} + t(\mathbf{b}-\mathbf{a})\bigr)\| - r$$
 
-$t$ is the scalar projection of $\mathbf{p}$ onto the line segment $\mathbf{AB}$, clamped to $[0, 1]$. The SDF is the distance from $\mathbf{p}$ to the nearest point on the segment, minus the tube radius.
+$$$1$$ is the scalar projection of $$$1$$ onto the line segment $$$1$$, clamped to $$$1$$. The SDF is the distance from $$$1$$ to the nearest point on the segment, minus the tube radius.
 
 ```wgsl
 fn sdf_capsule(p: vec3<f32>, a: vec3<f32>, b: vec3<f32>, r: f32) -> f32 {
@@ -147,11 +147,11 @@ fn sdf_capsule(p: vec3<f32>, a: vec3<f32>, b: vec3<f32>, r: f32) -> f32 {
 }
 ```
 
-**Torus** — major radius $R$ (ring), minor radius $r$ (tube), centred at origin in the XZ plane:
+**Torus** — major radius $$$1$$ (ring), minor radius $$$1$$ (tube), centred at origin in the XZ plane:
 
 $$f_{\text{torus}}(\mathbf{p}, R, r) = \sqrt{\!\left(\sqrt{p_x^2 + p_z^2} - R\right)^{\!2} + p_y^2} - r$$
 
-The inner $\sqrt{p_x^2+p_z^2}-R$ is the signed distance from $\mathbf{p}$'s XZ projection to the ring circle of radius $R$. Treating that value and $p_y$ as a 2-D point gives the distance to the ring centreline, and subtracting $r$ produces the tube surface.
+The inner $$$1$$ is the signed distance from $$$1$$'s XZ projection to the ring circle of radius $$$1$$. Treating that value and $$$1$$ as a 2-D point gives the distance to the ring centreline, and subtracting $$$1$$ produces the tube surface.
 
 ```wgsl
 fn sdf_torus(p: vec3<f32>, R: f32, r: f32) -> f32 {
@@ -160,7 +160,7 @@ fn sdf_torus(p: vec3<f32>, R: f32, r: f32) -> f32 {
 }
 ```
 
-**Cylinder** — half-height $h$, radius $r$, centred at origin, Y-axis aligned:
+**Cylinder** — half-height $$$1$$, radius $$$1$$, centred at origin, Y-axis aligned:
 
 $$f_{\text{cylinder}}(\mathbf{p}, h, r) = \max\!\left(\sqrt{p_x^2 + p_z^2} - r,\; |p_y| - h\right)$$
 
@@ -236,13 +236,13 @@ At each sample point, the GPU holds the accumulated SDF value `a` (the field so 
 | `SmoothSubtraction` | polynomial blend of `max(a, -b)` | Subtraction with rounded concave edge |
 | `SmoothIntersection` | polynomial blend of `max(a, b)` | Intersection with rounded convex edge |
 
-The sharp boolean operations have exact set-theoretic interpretations. Given accumulated field $f_A$ and new primitive $f_B$:
+The sharp boolean operations have exact set-theoretic interpretations. Given accumulated field $$$1$$ and new primitive $$$1$$:
 
 $$f_{A \cup B}(\mathbf{p}) = \min(f_A(\mathbf{p}),\; f_B(\mathbf{p}))$$
 
 $$f_{A \setminus B}(\mathbf{p}) = \max(f_A(\mathbf{p}),\; -f_B(\mathbf{p}))$$
 
-Negating $f_B$ flips its inside/outside sense; taking the max then selects points that are inside $A$ but outside $B$.
+Negating $$$1$$ flips its inside/outside sense; taking the max then selects points that are inside $$$1$$ but outside $$$1$$.
 
 $$f_{A \cap B}(\mathbf{p}) = \max(f_A(\mathbf{p}),\; f_B(\mathbf{p}))$$
 
@@ -254,13 +254,13 @@ fn op_intersect(d1: f32, d2: f32) -> f32 { return max(d1, d2); }
 
 The smooth variants use Inigo Quilez's polynomial smooth-min / smooth-max functions, parameterised by `SdfEdit::smoothing`. A smoothing value of `0.0` degrades to the sharp boolean. A value of `1.0` blends the two shapes together over a one-metre radius, producing a seamless organic junction.
 
-The polynomial smooth-min $\text{smin}$ is defined as:
+The polynomial smooth-min $$$1$$ is defined as:
 
 $$h = \max\!\left(\frac{k - |a-b|}{k},\; 0\right)$$
 
 $$\text{smin}_{\text{poly}}(a,\, b,\, k) = \min(a, b) - \frac{h^2\, k}{4}$$
 
-When $|a - b| > k$ (the two primitives are further apart than the blend radius), $h = 0$ and this reduces to the sharp $\min$. When $|a - b| < k$ (within the blend zone), the $h^2 k / 4$ term subtracts a smooth correction that rounds the junction. The parameter $k$ is `SdfEdit::smoothing` — the blend radius in metres.
+When $$$1$$ (the two primitives are further apart than the blend radius), $$$1$$ and this reduces to the sharp $$$1$$. When $$$1$$ (within the blend zone), the $$$1$$ term subtracts a smooth correction that rounds the junction. The parameter $$$1$$ is `SdfEdit::smoothing` — the blend radius in metres.
 
 ```wgsl
 fn smooth_union(d1: f32, d2: f32, k: f32) -> f32 {
@@ -325,7 +325,7 @@ pub struct SdfEditList {
 }
 ```
 
-Every mutation — `push`, `remove`, or `clear` — increments `generation`. `SdfFeature::prepare` compares `edit_list.generation` against `last_uploaded_gen`. If they differ, the entire edit list is serialised into `GpuSdfEdit` structs and uploaded to the GPU `edit_buffer`. This lazy upload pattern means that frames where nothing changes incur zero buffer-write overhead.
+Every mutation — `push`, `remove`, or `clear` — increments `generation`. `SdfFeature.prepare` compares `edit_list.generation` against `last_uploaded_gen`. If they differ, the entire edit list is serialised into `GpuSdfEdit` structs and uploaded to the GPU `edit_buffer`. This lazy upload pattern means that frames where nothing changes incur zero buffer-write overhead.
 
 > [!NOTE]
 > The generation counter does not track *which* edits changed, only *whether* they changed. Any mutation triggers a full re-upload of all edits. For typical edit counts (tens to low hundreds) this is fast; the buffer is compact and a single `write_buffer` call suffices.
@@ -374,7 +374,7 @@ pub const DEFAULT_CLIP_LEVELS: usize = 4;
 
 Because all levels share the same `grid_dim`, the voxel size at level `L` is `voxel_size_L0 × 2^L`. Level 0 gives you the sharpest SDF detail right around the camera. Level 3 gives you coarser but longer-range SDF coverage for distant geometry and shadow marching.
 
-At runtime, `SdfFeature::prepare` moves all clip map levels to follow the camera's world-space position. Levels that shift by more than one voxel width are marked dirty and re-evaluated by `SdfClipUpdatePass` on the next compute dispatch.
+At runtime, `SdfFeature.prepare` moves all clip map levels to follow the camera's world-space position. Levels that shift by more than one voxel width are marked dirty and re-evaluated by `SdfClipUpdatePass` on the next compute dispatch.
 
 > [!NOTE]
 > The clip map is camera-centered — it is not tied to a fixed world volume. This means SDF geometry far from the camera is simply not represented in the clip map and will not be ray marched. Plan your scene so that important interactive SDF elements are within the finest few levels.
@@ -389,13 +389,13 @@ Each level is stored as a `wgpu::Texture` with format `R8Unorm` — a single 8-b
 | 128 | Zero crossing (surface) |
 | 255 | Maximum positive (far outside solid) |
 
-The mapping from a raw SDF value $f(\mathbf{p})$ to a stored byte is:
+The mapping from a raw SDF value $$$1$$ to a stored byte is:
 
 $$f_{\text{clamped}} = \operatorname{clamp}\!\left(f(\mathbf{p}),\; -d_{\max},\; +d_{\max}\right)$$
 
 $$\text{stored} = \left\lfloor\frac{f_{\text{clamped}} - (-d_{\max})}{2\,d_{\max}} \times 255 + 0.5\right\rfloor$$
 
-where $d_{\max}$ is the maximum representable distance for that clip level (typically half the level's world-space extent). Byte 0 maps to $-d_{\max}$ (deepest interior), byte 128 maps to the zero crossing (surface), and byte 255 maps to $+d_{\max}$ (furthest exterior).
+where $$$1$$ is the maximum representable distance for that clip level (typically half the level's world-space extent). Byte 0 maps to $$$1$$ (deepest interior), byte 128 maps to the zero crossing (surface), and byte 255 maps to $$$1$$ (furthest exterior).
 
 The quantisation range is set by the level's `level_size` so that the ±1.0 normalised range spans the entire world-space extent of that level. This gives adequate precision near the surface for ray marching convergence.
 
@@ -465,7 +465,7 @@ The AABB for an edit is conservatively padded by the `smoothing` radius. A smoot
 
 ## GPU Uniform Parameters
 
-`SdfGridParams` is the uniform struct that parameterises the SDF evaluation on the GPU. It is uploaded to `params_buffer` by `SdfFeature::prepare`:
+`SdfGridParams` is the uniform struct that parameterises the SDF evaluation on the GPU. It is uploaded to `params_buffer` by `SdfFeature.prepare`:
 
 ```rust
 pub struct SdfGridParams {
@@ -522,30 +522,30 @@ The ray march pass runs after all opaque geometry has been rendered. It is a ful
 
 ```mermaid
 flowchart LR
-    A[Fragment\nscreen pixel] --> B{Depth buffer\ncheck}
+    A["Fragment<br/>screen pixel"] --> B{Depth buffer\ncheck}
     B -->|pixel covered by\nopaque geo| C[Discard early]
-    B -->|pixel uncovered| D[Reconstruct\nray from\ncamera + UV]
-    D --> E[Sphere-trace\nthrough clip map\nlevels 0→3]
+    B -->|pixel uncovered| D["Reconstruct<br/>ray from<br/>camera + UV"]
+    D --> E["Sphere-trace<br/>through clip map<br/>levels 0→3"]
     E --> F{Hit?}
     F -->|no hit\nmax distance| G[Discard]
-    F -->|hit| H[Estimate normal\nby finite diff]
-    H --> I[PBR shading\nvia lighting\nbind group]
-    I --> J[Write color\n+ depth]
+    F -->|hit| H["Estimate normal<br/>by finite diff"]
+    H --> I["PBR shading<br/>via lighting<br/>bind group"]
+    I --> J["Write color<br/>+ depth"]
 ```
 
 ### Sphere Tracing Algorithm
 
-Given a ray $\mathbf{r}(t) = \mathbf{o} + t\,\mathbf{d}$ (origin $\mathbf{o}$, unit direction $\mathbf{d}$), sphere tracing advances the ray by the SDF value at each step:
+Given a ray $$$1$$ (origin $$$1$$, unit direction $$$1$$), sphere tracing advances the ray by the SDF value at each step:
 
 $$t_{i+1} = t_i + f\!\left(\mathbf{r}(t_i)\right)$$
 
-This is always safe: because $f(\mathbf{p})$ is a **lower bound** on the true distance to the surface, stepping by $f$ can never overshoot it. The march terminates with:
+This is always safe: because $$$1$$ is a **lower bound** on the true distance to the surface, stepping by $$$1$$ can never overshoot it. The march terminates with:
 
 $$\text{hit if } f\!\left(\mathbf{r}(t_i)\right) < \varepsilon_{\text{surface}}$$
 
 $$\text{miss if } t_i > t_{\max}$$
 
-The efficiency gain over uniform ray-casting comes from the fact that far from any surface $f$ is large, enabling large steps through empty space. Only near surfaces (where $f \to 0$) does the step size shrink, concentrating samples precisely where needed.
+The efficiency gain over uniform ray-casting comes from the fact that far from any surface $$$1$$ is large, enabling large steps through empty space. Only near surfaces (where $$$1$$) does the step size shrink, concentrating samples precisely where needed.
 
 ```wgsl
 const MAX_STEPS: i32 = 128;
@@ -570,7 +570,7 @@ fn ray_march(ray_origin: vec3<f32>, ray_dir: vec3<f32>, t_max: f32) -> f32 {
 
 **Level selection** during marching works coarse-to-fine: the marcher advances through clip level 3 in large steps until the sample value drops below a threshold, then switches to finer levels for the precise surface crossing. This prevents wasting fine-level samples in empty space far from surfaces.
 
-**Normal estimation** is done by computing the gradient of the SDF. Because the gradient of any SDF has unit length at the surface ($\|\nabla f\| = 1$ — the *eikonal equation*), normalising the finite-difference approximation gives the surface normal directly:
+**Normal estimation** is done by computing the gradient of the SDF. Because the gradient of any SDF has unit length at the surface ($$$1$$ — the *eikonal equation*), normalising the finite-difference approximation gives the surface normal directly:
 
 $$\mathbf{N}(\mathbf{p}) = \nabla f(\mathbf{p}) \approx \operatorname{normalize}\!\left(\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z}\right)$$
 
@@ -587,11 +587,11 @@ fn estimate_normal(p: vec3<f32>) -> vec3<f32> {
 }
 ```
 
-An alternative is the **tetrahedron technique** (Inigo Quilez), which achieves the same quality with only 4 SDF evaluations instead of 6 by using four tetrahedral sample offsets $k_1\text{–}k_4$:
+An alternative is the **tetrahedron technique** (Inigo Quilez), which achieves the same quality with only 4 SDF evaluations instead of 6 by using four tetrahedral sample offsets $$$1$$:
 
 $$\mathbf{N}(\mathbf{p}) \approx \operatorname{normalize}\!\left(\sum_{i=1}^{4} k_i \cdot f(\mathbf{p} + k_i\,\varepsilon)\right)$$
 
-where $k_1=(+1,-1,-1)$, $k_2=(-1,-1,+1)$, $k_3=(-1,+1,-1)$, $k_4=(+1,+1,+1)$.
+where $$$1$$, $$$1$$, $$$1$$, $$$1$$.
 
 ```wgsl
 const EPS: f32 = 0.001;
@@ -758,18 +758,18 @@ Here is the recommended end-to-end workflow for integrating the SDF CSG system i
 
 ```mermaid
 flowchart TD
-    A[Create SdfFeature\nwith_grid_dim · with_volume_bounds] --> B[Configure terrain\nset_terrain with TerrainConfig]
-    B --> C[Register with renderer\nrenderer.register_feature]
-    C --> D[Feature::register called\nGPU resources allocated\npasses registered]
-    D --> E[Game loop starts]
-    E --> F{Edit list\nchanged?}
-    F -->|yes| G[Feature::prepare\nupload edits to GPU\nrebuild BVH]
-    F -->|no| H[Feature::prepare\nskip upload no-op]
-    G --> I[SdfClipUpdatePass\nrecompute dirty tiles]
+    A["Create SdfFeature<br/>with_grid_dim · with_volume_bounds"] --> B["Configure terrain<br/>set_terrain with TerrainConfig"]
+    B --> C["Register with renderer<br/>renderer.register_feature"]
+    C --> D["Feature.register called<br/>GPU resources allocated<br/>passes registered"]
+    D --> E["Game loop starts]
+    E --> F{Edit list<br/>changed?}
+    F -->|yes| G["Feature.prepare<br/>upload edits to GPU<br/>rebuild BVH"]
+    F -->|no| H["Feature.prepare<br/>skip upload no-op"]
+    G --> I["SdfClipUpdatePass<br/>recompute dirty tiles"]
     H --> I
-    I --> J[SdfRayMarchPass\nfullscreen render]
+    I --> J["SdfRayMarchPass<br/>fullscreen render"]
     J --> K[Player interaction?]
-    K -->|pick / place| L[pick_ray\nadd_edit / remove_edit]
+    K -->|pick / place| L["pick_ray<br/>add_edit / remove_edit"]
     L --> F
     K -->|no| F
 ```

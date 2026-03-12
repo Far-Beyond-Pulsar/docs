@@ -96,23 +96,23 @@ Understanding the data path from renderer to browser helps when reasoning about 
 ```mermaid
 flowchart LR
     subgraph Render Thread
-        RT["render() loop\nbuilds PortalFrameSnapshot"]
+        RT["render() loop<br/>builds PortalFrameSnapshot"]
     end
 
     subgraph Background OS Thread
         direction TB
-        BT["Bridge Thread\n(polls mpsc, 100 ms timeout)"]
-        TK["Tokio Runtime\n(single-threaded)"]
-        AX["axum server\nHTTP + WebSocket"]
-        BC["broadcast::channel\ncapacity = 256"]
+        BT["Bridge Thread<br/>(polls mpsc, 100 ms timeout)"]
+        TK["Tokio Runtime<br/>(single-threaded)"]
+        AX["axum server<br/>HTTP + WebSocket"]
+        BC["broadcast.channel<br/>capacity = 256"]
         BT --> BC
         TK --> AX
         BC --> AX
     end
 
     subgraph Browser
-        WS1["Tab 1\nWebSocket client"]
-        WS2["Tab 2\nWebSocket client"]
+        WS1["Tab 1<br/>WebSocket client"]
+        WS2["Tab 2<br/>WebSocket client"]
     end
 
     RT -->|mpsc send| BT
@@ -402,9 +402,9 @@ The outer `Option` is the *change flag* — `None` means "no diff". The inner `O
 ```mermaid
 flowchart TD
     A["camera field in delta"]
-    A -->|None| B["No camera change\nClient keeps existing state"]
-    A -->|Some-None| C["Camera removed\nClient clears frustum indicator"]
-    A -->|Some-Some-cam| D["Camera updated\nClient re-renders frustum"]
+    A -->|None| B["No camera change<br/>Client keeps existing state"]
+    A -->|Some-None| C["Camera removed<br/>Client clears frustum indicator"]
+    A -->|Some-Some-cam| D["Camera updated<br/>Client re-renders frustum"]
 ```
 
 ## `compute_scene_delta` — Diffing the Scene
@@ -415,12 +415,12 @@ The diff logic operates on each entity class independently:
 
 ```mermaid
 flowchart TD
-    P["previous_scene_layout\n(object_count, light_count, billboard_count)"]
-    C["latest_scene_layout\n(updated this frame)"]
+    P["previous_scene_layout<br/>(object_count, light_count, billboard_count)"]
+    C["latest_scene_layout<br/>(updated this frame)"]
     P --> D["compute_scene_delta"]
     C --> D
-    D --> OC["object_changes\n(new or modified)"]
-    D --> MO["moved_object_ids\n(position-only change)"]
+    D --> OC["object_changes<br/>(new or modified)"]
+    D --> MO["moved_object_ids<br/>(position-only change)"]
     D --> RO["removed_object_ids"]
     D --> LC["light_changes"]
     D --> RL["removed_light_ids"]

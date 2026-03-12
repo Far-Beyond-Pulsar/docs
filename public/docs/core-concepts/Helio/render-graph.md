@@ -279,12 +279,12 @@ sequenceDiagram
 
 Note that `creates` declarations contribute to `all_writers` just like `writes` declarations — the difference between them is semantic (one creates the resource, one modifies it), but both establish a "this pass must run before any pass that reads this resource" relationship in the dependency graph. The separate tracking in `PassNode` is for documentation and future tooling purposes.
 
-**Topological sort.** The sort uses Kahn's algorithm with a FIFO queue (a `VecDeque`). Given the directed acyclic graph $G = (V, E)$ where $(u, v) \in E$ means "pass $u$ must run before pass $v$", Kahn's algorithm proceeds as follows:
+**Topological sort.** The sort uses Kahn's algorithm with a FIFO queue (a `VecDeque`). Given the directed acyclic graph $$$1$$ where $$$1$$ means "pass $$$1$$ must run before pass $$$1$$", Kahn's algorithm proceeds as follows:
 
-1. Compute in-degree for each node: $\deg^-(v) = |\{u : (u,v) \in E\}|$
-2. Initialise queue $Q = \{v \in V : \deg^-(v) = 0\}$
-3. While $Q \neq \emptyset$: dequeue $u$ → append to execution order; for each $(u, v) \in E$: decrement $\deg^-(v)$; if $\deg^-(v) = 0$, enqueue $v$
-4. If $|\text{execution order}| < |V|$: cycle detected → error
+1. Compute in-degree for each node: $$$1$$
+2. Initialise queue $$$1$$
+3. While $$$1$$: dequeue $$$1$$ → append to execution order; for each $$$1$$: decrement $$$1$$; if $$$1$$, enqueue $$$1$$
+4. If $$$1$$: cycle detected → error
 
 $$\text{Time complexity: } O(|V| + |E|)$$
 

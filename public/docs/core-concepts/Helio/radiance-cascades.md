@@ -92,7 +92,7 @@ Reading these side-by-side:
 
 #### T_MAX Doubling Progression
 
-Cascades 0–2 follow a geometric $\times 2$ progression; cascade 3 jumps to sky distance:
+Cascades 0–2 follow a geometric $$$1$$ progression; cascade 3 jumps to sky distance:
 
 $$T_{\max}[i] = \{0.5,\; 1.0,\; 2.0,\; 1{,}000.0\} \text{ metres}$$
 
@@ -104,7 +104,7 @@ The doubling of `DIR_DIM` at each level and halving of `PROBE_DIM` is not arbitr
 
 #### Probe Spacing Per Cascade
 
-For a world AABB of size $\mathbf{S} = \mathbf{w}_{\max} - \mathbf{w}_{\min}$, the probe grid spacing for cascade $i$ is:
+For a world AABB of size $$$1$$, the probe grid spacing for cascade $$$1$$ is:
 
 $$\Delta_i = \frac{\mathbf{S}}{\text{PROBE\_DIMS}[i]}$$
 
@@ -132,7 +132,7 @@ At cascade 3, 32×32 = 1 024 bins give approximately 0.4° of solid angle per bi
 
 #### Octahedral Direction Encoding
 
-Each cascade's DIR_DIM × DIR_DIM grid of direction bins maps to the sphere using octahedral projection. For a 2D bin coordinate $(u, v) \in [0,1]^2$:
+Each cascade's DIR_DIM × DIR_DIM grid of direction bins maps to the sphere using octahedral projection. For a 2D bin coordinate $$$1$$:
 
 $$\mathbf{d} = \text{oct\_decode}(2u-1,\; 2v-1)$$
 
@@ -140,18 +140,18 @@ The octahedral map has no singularities (unlike polar/spherical coordinates) and
 
 $$\text{oct\_decode}(x, z) = \operatorname{normalize}\!\left(\begin{cases} (x,\; 1-|x|-|z|,\; z) & \text{if } |x|+|z| \leq 1 \\ (\operatorname{sign}(x)(1-|z|),\; -(1-|x|-|z|),\; \operatorname{sign}(z)(1-|x|)) & \text{otherwise}\end{cases}\right)$$
 
-The upper hemisphere corresponds to $|x|+|z| \leq 1$ (the octant where $y \geq 0$); the lower hemisphere folds into the four triangular corners. This is why `dir_dim` starts at 4 — a 4×4 grid gives exactly 16 bins covering both hemispheres with no wasted texels.
+The upper hemisphere corresponds to $$$1$$ (the octant where $$$1$$); the lower hemisphere folds into the four triangular corners. This is why `dir_dim` starts at 4 — a 4×4 grid gives exactly 16 bins covering both hemispheres with no wasted texels.
 
 ```mermaid
 graph LR
     subgraph "Octahedral direction map (cascade 0, 4×4)"
-        A["(0,0)\nNW upper"] --- B["(1,0)\nNE upper"]
-        B --- C["(2,0)\nSE upper"]
-        C --- D["(3,0)\nSW upper"]
-        A --- E["(0,1)\nNW lower"]
-        E --- F["(1,1)\nNE lower"]
-        F --- G["(2,1)\nSE lower"]
-        G --- H["(3,1)\nSW lower"]
+        A["0,0<br/>NW upper"] --- B["1,0<br/>NE upper"]
+        B --- C["2,0<br/>SE upper"]
+        C --- D["3,0<br/>SW upper"]
+        A --- E["0,1<br/>NW lower"]
+        E --- F["1,1<br/>NE lower"]
+        F --- G["2,1<br/>SE lower"]
+        G --- H["3,1<br/>SW lower"]
     end
 ```
 
@@ -180,7 +180,7 @@ The invariant `PROBE_DIM × DIR_DIM = 64` holds for every cascade:
 
 #### Cascade Atlas Invariant
 
-For every cascade $i$, the atlas width is constant:
+For every cascade $$$1$$, the atlas width is constant:
 
 $$\text{ATLAS\_W} = \text{PROBE\_DIMS}[i] \times \text{DIR\_DIMS}[i] = 64$$
 
@@ -255,10 +255,10 @@ pub struct CascadeStatic {
 
 ```mermaid
 graph TD
-    C3["CascadeStatic[3]\nprobe_dim=2, dir_dim=32\nt_max=1000m\nparent_probe_dim=0\nparent_dir_dim=0"] -->|borrows from| NONE["(no parent — top of hierarchy)"]
-    C2["CascadeStatic[2]\nprobe_dim=4, dir_dim=16\nt_max=2.0m\nparent_probe_dim=2\nparent_dir_dim=32"] -->|borrows from| C3
-    C1["CascadeStatic[1]\nprobe_dim=8, dir_dim=8\nt_max=1.0m\nparent_probe_dim=4\nparent_dir_dim=16"] -->|borrows from| C2
-    C0["CascadeStatic[0]\nprobe_dim=16, dir_dim=4\nt_max=0.5m\nparent_probe_dim=8\nparent_dir_dim=8"] -->|borrows from| C1
+    C3["CascadeStatic[3]<br/>probe_dim=2, dir_dim=32<br/>t_max=1000m\nparent_probe_dim=0\nparent_dir_dim=0"] -->|borrows from| NONE["no parent — top of hierarchy"]
+    C2["CascadeStatic[2]<br/>probe_dim=4, dir_dim=16<br/>t_max=2.0m\nparent_probe_dim=2\nparent_dir_dim=32"] -->|borrows from| C3
+    C1["CascadeStatic[1]<br/>probe_dim=8, dir_dim=8<br/>t_max=1.0m\nparent_probe_dim=4\nparent_dir_dim=16"] -->|borrows from| C2
+    C0["CascadeStatic[0]<br/>probe_dim=16, dir_dim=4<br/>t_max=0.5m\nparent_probe_dim=8\nparent_dir_dim=8"] -->|borrows from| C1
 ```
 
 > [!NOTE]
@@ -381,11 +381,11 @@ The blend weight is typically in the range 0.05–0.1 per frame, meaning the his
 
 #### History Blending
 
-The history blend weight $w_h$ controls temporal stability versus lag:
+The history blend weight $$$1$$ controls temporal stability versus lag:
 
 $$C_{\text{out}} = (1 - w_h) \cdot C_{\text{current}} + w_h \cdot C_{\text{history}}$$
 
-For radiance cascades a typical $w_h$ of 0.9 means each frame retains 90% of prior GI. Static scenes converge in approximately 10 frames $(1 - 0.9^{10} \approx 65\%)$ and are effectively fully converged by 20 frames $(1 - 0.9^{20} \approx 88\%)$. Moving light sources cause a temporal lag proportional to $(1 - w_h)^{-1}$ — at $w_h = 0.9$ the effective lag is about 10 frames.
+For radiance cascades a typical $$$1$$ of 0.9 means each frame retains 90% of prior GI. Static scenes converge in approximately 10 frames $$$1$$ and are effectively fully converged by 20 frames $$$1$$. Moving light sources cause a temporal lag proportional to $$$1$$ — at $$$1$$ the effective lag is about 10 frames.
 
 > [!TIP]
 > In scenes where the probe grid is static (fixed AABB, no moving lights), the GI converges in about 10–20 frames and then costs almost nothing in terms of perceived noise. The GPU still executes the full trace-merge-blend pipeline every frame, but the output is visually stable. Consider disabling or cheapening RC in cut-scenes where the camera moves continuously and convergence never completes.
@@ -723,13 +723,13 @@ Radiance Cascades in Helio provides real-time global illumination through a hier
 
 ```mermaid
 flowchart TD
-    A["RadianceCascadesFeature::new()\n.with_world_bounds(min, max)\n.with_camera_follow(extents)"] --> B["renderer.register_feature(gi)"]
-    B --> C["Per frame: RCDynamic upload\nworld_min/max, frame, light_count, sky_color"]
-    C --> D["Cascade 3: trace 8192 rays\n(8 probes × 1024 dirs, T_max=1000m)"]
+    A["RadianceCascadesFeature.new<br/>.with_world_bounds(min, max)<br/>.with_camera_follow(extents)"] --> B["renderer.register_featuregi"]
+    B --> C["Per frame: RCDynamic upload<br/>world_min/max, frame, light_count, sky_color"]
+    C --> D["Cascade 3: trace 8192 rays<br/>8 probes × 1024 dirs, T_max=1000m"]
     D --> E["Cascade 2: trace 16384 rays + merge C3"]
     E --> F["Cascade 1: trace 32768 rays + merge C2"]
     F --> G["Cascade 0: trace 65536 rays + merge C1"]
-    G --> H["History blend: output[i] × α + history[i] × (1−α)"]
+    G --> H["History blend: output[i] × α + history[i] × 1−α"]
     H --> I["rc_cascade0_view → lighting bind group"]
     I --> J["DeferredLightingPass: per-pixel irradiance lookup"]
     J --> K["Final image: direct + RC indirect + ambient"]

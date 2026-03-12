@@ -194,14 +194,14 @@ The flow from window to device looks like this:
 ```mermaid
 flowchart TD
     A[winit EventLoop] --> B[Window]
-    B --> C[wgpu::Instance]
-    C --> D[wgpu::Surface]
+    B --> C["wgpu.Instance"]
+    C --> D["wgpu.Surface"]
     C --> E[request_adapter]
     D --> E
-    E --> F[wgpu::Adapter]
+    E --> F["wgpu.Adapter"]
     F --> G[request_device\nfeatures: MULTI_DRAW_INDIRECT\n+ TIMESTAMP_QUERY]
-    G --> H[wgpu::Device + wgpu::Queue]
-    H --> I[Renderer::new]
+    G --> H["wgpu.Device + wgpu.Queue"]
+    H --> I["Renderer.new"]
     D --> I
 ```
 

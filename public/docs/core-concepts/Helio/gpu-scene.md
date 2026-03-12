@@ -60,13 +60,13 @@ Cache-line size on x86/ARM = 64 bytes. Two cache lines per instance means the GP
 
 **`normal_mat` (48 bytes)** is the inverse-transpose of the upper-left 3×3 of the transform, padded to three `vec4` rows. This is the matrix required for transforming surface normals correctly in the presence of non-uniform scale — a step that is expensive enough (matrix inverse) to be worth precomputing once on the CPU rather than repeating in every vertex shader invocation.
 
-For a model matrix $\mathbf{M}$, the normal matrix is:
+For a model matrix $$$1$$, the normal matrix is:
 
 $$\mathbf{N}_{\text{mat}} = (\mathbf{M}^{-1})^T$$
 
-Only the upper-left 3×3 submatrix is needed (translation doesn't affect normals). In `GpuInstanceData` this is stored as 12 floats (a mat3×4 with padding): $\mathbf{N}_{\text{mat}} \in \mathbb{R}^{3 \times 3}$.
+Only the upper-left 3×3 submatrix is needed (translation doesn't affect normals). In `GpuInstanceData` this is stored as 12 floats (a mat3×4 with padding): $$$1$$.
 
-Why not just use $\mathbf{M}$ itself? When a mesh is scaled non-uniformly (e.g., squeezed in X), normals transformed by $\mathbf{M}$ would tilt incorrectly. The inverse-transpose restores perpendicularity. For uniform scale and rotation-only transforms, $(\mathbf{M}^{-1})^T = \mathbf{M}$ so the operation is a no-op in the common case.
+Why not just use $$$1$$ itself? When a mesh is scaled non-uniformly (e.g., squeezed in X), normals transformed by $$$1$$ would tilt incorrectly. The inverse-transpose restores perpendicularity. For uniform scale and rotation-only transforms, $$$1$$ so the operation is a no-op in the common case.
 
 ```rust
 // Compute normal matrix from transform
@@ -84,12 +84,12 @@ fn normal_matrix(m: &glam::Mat4) -> [[f32; 3]; 3] {
 
 **`bounds_center` and `bounds_radius` (16 bytes)** encode a world-space bounding sphere. This data enables GPU-side frustum and occlusion culling without any CPU readback. The constructor `GpuInstanceData::from_transform` computes both fields automatically: it transforms the mesh-space bounds center by the full transform matrix and scales the radius by `max(sx, sy, sz)` extracted from the transform, producing a conservative sphere that is never smaller than the actual transformed mesh.
 
-Given a local bounding sphere $(c_{\text{local}}, r_{\text{local}})$ and model transform $\mathbf{M}$, the world-space sphere is:
+Given a local bounding sphere $$$1$$ and model transform $$$1$$, the world-space sphere is:
 
 $$\mathbf{c}_{\text{world}} = \mathbf{M} \cdot \mathbf{c}_{\text{local}}$$
 $$r_{\text{world}} = r_{\text{local}} \cdot \max(s_x, s_y, s_z)$$
 
-where the scale factors are the column magnitudes of $\mathbf{M}$:
+where the scale factors are the column magnitudes of $$$1$$:
 
 $$s_x = \|\mathbf{M}_{\text{col}_0}\|, \quad s_y = \|\mathbf{M}_{\text{col}_1}\|, \quad s_z = \|\mathbf{M}_{\text{col}_2}\|$$
 
@@ -261,7 +261,7 @@ The 64-bit FNV-1a algorithm is defined by:
 $$h_0 = 14\,695\,981\,039\,346\,656\,037$$
 $$h_{i+1} = (h_i \oplus b_i) \times 1\,099\,511\,628\,211 \pmod{2^{64}}$$
 
-where $b_i$ is the $i$-th byte of the input and $\oplus$ is bitwise XOR. All arithmetic is unsigned 64-bit with wrapping overflow. Applied to the full 64 bytes of a transform matrix: if $h_{\text{new}} = h_{\text{cached}}$ the transform is unchanged — skip the GPU upload. The birthday bound for a false positive over $N$ frames is $N^2 / 2^{64}$ — essentially zero for any real application.
+where $$$1$$ is the $$$1$$-th byte of the input and $$$1$$ is bitwise XOR. All arithmetic is unsigned 64-bit with wrapping overflow. Applied to the full 64 bytes of a transform matrix: if $$$1$$ the transform is unchanged — skip the GPU upload. The birthday bound for a false positive over $$$1$$ frames is $$$1$$ — essentially zero for any real application.
 
 ```rust
 const FNV_OFFSET: u64 = 14_695_981_039_346_656_037;
@@ -293,11 +293,11 @@ For a 64-byte transform (sixteen `f32` values), this is 64 iterations — roughl
 
 After the hash check, dirty slot indices are collected and merged into contiguous ranges before issuing `write_buffer` calls. This matters because `write_buffer` has a fixed per-call overhead (descriptor allocation, synchronisation fence check, staging buffer management) that is paid regardless of how many bytes are written. Writing 100 adjacent slots as one 12,800-byte call is dramatically cheaper than writing them as 100 individual 128-byte calls.
 
-Given a set of dirty slots $D = \{s_1, s_2, \ldots, s_k\}$ (sorted), each slot is 128 bytes. Adjacent or near-adjacent slots are merged into contiguous ranges for a single `write_buffer` call:
+Given a set of dirty slots $$$1$$ (sorted), each slot is 128 bytes. Adjacent or near-adjacent slots are merged into contiguous ranges for a single `write_buffer` call:
 
 $$\text{ranges} = \{[s_i \cdot 128,\; s_j \cdot 128 + 128) \mid s_{j+1} - s_j > \text{GAP}\}$$
 
-Merging slots that are within a configurable gap threshold avoids $N$ individual `queue.write_buffer()` calls at the cost of uploading a few unchanged bytes between them. The optimal gap threshold depends on the cost model of the wgpu backend.
+Merging slots that are within a configurable gap threshold avoids $$$1$$ individual `queue.write_buffer()` calls at the cost of uploading a few unchanged bytes between them. The optimal gap threshold depends on the cost model of the wgpu backend.
 
 ```rust
 // Pseudocode for dirty range merging in flush():
@@ -510,12 +510,12 @@ The light flush loop itself mirrors the object flush but operates over the dense
 pub fn flush(&mut self, queue: &wgpu::Queue) {
     // Upload dirty light data
     for i in 0..self.active_count as usize {
-        if self.light_dirty[i] {
+        if self.light_dirty["i] {
             let offset = (i * std::mem::size_of::<GpuLight>()) as u64;
             queue.write_buffer(
                 &self.light_buffer,
                 offset,
-                bytemuck::bytes_of(&self.cpu_lights[i]),
+                bytemuck::bytes_of(&self.cpu_lights[i"]),
             );
             self.light_dirty[i] = false;
         }
@@ -605,12 +605,12 @@ graph LR
     subgraph Before growth
         M1[GpuMesh A] --> S[SharedPoolBuffer]
         M2[GpuMesh B] --> S
-        S --> B1[wgpu::Buffer 128 MiB]
+        S --> B1["wgpu.Buffer 128 MiB"]
     end
     subgraph After growth
         M3[GpuMesh A] --> S2[SharedPoolBuffer]
         M4[GpuMesh B] --> S2
-        S2 --> B2[wgpu::Buffer 256 MiB]
+        S2 --> B2["wgpu.Buffer 256 MiB"]
         B1 -.copy_buffer_to_buffer.-> B2
     end
 ```

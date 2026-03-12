@@ -39,9 +39,9 @@ The specular reflectance for a single light is:
 $$f_r(\mathbf{v}, \mathbf{l}) = \frac{D(\mathbf{h},\alpha) \cdot G(\mathbf{v},\mathbf{l},\alpha) \cdot F(\mathbf{v},\mathbf{h},F_0)}{4\,(\mathbf{n} \cdot \mathbf{v})\,(\mathbf{n} \cdot \mathbf{l})}$$
 
 Where:
-- $\mathbf{h} = \text{normalize}(\mathbf{v} + \mathbf{l})$ — half-vector between view and light
-- $\mathbf{n}$ — surface normal
-- $\alpha = \text{roughness}^2$
+- $$$1$$ — half-vector between view and light
+- $$$1$$ — surface normal
+- $$$1$$
 
 | Term | Meaning | Helio implementation |
 |------|---------|----------------------|
@@ -53,21 +53,21 @@ Where:
 
 #### F₀ — Base Reflectance
 
-$F_0$ is the specular colour at normal incidence ($\theta = 0°$). Dielectrics (water, glass, plastic) have $F_0 \approx 0.04$ — about 4% reflectance. Metals set $F_0$ equal to the albedo: all energy goes to specular, tinted by the surface base colour.
+$$$1$$ is the specular colour at normal incidence ($$$1$$). Dielectrics (water, glass, plastic) have $$$1$$ — about 4% reflectance. Metals set $$$1$$ equal to the albedo: all energy goes to specular, tinted by the surface base colour.
 
 $$F_0 = \text{lerp}(0.04,\; \text{albedo},\; \text{metallic})$$
 
 #### GGX Normal Distribution Function
 
-$D$ counts the statistical fraction of microfacets whose normal aligns with the half-vector $\mathbf{h}$:
+$$$1$$ counts the statistical fraction of microfacets whose normal aligns with the half-vector $$$1$$:
 
 $$D(\mathbf{n},\mathbf{h},\alpha) = \frac{\alpha^2}{\pi\bigl[(\mathbf{n}\cdot\mathbf{h})^2(\alpha^2-1)+1\bigr]^2}$$
 
-where $\alpha = \text{roughness}^2$. High $\alpha$ (rough surface) produces a wide distribution and a broad highlight. Low $\alpha$ (smooth surface) produces a sharp peak at $\mathbf{n}\cdot\mathbf{h}=1$, giving mirror-like reflection.
+where $$$1$$. High $$$1$$ (rough surface) produces a wide distribution and a broad highlight. Low $$$1$$ (smooth surface) produces a sharp peak at $$$1$$, giving mirror-like reflection.
 
 #### Smith Geometry Shadowing Function
 
-$G$ models the probability that a microfacet is visible from both the view and light directions — i.e. not self-shadowed or masked:
+$$$1$$ models the probability that a microfacet is visible from both the view and light directions — i.e. not self-shadowed or masked:
 
 $$G_1(\mathbf{n},\mathbf{x},k) = \frac{\mathbf{n}\cdot\mathbf{x}}{(\mathbf{n}\cdot\mathbf{x})(1-k)+k}, \quad k = \frac{(\alpha+1)^2}{8}$$
 
@@ -75,13 +75,13 @@ $$G(\mathbf{n},\mathbf{v},\mathbf{l},k) = G_1(\mathbf{n},\mathbf{v},k)\cdot G_1(
 
 #### Schlick Fresnel Approximation
 
-$F$ gives the fraction of light reflected at a given view angle. Reflectance increases at grazing angles — surfaces look more mirror-like when viewed edge-on:
+$$$1$$ gives the fraction of light reflected at a given view angle. Reflectance increases at grazing angles — surfaces look more mirror-like when viewed edge-on:
 
 $$F(\mathbf{v},\mathbf{h},F_0) = F_0 + (1-F_0)(1-\mathbf{v}\cdot\mathbf{h})^5$$
 
 #### Energy Conservation
 
-The full BRDF balances specular and diffuse so the surface cannot emit more energy than it receives. The Fresnel term $F$ determines what fraction of incoming light becomes specular; the remainder $(1-F)$ is available for diffuse. For metals (`metallic = 1`) the diffuse term is zero — all energy goes to specular with albedo-tinted $F_0$:
+The full BRDF balances specular and diffuse so the surface cannot emit more energy than it receives. The Fresnel term $$$1$$ determines what fraction of incoming light becomes specular; the remainder $$$1$$ is available for diffuse. For metals (`metallic = 1`) the diffuse term is zero — all energy goes to specular with albedo-tinted $$$1$$:
 
 $$f(\mathbf{v},\mathbf{l}) = k_d \frac{\text{albedo}}{\pi} + k_s \cdot f_r(\mathbf{v},\mathbf{l})$$
 
@@ -140,7 +140,7 @@ a physically correct inverse-square attenuation windowed by the `range` field:
 
 $$\text{attenuation}(d, r) = \frac{\text{saturate}\!\left(1 - \left(\tfrac{d}{r}\right)^4\right)^2}{d^2}$$
 
-where $d$ is the distance to the light and $r$ is the light's range. The $(d/r)^4$ term creates a smooth rolloff at the boundary — attenuation reaches exactly 0 when $d = r$, eliminating harsh cutoff artefacts. The $1/d^2$ term is physically correct inverse-square falloff. Together they give physically-based behaviour near the light while guaranteeing zero contribution beyond the range.
+where $$$1$$ is the distance to the light and $$$1$$ is the light's range. The $$$1$$ term creates a smooth rolloff at the boundary — attenuation reaches exactly 0 when $$$1$$, eliminating harsh cutoff artefacts. The $$$1$$ term is physically correct inverse-square falloff. Together they give physically-based behaviour near the light while guaranteeing zero contribution beyond the range.
 
 ```wgsl
 fn point_attenuation(dist: f32, range: f32) -> f32 {
@@ -166,7 +166,7 @@ giving control over the penumbra without extra parameters.
 
 $$\text{falloff}(\theta) = \text{smoothstep}(\cos\theta_{\text{outer}},\; \cos\theta_{\text{inner}},\; \cos\theta_{\text{actual}})$$
 
-$\theta_{\text{inner}}$ is the half-angle of the full-brightness cone; $\theta_{\text{outer}}$ is the half-angle of the dark boundary. `smoothstep` applies a smooth Hermite curve between them — no hard edge. Note: because a larger angle corresponds to a smaller cosine, the arguments are in reverse cosine order — `cos_outer` (smaller value) is the low edge and `cos_inner` (larger value) is the high edge.
+$$$1$$ is the half-angle of the full-brightness cone; $$$1$$ is the half-angle of the dark boundary. `smoothstep` applies a smooth Hermite curve between them — no hard edge. Note: because a larger angle corresponds to a smaller cosine, the arguments are in reverse cosine order — `cos_outer` (smaller value) is the low edge and `cos_inner` (larger value) is the high edge.
 
 ```wgsl
 fn spot_falloff(cos_theta: f32, cos_inner: f32, cos_outer: f32) -> f32 {
@@ -413,7 +413,7 @@ coverage far away.
 ### Split Scheme
 
 Cascade splits are computed from the camera's near and far planes using a logarithmic scheme that
-weights more layers toward the viewer. For $N$ cascades with near plane $z_n$ and far plane $z_f$:
+weights more layers toward the viewer. For $$$1$$ cascades with near plane $$$1$$ and far plane $$$1$$:
 
 $$z_i^{\text{log}} = z_n \left(\frac{z_f}{z_n}\right)^{i/N}$$
 
@@ -421,7 +421,7 @@ $$z_i^{\text{uni}} = z_n + (z_f - z_n)\frac{i}{N}$$
 
 $$z_i = \lambda \cdot z_i^{\text{log}} + (1-\lambda) \cdot z_i^{\text{uni}}$$
 
-Pure logarithmic splits ($z_i^{\text{log}}$) allocate more cascade precision near the camera where detail is needed most. Uniform splits ($z_i^{\text{uni}}$) distribute coverage evenly across the view range. The blend factor $\lambda$ (PSSM correction factor, typically 0.5–0.9) mixes the two to avoid extremely thin near cascades on large outdoor scenes while preserving close-range shadow detail.
+Pure logarithmic splits ($$$1$$) allocate more cascade precision near the camera where detail is needed most. Uniform splits ($$$1$$) distribute coverage evenly across the view range. The blend factor $$$1$$ (PSSM correction factor, typically 0.5–0.9) mixes the two to avoid extremely thin near cascades on large outdoor scenes while preserving close-range shadow detail.
 
 The four resulting world-space depths are uploaded every frame in `GlobalsUniform.csm_splits`:
 
@@ -546,7 +546,7 @@ $$h_0 = 14695981039346656037$$
 
 $$h_{i+1} = (h_i \oplus b_i) \times 1099511628211$$
 
-where $b_i$ is byte $i$ of the input data and $\oplus$ is bitwise XOR. The $2^{64}$ hash space makes false positives negligible in practice — if the output hash matches the cached hash, the matrices are unchanged and shadow rasterisation is skipped entirely for that light.
+where $$$1$$ is byte $$$1$$ of the input data and $$$1$$ is bitwise XOR. The $$$1$$ hash space makes false positives negligible in practice — if the output hash matches the cached hash, the matrices are unchanged and shadow rasterisation is skipped entirely for that light.
 
 ```rust
 const FNV_OFFSET: u64 = 14_695_981_039_346_656_037;
@@ -827,11 +827,11 @@ quadrantChart
     quadrant-2 Avoid if possible
     quadrant-3 Always fine
     quadrant-4 Best value
-    Directional (CSM): [0.75, 0.45]
-    Spot (small range): [0.55, 0.25]
-    Spot (wide, long range): [0.65, 0.75]
-    Point (small range): [0.45, 0.55]
-    Point (large range): [0.30, 0.85]
+    Directional CSM: [0.75, 0.45]
+    Spot small range: [0.55, 0.25]
+    Spot wide long range: [0.65, 0.75]
+    Point small range: [0.45, 0.55]
+    Point large range: [0.30, 0.85]
     Analytical ambient: [0.70, 0.05]
     Skylight: [0.80, 0.15]
 ```
