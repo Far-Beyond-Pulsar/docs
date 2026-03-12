@@ -36,13 +36,13 @@ Rayleigh scattering has an angular distribution described by the **Rayleigh phas
 
 $$P_R(\theta) = \frac{3}{16\pi}\left(1 + \cos^2\theta\right)$$
 
-Here $$$1$$ is the angle between the incoming and outgoing light directions. The $$$1$$ factor means Rayleigh scattering is stronger forward (towards viewer) and backward (away from viewer), and weakest at 90°. This is why the sky appears bright near the sun and also behind you. The $$$1$$ normalises the function so it integrates to 1 over the sphere.
+Here  is the angle between the incoming and outgoing light directions. The  factor means Rayleigh scattering is stronger forward (towards viewer) and backward (away from viewer), and weakest at 90°. This is why the sky appears bright near the sun and also behind you. The  normalises the function so it integrates to 1 over the sphere.
 
-The wavelength-dependent scattering coefficient $$$1$$ scales this phase function according to an exponential density profile:
+The wavelength-dependent scattering coefficient  scales this phase function according to an exponential density profile:
 
 $$\beta_R(\lambda, h) = \beta_R(\lambda, 0) \cdot e^{-h/H_R}$$
 
-where $$$1$$ is altitude, $$$1$$ km is the Rayleigh scale height, and $$$1$$ km$$$1$$ for R/G/B. The $$$1$$ dependence of Rayleigh scattering is baked into these RGB coefficients — blue ($$$1$$ nm) is scattered $$$1$$ more than red ($$$1$$ nm).
+where  is altitude,  km is the Rayleigh scale height, and  km for R/G/B. The  dependence of Rayleigh scattering is baked into these RGB coefficients — blue ( nm) is scattered  more than red ( nm).
 
 This produces a mostly isotropic distribution with a slight forward and backward preference — there is no strong "glow" around the sun from Rayleigh alone.
 
@@ -54,12 +54,12 @@ The angular distribution is described by the **Henyey-Greenstein phase function*
 
 $$P_{HG}(\theta, g) = \frac{1 - g^2}{4\pi\left(1 + g^2 - 2g\cos\theta\right)^{3/2}}$$
 
-The asymmetry parameter $$$1$$ controls the forward/backward balance:
-- $$$1$$: isotropic (equal in all directions)
-- $$$1$$: forward-scattering (aerosols, fog — bright halo around sun)
-- $$$1$$: backward-scattering (rare)
-- $$$1$$: typical hazy atmosphere (Helio default `mie_g`)
-- $$$1$$–$$$1$$: strong forward-scattering (dense fog)
+The asymmetry parameter  controls the forward/backward balance:
+- : isotropic (equal in all directions)
+- : forward-scattering (aerosols, fog — bright halo around sun)
+- : backward-scattering (rare)
+- : typical hazy atmosphere (Helio default `mie_g`)
+- –: strong forward-scattering (dense fog)
 
 The `g` parameter (the asymmetry factor) ranges from -1 (full back-scatter) through 0 (isotropic) to +1 (full forward-scatter). In a clear Earth atmosphere, aerosols typically produce `g ≈ 0.76`, which concentrates most of the scattered energy within a roughly 30° cone around the sun direction.
 
@@ -82,28 +82,28 @@ Helio evaluates both scattering types along rays cast through the atmosphere usi
 
 $$L(\mathbf{d}) = \int_0^{t_{\max}} T(\text{cam} \to s) \cdot \left[ \beta_R(h_s)\, P_R(\theta) + \beta_M(h_s)\, P_{HG}(\theta, g) \right] \cdot T(\text{sun} \to s) \cdot E_{\text{sun}} \; ds$$
 
-- $$$1$$: transmittance from camera to sample point $$$1$$ — how much scatter along the view ray attenuates the contribution
-- $$$1$$: combined in-scatter at the sample point (Rayleigh + Mie)
-- $$$1$$: transmittance from the sun to $$$1$$ — how much sunlight is attenuated before reaching $$$1$$
-- $$$1$$: solar irradiance at top of atmosphere
+- : transmittance from camera to sample point  — how much scatter along the view ray attenuates the contribution
+- : combined in-scatter at the sample point (Rayleigh + Mie)
+- : transmittance from the sun to  — how much sunlight is attenuated before reaching 
+- : solar irradiance at top of atmosphere
 
 Where `T_sun(x)` is the transmittance from the sun to point `x`, `T_cam(x)` is the transmittance from `x` to the camera, `β_R` and `β_M` are the Rayleigh and Mie scattering coefficients, and `s` is distance along the ray. Computing this integral for every sky pixel every frame would be prohibitively expensive; Helio uses a look-up table to amortize the cost.
 
 ### Transmittance and Optical Depth
 
-A subtle but important quantity in the integration is **optical depth** — the accumulated extinction along a path. The optical depth $$$1$$ and transmittance $$$1$$ from point A to B are:
+A subtle but important quantity in the integration is **optical depth** — the accumulated extinction along a path. The optical depth  and transmittance  from point A to B are:
 
 $$\tau(A \to B) = \int_A^B \left(\beta_R(h(s)) + \beta_M(h(s))\right) ds$$
 
 $$T(A \to B) = e^{-\tau(A \to B)}$$
 
-$$$1$$ is the total amount of scattering/absorption along the ray — the atmosphere is transparent when $$$1$$ and optically thick when $$$1$$ (heavy fog at sunrise). $$$1$$ is the fraction of light that survives the journey without being scattered away.
+ is the total amount of scattering/absorption along the ray — the atmosphere is transparent when  and optically thick when  (heavy fog at sunrise).  is the fraction of light that survives the journey without being scattered away.
 
 Both Rayleigh and Mie coefficients decay exponentially with altitude:
 
 $$\beta(h) = \beta_0 \cdot e^{-h/H}$$
 
-where $$$1$$ is the scale height ($$$1$$ km for Rayleigh, $$$1$$ km for Mie).
+where  is the scale height ( km for Rayleigh,  km for Mie).
 
 Where `β_R(h)` and `β_M(h)` are the scattering coefficients at altitude `h`, following exponential density profiles controlled by `rayleigh_h_scale` and `mie_h_scale` respectively. A ray traveling nearly horizontally near the horizon accumulates far more optical depth than a vertical ray, which is why both Rayleigh (blue sky) and Mie (sun glow) are most intense near the horizon and at sunset.
 
@@ -154,17 +154,17 @@ pub struct SkyAtmosphere {
 
 `rayleigh_scatter` is a three-component vector giving the per-wavelength scattering coefficient in units of km⁻¹, one entry for each of the red, green, and blue channels. The Earth defaults — `[5.8e-3, 13.5e-3, 33.1e-3]` — encode the wavelength-to-the-minus-fourth relationship: the blue coefficient is approximately 5.7× the red coefficient, which is why the sky strongly favors blue. Increasing all three components uniformly makes the atmosphere denser and produces a deeper blue at the same sun angle. Deliberately biasing toward red/green (for example, `[33.1e-3, 13.5e-3, 5.8e-3]`) flips the scattering, yielding an orange-heavy alien sky.
 
-The $$$1$$ law is baked directly into the Earth default coefficients:
+The  law is baked directly into the Earth default coefficients:
 
 $$\beta_R(\lambda) \propto \frac{1}{\lambda^4}$$
 
-| Channel | $$$1$$ (nm) | $$$1$$ (km⁻¹) | Relative |
+| Channel |  (nm) |  (km⁻¹) | Relative |
 |---------|---------------|----------------|----------|
-| R | ~700 | $$$1$$ | 1.0× |
-| G | ~550 | $$$1$$ | 2.3× |
-| B | ~450 | $$$1$$ | 5.7× |
+| R | ~700 |  | 1.0× |
+| G | ~550 |  | 2.3× |
+| B | ~450 |  | 5.7× |
 
-The ratio $$$1$$ matches $$$1$$ — confirming the $$$1$$ law.
+The ratio  matches  — confirming the  law.
 
 `rayleigh_h_scale` is the normalized scale height for the Rayleigh density profile — the altitude (expressed as a fraction of the atmosphere thickness) at which the density has fallen to 1/e of its sea-level value. The default of 0.08 corresponds to Earth's approximately 8 km scale height over a 60 km thick atmosphere. Increasing this value distributes molecules higher into the atmosphere and reduces the saturation of the blue sky.
 
@@ -326,8 +326,8 @@ Evaluating the full Nishita scattering integral naively — raymarching through 
 
 The LUT encodes sky luminance as a function of two parameters:
 
-- **U axis (256 texels):** the cosine of the sun's angle from the zenith, $$$1$$, remapped to $$$1$$
-- **V axis (64 texels):** the sine of the view ray's elevation above the horizon, $$$1$$
+- **U axis (256 texels):** the cosine of the sun's angle from the zenith, , remapped to 
+- **V axis (64 texels):** the sine of the view ray's elevation above the horizon, 
 
 Because the atmosphere is rotationally symmetric around the sun direction, these two parameters fully describe any sky pixel. At render time, the sky shader simply reconstructs the view ray from the inverse view-projection matrix, computes its angle relative to the sun, and looks up the pre-integrated luminance. The entire sky renders as a single full-screen pass with no raymarching — just a texture sample and a few phase-function evaluations.
 
