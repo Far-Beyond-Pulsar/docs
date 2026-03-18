@@ -2,7 +2,7 @@
 title: Materials and Geometry
 description: PBR materials, texture conventions, mesh creation, vertex format, and geometry management in Helio
 category: experiments
-lastUpdated: '2026-03-12'
+lastUpdated: '2026-03-18'
 tags: [materials, pbr, mesh, geometry, textures, vertex-format]
 related:
   - core-concepts/experiments/Helio
@@ -103,6 +103,60 @@ graph TD
 
 ---
 
+## Material Workflows
+
+Helio now has two canonical surface workflows under the `MaterialWorkflow` enum:
+
+- **`MetallicRoughness`** — the familiar glTF-style metallic / roughness model
+- **`SpecularIor`** — an explicit dielectric workflow with authored `specular_color`, `specular_weight`, and `ior`
+
+The important design choice is that `Material.workflow` is now the authoritative representation, but
+the legacy `metallic` and `roughness` fields still exist and are mirrored for backward
+compatibility. Existing call sites that only set `with_metallic(...)` and `with_roughness(...)`
+still work, while new content can opt into the explicit specular workflow without a parallel
+material type.
+
+### Metallic / Roughness
+
+This remains the default:
+
+```rust
+let brushed_aluminum = Material::new()
+    .with_base_color([0.74, 0.74, 0.76, 1.0])
+    .with_metallic_roughness_workflow(1.0, 0.22);
+```
+
+In this mode the geometry pass resolves the specular baseline as:
+
+$$F_0 = \text{lerp}(F_{0,\text{dielectric}},\; \text{albedo},\; \text{metallic})$$
+
+where Helio's default dielectric baseline comes from `ior = 1.5`, i.e. roughly **0.04**.
+
+### Explicit Specular / IOR
+
+Use this when your source asset already authors dielectric Fresnel parameters directly:
+
+```rust
+let coated_glass = Material::new()
+    .with_base_color([1.0, 1.0, 1.0, 0.35])
+    .with_specular_ior_workflow([1.0, 0.98, 0.96], 0.85, 1.52, 0.05)
+    .with_alpha_blend();
+```
+
+The dielectric baseline is derived from the authored index of refraction:
+
+$$F_{0,\text{dielectric}} = \left(\frac{\text{ior} - 1}{\text{ior} + 1}\right)^2$$
+
+Helio then multiplies that scalar by `specular_color`, scales it by `specular_weight`, and applies
+any matching specular textures before packing the resolved `F0.rgb` value into the G-buffer.
+
+> [!TIP]
+> `SpecularIor` is most useful for imported dielectrics such as glass, plastics, varnishes, or
+> coated materials where the authoring tool already exposes IOR and specular controls. Pure metals
+> should usually stay in the metallic / roughness workflow.
+
+---
+
 ## The `Material` Struct
 
 The CPU-side `Material` is a plain Rust struct you build with a fluent builder API and then hand to `renderer.create_material()`. Every field has a well-defined physical meaning.
@@ -111,8 +165,9 @@ The CPU-side `Material` is a plain Rust struct you build with a fluent builder A
 pub struct Material {
     // --- Scalar factors ---
     pub base_color: [f32; 4],     // Linear-space RGBA tint; multiplied with albedo texture
-    pub metallic: f32,            // 0 = fully dielectric, 1 = fully metallic
-    pub roughness: f32,           // 0 = mirror-smooth, 1 = fully diffuse
+    pub workflow: MaterialWorkflow,
+    pub metallic: f32,            // Compatibility mirror for MetallicRoughness
+    pub roughness: f32,           // Shared roughness term; mirrored into both workflows
     pub ao: f32,                  // Scalar ambient occlusion override (0–1)
     pub emissive_color: [f32; 3], // Linear RGB colour of self-emission
     pub emissive_factor: f32,     // Brightness multiplier for emission
@@ -124,6 +179,8 @@ pub struct Material {
     pub normal_map: Option<TextureData>,
     pub orm_texture: Option<TextureData>,
     pub emissive_texture: Option<TextureData>,
+    pub specular_color_texture: Option<TextureData>,
+    pub specular_weight_texture: Option<TextureData>,
 }
 ```
 
@@ -131,9 +188,10 @@ pub struct Material {
 
 | Field | Default | Range | Physical meaning |
 |---|---|---|---|
+| `workflow` | `MetallicRoughness(...)` | enum | Canonical material workflow. Choose between metallic/roughness and explicit specular/IOR shading. |
 | `base_color` | `[1,1,1,1]` | `[0,1]⁴` | Linear tint multiplied with the albedo texture. Pure white = no tint. |
-| `metallic` | `0.0` | `0–1` | How "metallic" the surface is. Avoid values between 0.1 and 0.9 in practice — most real materials are either clearly one or the other. |
-| `roughness` | `0.5` | `0–1` | Surface micro-roughness. 0 = perfectly smooth mirror; 1 = chalk-like Lambertian. |
+| `metallic` | `0.0` | `0–1` | How "metallic" the surface is for the `MetallicRoughness` workflow. Preserved for compatibility with older call sites. |
+| `roughness` | `0.5` | `0–1` | Surface micro-roughness. Shared by both workflows. 0 = perfectly smooth mirror; 1 = chalk-like Lambertian. |
 | `ao` | `1.0` | `0–1` | Scalar ambient occlusion. Multiplied with the R channel of `orm_texture`. Value of 1 = no extra darkening. |
 | `emissive_color` | `[0,0,0]` | `[0,∞)³` | Linear RGB of the emitted light. Combined as `emissive_texture × emissive_color × emissive_factor`. |
 | `emissive_factor` | `0.0` | `≥ 0` | Master brightness multiplier. 0 = emission fully off regardless of other fields. |
@@ -154,8 +212,7 @@ let stone = Material::new()
 // A polished metal panel
 let metal = Material::new()
     .with_base_color([0.72, 0.72, 0.72, 1.0])
-    .with_metallic(1.0)
-    .with_roughness(0.15);
+    .with_metallic_roughness_workflow(1.0, 0.15);
 
 // A glowing neon tube
 let neon = Material::new()
@@ -171,13 +228,12 @@ let leaves = Material::new()
 // Semi-transparent glass — uses forward blend pass
 let glass = Material::new()
     .with_base_color([0.8, 0.9, 1.0, 0.3])
-    .with_metallic(0.0)
-    .with_roughness(0.05)
-    .transparent();
+    .with_specular_ior_workflow([1.0, 1.0, 1.0], 1.0, 1.52, 0.05)
+    .with_alpha_blend();
 ```
 
 > [!TIP]
-> Keep `base_color` values in a perceptually plausible range. For non-metals (dielectrics), luminance should stay between roughly 0.04 and 0.9 (i.e., avoid pure black and pure white albedo). For metals, the tint encodes the wavelength-dependent F0 directly — copper is `[0.95, 0.64, 0.54]`, gold is `[1.0, 0.86, 0.57]`.
+> Keep `base_color` values in a perceptually plausible range. For non-metals (dielectrics), luminance should stay between roughly 0.04 and 0.9 (i.e., avoid pure black and pure white albedo). For metals in the metallic workflow, the tint encodes the wavelength-dependent `F0` directly — copper is `[0.95, 0.64, 0.54]`, gold is `[1.0, 0.86, 0.57]`.
 
 ---
 
@@ -219,14 +275,16 @@ fn load_texture(path: &str) -> TextureData {
 
 ## Texture Channel Conventions
 
-Helio uses four texture slots, each with a specific format expectation and channel layout:
+Helio uses six texture slots, each with a specific format expectation and channel layout:
 
 ```mermaid
 graph LR
-    BCT["base_color_texture<br/>sRGB RGBA<br/>albedo · alpha"] -->|group 1, binding 0| GPU
-    NM["normal_map<br/>linear RGBA<br/>tangent-space normals"] -->|group 1, binding 1| GPU
-    ORM["orm_texture<br/>linear RGBA<br/>R=AO G=rough B=metal"] -->|group 1, binding 2| GPU
-    ET["emissive_texture<br/>sRGB RGBA<br/>emission colour"] -->|group 1, binding 3| GPU
+    BCT["base_color_texture<br/>sRGB RGBA<br/>albedo · alpha"] -->|group 1, binding 1| GPU
+    NM["normal_map<br/>linear RGBA<br/>tangent-space normals"] -->|group 1, binding 2| GPU
+    ORM["orm_texture<br/>linear RGBA<br/>R=AO G=rough B=metal"] -->|group 1, binding 4| GPU
+    ET["emissive_texture<br/>sRGB RGBA<br/>emission colour"] -->|group 1, binding 5| GPU
+    SCT["specular_color_texture<br/>sRGB RGBA<br/>explicit F0 tint"] -->|group 1, binding 6| GPU
+    SWT["specular_weight_texture<br/>linear RGBA<br/>A=specular weight"] -->|group 1, binding 7| GPU
 ```
 
 ### `base_color_texture` — sRGB RGBA
@@ -280,6 +338,18 @@ emission = emissive_texture.rgb × emissive_color × emissive_factor
 ```
 
 Setting `emissive_factor` to `0.0` (the default) suppresses all emission regardless of texture content, which is a convenient way to reuse a material with emission toggled off.
+
+### `specular_color_texture` — sRGB RGBA
+
+This texture is only relevant for the `SpecularIor` workflow. Its RGB channels modulate the
+authored `specular_color` factor that tints the dielectric Fresnel baseline. The texture is sampled
+as `Rgba8UnormSrgb`, because it represents colour data rather than linear scalar data.
+
+### `specular_weight_texture` — linear RGBA
+
+This texture is also only used by the `SpecularIor` workflow. Helio samples the **alpha channel**
+as a scalar weight and multiplies it by the material's `specular_weight` factor. RGB is currently
+unused, so authoring tools typically store the useful data in A and leave RGB black.
 
 <!-- screenshot: side-by-side comparison of a metallic sphere at roughness=0.0, 0.3, 0.7, 1.0 with the ORM texture visualised below each -->
 
@@ -338,37 +408,47 @@ The bind group layout for `group(1)` in the material shaders is:
 
 | Binding | Type | Contents |
 |---|---|---|
-| 0 | `Texture2D` | `base_color_texture` |
-| 1 | `Texture2D` | `normal_map` |
-| 2 | `Texture2D` | `orm_texture` |
-| 3 | `Texture2D` | `emissive_texture` |
-| 4 | `Sampler` | Shared filtering sampler (linear/linear, repeat) |
-| 5 | `UniformBuffer` | `MaterialUniform` (64 bytes) |
+| 0 | `UniformBuffer` | `MaterialUniform` (96 bytes) |
+| 1 | `Texture2D` | `base_color_texture` |
+| 2 | `Texture2D` | `normal_map` |
+| 3 | `Sampler` | Shared filtering sampler (linear/linear, clamp-to-edge) |
+| 4 | `Texture2D` | `orm_texture` |
+| 5 | `Texture2D` | `emissive_texture` |
+| 6 | `Texture2D` | `specular_color_texture` |
+| 7 | `Texture2D` | `specular_weight_texture` |
 
-The `MaterialUniform` buffer packs all scalar factors into a tight 64-byte layout:
+The `MaterialUniform` buffer now packs both legacy metallic-roughness fields and the explicit
+specular/IOR workflow into a **96-byte** layout:
 
 ```
 offset  0: base_color     [f32; 4]   16 bytes
 offset 16: metallic       f32         4 bytes
 offset 20: roughness      f32         4 bytes
-offset 24: ao             f32         4 bytes
-offset 28: emissive_factor f32        4 bytes
+offset 24: emissive_factor f32        4 bytes
+offset 28: ao             f32         4 bytes
 offset 32: emissive_color [f32; 3]   12 bytes
 offset 44: alpha_cutoff   f32         4 bytes
-offset 48: (padding)                 16 bytes
-total: 64 bytes
+offset 48: workflow       u32         4 bytes
+offset 52: workflow_flags u32         4 bytes
+offset 64: specular_color [f32; 3]   12 bytes
+offset 76: specular_weight f32        4 bytes
+offset 80: ior            f32         4 bytes
+offset 84: dielectric_f0  f32         4 bytes
+total: 96 bytes
 ```
 
 ### Default Fallback Textures
 
-When a `Material` field is `None`, Helio substitutes a pre-allocated **1×1 default texture** created during renderer initialisation. This means every material, even `Material::new()`, binds a complete set of four textures — the bind group layout is always satisfied.
+When a `Material` field is `None`, Helio substitutes a pre-allocated **1×1 default texture** created during renderer initialisation. This means every material, even `Material::new()`, binds a complete set of six textures — the bind group layout is always satisfied.
 
 | Slot | Default pixel | Visual effect |
 |---|---|---|
 | `base_color_texture` | `(255, 255, 255, 255)` — white | `base_color` scalar tint is applied without texture modulation |
 | `normal_map` | `(128, 128, 255, 255)` — flat up | No normal perturbation; surface normals come from the vertex normal only |
-| `orm_texture` | `(255, 128, 0, 255)` — AO=1, roughness=0.5, metallic=0 | Half-rough dielectric, no occlusion |
+| `orm_texture` | `(255, 255, 255, 255)` — AO=1, roughness multiplier=1, metallic multiplier=1 | Final roughness and metallic come from the material factors when no ORM texture is present |
 | `emissive_texture` | `(0, 0, 0, 255)` — black | No emission contribution |
+| `specular_color_texture` | `(255, 255, 255, 255)` — white | Leaves the authored `specular_color` factor unchanged |
+| `specular_weight_texture` | `(255, 255, 255, 255)` — white alpha | Leaves the authored `specular_weight` factor unchanged |
 
 > [!TIP]
 > The flat normal default `(128, 128, 255)` unpacks to `(0, 0, 1)` in tangent space — a normal pointing directly out of the surface. This is exactly the correct identity value for a normal map. Never use `(0, 0, 0)` as a normal map fill colour; a zero vector causes division-by-zero artefacts when normalised.
@@ -430,12 +510,15 @@ The bitangent (also called binormal) is not stored in the vertex — it is recon
 
 $$\mathbf{B} = (\mathbf{N} \times \mathbf{T}) \cdot s$$
 
-where **s** is the `bitangent_sign` stored in the `w` component of the packed tangent. The cross product **(N × T)** yields the vector perpendicular to both the normal and tangent; the sign **s** corrects for UV mirroring in left-handed UV spaces. This avoids storing the bitangent explicitly, saving 4 bytes per vertex with zero loss of precision.
+where **s** is the separate `bitangent_sign` field. The cross product **(N × T)** yields the vector
+perpendicular to both the normal and tangent; the sign **s** corrects for UV mirroring in
+left-handed UV spaces. This avoids storing the bitangent explicitly, saving 4 bytes per vertex
+with zero loss of precision.
 
 ```wgsl
 let N = normalize(vertex.normal);
 let T = normalize(vertex.tangent.xyz);
-let B = cross(N, T) * vertex.tangent.w; // w = bitangent_sign
+let B = cross(N, T) * vertex.bitangent_sign;
 ```
 
 The sign is either `+1.0` or `-1.0` and encodes the handedness of the tangent frame. This sign is required because UV maps sometimes use left-handed or right-handed coordinate systems depending on how the geometry was unwrapped. Storing it as a full `f32` rather than a bit keeps the struct aligned to 4-byte boundaries throughout.
@@ -459,10 +542,23 @@ let v_tangent = PackedVertex::new_with_tangent(
     [0.0, 0.0],
     [1.0, 0.0, 0.0],   // tangent along +X
 );
+
+// Imported authored mesh data with explicit handedness
+let v_authored = PackedVertex::from_components(
+    [0.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0],
+    [0.0, 0.0],
+    [1.0, 0.0, 0.0],
+    -1.0,              // mirrored UV island
+);
 ```
 
 > [!WARNING]
-> The `new()` constructor computes a tangent as a **perpendicular fallback** using `normal_to_tangent(normal)`. This is stable for simple shapes but will produce incorrect tangent frames for UV-unwrapped meshes, leading to shearing artefacts in normal maps. Always use `new_with_tangent()` and provide Mikktspace-computed tangents when attaching a normal map to an authored mesh.
+> The `new()` constructor computes a tangent as a **perpendicular fallback** using
+> `normal_to_tangent(normal)`. This is stable for simple shapes but will produce incorrect tangent
+> frames for UV-unwrapped meshes, leading to shearing artefacts in normal maps. For authored assets
+> that already provide MikkTSpace tangents with a signed `w` component, prefer
+> `PackedVertex::from_components(...)` so the bitangent handedness survives import.
 
 ---
 

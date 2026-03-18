@@ -2,7 +2,7 @@
 title: Getting Started
 description: Prerequisites, setup, running examples, building for WASM and Android, and a minimal renderer integration for Helio
 category: experiments
-lastUpdated: '2026-03-12'
+lastUpdated: '2026-03-18'
 tags: [getting-started, setup, examples, wasm, android, integration]
 related:
   - core-concepts/experiments/Helio
@@ -90,6 +90,7 @@ helio/
 │   ├── helio-core/          # Backend-agnostic math, camera, scene graph primitives
 │   ├── helio-render-v2/     # The renderer itself: render graph, features, wgpu integration
 │   ├── helio-live-portal/   # Optional web dashboard for real-time GPU profiling
+│   ├── helio-asset-compat/  # SolidRS bridge for FBX / glTF / OBJ / USD asset import
 │   ├── examples/            # All runnable demo binaries (see §4)
 │   ├── helio-wasm-app/      # Thin wasm wrapper wired to helio-render-v2
 │   └── helio-wasm-examples/ # Browser-runnable versions of selected examples
@@ -113,6 +114,30 @@ Your integration crate should inherit these versions by depending on `helio-rend
 
 > [!TIP]
 > The `helio-live-portal` crate has a compile-time guard: it is excluded from the `wasm32` target in its own `build.rs`. Never add it as a dependency in a crate that also targets WASM — you will get a compile error from the native OS networking code.
+
+---
+
+### 3.1 Asset Import Crate
+
+Helio now ships an optional `helio-asset-compat` workspace crate for importing authored scenes through SolidRS. It supports **FBX**, **glTF 2.0**, **OBJ**, and **USD** (`.usda`, `.usdc`, `.usdz`) and converts them into CPU-side Helio structures that you upload through the normal renderer APIs.
+
+```rust
+use helio_asset_compat::load_scene_file;
+
+let scene = load_scene_file("assets/character.fbx")?;
+println!(
+    "loaded {} meshes, {} materials, {} lights",
+    scene.meshes.len(),
+    scene.materials.len(),
+    scene.lights.len()
+);
+```
+
+For regular files, external textures are resolved relative to the model file's directory automatically. If you are loading embedded bytes instead of a file path, use `load_scene_bytes(...)` or `load_scene_bytes_with_config(...)` and pass a `base_dir` if the asset references sibling textures on disk.
+
+If an import arrives with upside-down UVs, build a `LoadConfig` and call `.with_uv_flip(true)` before loading. Helio applies the flip during vertex conversion, so the rest of the renderer still sees standard bottom-left UVs.
+
+See **[Asset Loading and Material Workflows](./asset-loading)** for the full conversion pipeline, workflow mapping rules, and the `ConvertedScene -> create_mesh/create_material/add_object` handoff.
 
 ---
 

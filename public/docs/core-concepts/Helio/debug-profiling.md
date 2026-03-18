@@ -2,7 +2,7 @@
 title: Debug Visualization and Profiling
 description: Debug shapes, overlay system, GPU timestamp profiling, editor mode, and runtime diagnostics in Helio
 category: experiments
-lastUpdated: '2026-03-12'
+lastUpdated: '2026-03-18'
 tags: [debug, profiling, visualization, gpu-profiler, timestamps, editor-mode]
 related:
   - core-concepts/experiments/Helio
@@ -262,7 +262,7 @@ Draws a wireframe `Sphere` at each point light's position with radius equal to t
 
 ### `light_direction`
 
-Draws a `Cone` at each spot light position, with the cone apex at the light's position, opening in the light's direction, scaled by the spot light's range and outer cone radius. Directional lights additionally receive a `Line` arrow extending from a point along the camera-forward direction to indicate the global light direction. This renderer is indispensable when debugging spot light orientations that look correct from one angle but are misaligned from another.
+Draws a `Cone` at each spot light position, with the cone apex at the light's position, opening in the light's direction, and scaled from the light's actual `range`. The outer cone always renders, and when `inner_angle` is smaller than `outer_angle` Helio draws a second, tighter cone inside it so you can see the falloff region directly. Directional lights additionally receive a `Line` arrow extending from a point along the camera-forward direction to indicate the global light direction. This renderer is indispensable when debugging spot light orientations that look correct from one angle but are misaligned from another.
 
 ### `mesh_bounds`
 
@@ -273,6 +273,38 @@ Draws a translucent wireframe `Sphere` around each registered `ObjectBounds` ent
 Draws a world-space XZ grid at Y = 0, snapped to the nearest integer meter boundary, extending a fixed radius around the camera's XZ position. The grid updates its center each frame to follow the camera, so it never scrolls off screen. Grid lines are colored with a subtle gray and emit at low alpha to avoid competing visually with scene geometry.
 
 <!-- screenshot: grid renderer showing the snapped XZ ground grid under a scene, with slightly brighter major axis lines along the X and Z global axes -->
+
+---
+
+## Shader Debug Visualization Modes
+
+`DebugVizSystem` overlays are geometry drawn on top of the scene. Helio also exposes a separate
+**shader debug mode** switch that changes what the core geometry and lighting shaders output.
+Use it when you need to inspect UVs, raw textures, normals, or the deferred handoff itself rather
+than scene-space helper shapes.
+
+```rust
+renderer.set_debug_mode(5);           // world normals
+assert_eq!(renderer.debug_mode(), 5);
+```
+
+| Mode | Output | Typical use |
+|---|---|---|
+| `0` | Normal rendering | Standard lit frame with full material and normal mapping |
+| `1` | UV-as-color | Verify UV layout, seams, and flipped islands |
+| `2` | Base-color texture direct | Check texture decoding before material tint and lighting |
+| `3` | Lit without normal mapping | Separate tangent-space issues from lighting issues |
+| `4` | G-buffer albedo readback | Confirm deferred handoff and G-buffer sampling |
+| `5` | World normals remapped to RGB | Inspect vertex/TBN correctness and surface orientation |
+
+Modes `1`, `2`, and `4` intentionally bypass lighting and return colour straight from the geometry
+or G-buffer path. Mode `3` still runs the lighting pass, but it forces the shader to use the
+geometric normal instead of the sampled normal map. Mode `5` is especially useful when validating
+authored tangents from imported FBX or glTF assets, because mirrored UV seams and incorrect
+bitangent signs show up immediately as discontinuities in the remapped normal field.
+
+> [!TIP]
+> A practical debugging sequence for imported content is: `1` to verify UVs, `5` to verify world normals, then `3` to compare lit geometry normals against the fully normal-mapped result. If `3` looks correct and `0` does not, the problem is almost certainly in your tangent basis or normal texture.
 
 ---
 

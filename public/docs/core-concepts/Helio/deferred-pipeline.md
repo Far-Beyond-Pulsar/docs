@@ -2,7 +2,7 @@
 title: Deferred Rendering Pipeline
 description: G-buffer architecture, GPU-driven indirect rendering, and the full deferred shading pipeline in Helio
 category: experiments
-lastUpdated: '2026-03-12'
+lastUpdated: '2026-03-18'
 tags: [rendering, deferred, gbuffer, indirect-rendering, wgpu, pipeline]
 related:
   - core-concepts/experiments/Helio
@@ -50,7 +50,7 @@ With deferred, **N_overdraw** in the G-buffer pass is minimised by the depth pre
 
 ## The G-Buffer Layout
 
-The G-buffer is the heart of the deferred pipeline. Helio allocates **four render targets** that together encode everything the lighting pass needs to evaluate physically-based materials.
+The G-buffer is the heart of the deferred pipeline. Helio allocates **four render targets** that together encode everything the lighting pass needs to evaluate physically-based materials. The key recent change is that Helio now resolves workflow-specific specular **F₀** in the geometry pass and packs that RGB value into existing alpha lanes, so the lighting pass can stay branch-free.
 
 ```rust
 pub struct GBufferTargets {
@@ -67,18 +67,21 @@ The albedo target stores the **base colour** of each surface in sRGB-encoded 8-b
 
 ### Normal — `Rgba16Float`
 
-World-space surface normals are stored as 16-bit floats per channel. Half-precision is sufficient for normals because the lighting error introduced by quantisation is below perceptual threshold for the specular highlights Helio produces. The fourth channel stores the **roughness** value mapped from the ORM texture, keeping roughness in half-precision alongside the normal it modulates.
+World-space surface normals are stored as 16-bit floats per channel. Half-precision is sufficient for normals because the lighting error introduced by quantisation is below perceptual threshold for the specular highlights Helio produces. The fourth channel now stores the **red channel of resolved specular F₀**, leaving the XYZ lanes for the normal itself.
 
 > [!IMPORTANT]
 > Normals are stored in **world space**, not view space. This means the G-buffer remains valid if the camera moves between the geometry pass and the lighting pass — a useful invariant for future TAA reprojection work and for any pass that wants to read G-buffer data in a deferred compute shader.
 
 ### ORM — `Rgba8Unorm`
 
-ORM stands for **Occlusion / Roughness / Metallic**. Each channel stores one scalar property of the PBR material, packed into a single 8-bit unorm. The layout matches the glTF standard: R = ambient occlusion, G = roughness, B = metallic, A = unused. 8-bit precision is adequate for all three of these properties; the eye is not sensitive to fine metallic gradients.
+ORM stands for **Occlusion / Roughness / Metallic**. Each channel stores one scalar property of the PBR material, packed into a single 8-bit unorm. The layout matches the glTF standard in RGB: R = ambient occlusion, G = roughness, B = metallic. The alpha channel now stores the **green channel of resolved specular F₀**. 8-bit precision is adequate for these scalar properties and for the packed F₀ channel.
 
 ### Emissive — `Rgba16Float`
 
-Emissive radiance is stored in HDR half-precision because emissive surfaces can be much brighter than the [0, 1] range of unorm formats. The RGB channels store the emissive colour in linear light. This target is sampled by the deferred lighting pass and its value is added directly to the lit output before tonemapping.
+Emissive radiance is stored in HDR half-precision because emissive surfaces can be much brighter than the [0, 1] range of unorm formats. The RGB channels store the emissive colour in linear light, while alpha stores the **blue channel of resolved specular F₀**. This target is sampled by the deferred lighting pass and its RGB value is added directly to the lit output before tonemapping.
+
+> [!NOTE]
+> Helio still uses four render targets. The explicit specular/IOR workflow does **not** add a fifth attachment; instead, the geometry pass computes the final `F0.rgb` per pixel and distributes it across `normal.a`, `orm.a`, and `emissive.a`.
 
 <!-- screenshot: false-colour visualisation of each G-buffer target for a test scene -->
 
@@ -304,7 +307,7 @@ The LUT is a 256×64 `Rgba16Float` texture parameterised by (sun elevation, view
 
 ## G-Buffer Pass
 
-With the depth buffer populated and occlusion culling complete, the G-buffer pass writes the four render targets.
+With the depth buffer populated and occlusion culling complete, the G-buffer pass writes the four render targets. During this pass Helio also resolves the material workflow into a single specular **F₀** colour so the lighting pass only consumes packed data.
 
 ```rust
 pub struct GBufferPass {
@@ -397,7 +400,7 @@ This avoids a costly full-screen blend and keeps sky rendering decoupled from th
 
 ### PBR Evaluation
 
-The fragment shader reconstructs the world-space position from depth and the inverse view-projection matrix, then unpacks the G-buffer channels and runs a Cook-Torrance BRDF loop over all lights. Shadows are looked up from the shadow atlas using the shadow matrices computed by `ShadowMatrixPass`. Indirect GI is sampled from the radiance cascade `rc_cascade0` texture. The final HDR colour is written to `color_target` (`pre_aa_texture`).
+The fragment shader reconstructs the world-space position from depth and the inverse view-projection matrix, then unpacks the G-buffer channels — including the resolved specular **F₀** value reconstructed from the alpha channels of the normal/ORM/emissive targets — and runs a Cook-Torrance BRDF loop over all lights. Shadows are looked up from the shadow atlas using the shadow matrices computed by `ShadowMatrixPass`. Indirect GI is sampled from the radiance cascade `rc_cascade0` texture. The final HDR colour is written to `color_target` (`pre_aa_texture`).
 
 The position reconstruction from depth avoids storing position in the G-buffer (which would require a full `Rgba32Float` target).
 
@@ -599,7 +602,7 @@ Because this group never changes within a frame it is bound at group slot 0, whi
 
 ### Group 1 — Material
 
-Bound once per `MaterialRange` inside the G-buffer and shadow passes. Contains the four material textures (`base_color`, `normal_map`, `orm`, `emissive`) and a shared sampler. Each unique material in the scene owns one group-1 bind group, which is why the G-buffer loop iterates `material_ranges` and rebinds only group 1.
+Bound once per `MaterialRange` inside the G-buffer and shadow passes. Contains the material uniform buffer, four always-on material textures (`base_color`, `normal_map`, `orm`, `emissive`), two optional specular workflow textures (`specular_color`, `specular_weight`), and a shared sampler. Each unique material in the scene owns one group-1 bind group, which is why the G-buffer loop iterates `material_ranges` and rebinds only group 1.
 
 ### Group 2 — Lighting
 

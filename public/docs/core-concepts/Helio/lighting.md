@@ -2,7 +2,7 @@
 title: Lighting and Shadows
 description: Light types, PBR shading, cascaded shadow maps, GPU-driven shadow culling, and ambient lighting in Helio
 category: experiments
-lastUpdated: '2026-03-12'
+lastUpdated: '2026-03-18'
 tags: [lighting, shadows, csm, pbr, point-lights, directional, spot-lights, pcf]
 related:
   - core-concepts/experiments/Helio
@@ -26,9 +26,10 @@ dirty counter — so you can understand, configure, and extend Helio's lighting 
 ## Physically Based Shading
 
 Helio uses the **Cook-Torrance microfacet specular BRDF** paired with a Lambertian diffuse lobe.
-Every surface is described by two material parameters — **base color** (albedo), **metallic**, and
-**roughness** — and those parameters feed the same shading equation for every light type, including
-the ambient contribution at the end.
+Every surface is described by **base color** plus one of two canonical material workflows: the
+traditional **metallic/roughness** model, or an explicit **specular/IOR** model for authored
+dielectrics. Both resolve to the same per-pixel shading equation before the lighting loop runs, so
+all light types share a single physically-based implementation.
 
 ### The Cook-Torrance Model
 
@@ -47,13 +48,22 @@ Where:
 | `G`  | Geometry / self-shadowing term | Smith-GGX height-correlated |
 | `F`  | Fresnel reflectance | Schlick approximation |
 | `α`  | Perceptual roughness² | read from G-buffer roughness channel |
-| `F₀` | Specular colour at 0° | lerp(0.04, albedo, metallic) |
+| `F₀` | Specular colour at 0° | resolved per pixel from the active material workflow |
 
 #### F₀ — Base Reflectance
 
-**F₀** is the specular colour at normal incidence (**θ = 0°**). Dielectrics (water, glass, plastic) have **F₀ ≈ 0.04** — about 4% reflectance. Metals set **F₀** equal to the albedo: all energy goes to specular, tinted by the surface base colour.
+**F₀** is the specular colour at normal incidence (**θ = 0°**). In Helio's metallic-roughness
+workflow, dielectrics use a baseline dielectric reflectance and metals tint **F₀** from albedo:
 
 $$F_0 = \text{lerp}(0.04,\; \text{albedo},\; \text{metallic})$$
+
+In the explicit specular/IOR workflow, the dielectric baseline comes from the authored index of
+refraction:
+
+$$F_{0,\text{dielectric}} = \left(\frac{\text{ior} - 1}{\text{ior} + 1}\right)^2$$
+
+That scalar is then tinted by `specular_color` and scaled by `specular_weight`, plus any matching
+specular textures, before the geometry pass packs the resolved RGB **F₀** value into the G-buffer.
 
 #### GGX Normal Distribution Function
 
@@ -98,10 +108,10 @@ energy conservation — a fully metallic surface has no diffuse contribution.
 
 Because Helio uses a **deferred pipeline**, the BRDF is evaluated once per pixel per light in the
 lighting pass, not per-geometry. The G-buffer stores packed albedo, normal, metallic, roughness,
-and depth, and the full screen-space shading loop iterates over all active lights, accumulating
-diffuse and specular into the HDR colour target.
+resolved specular **F₀**, and depth, and the full screen-space shading loop iterates over all
+active lights, accumulating diffuse and specular into the HDR colour target.
 
-<!-- screenshot: deferred G-buffer channels visualised side-by-side (albedo / normal / metallic-roughness) -->
+<!-- screenshot: deferred G-buffer channels visualised side-by-side (albedo / normal+F0.r / orm+F0.g / emissive+F0.b) -->
 
 > [!NOTE]
 > The shading loop is in the deferred lighting pass WGSL shader.  The loop bound is `light_count`

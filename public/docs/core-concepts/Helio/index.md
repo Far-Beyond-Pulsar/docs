@@ -2,7 +2,7 @@
 title: Helio Renderer
 description: Production-grade, data-driven, physically-based real-time renderer built on wgpu — with a render graph, radiance cascades GI, cascaded shadow maps, volumetric sky, and SDF constructive solid geometry
 category: experiments
-lastUpdated: '2026-03-12'
+lastUpdated: '2026-03-18'
 tags:
   - rendering
   - wgpu
@@ -86,7 +86,7 @@ The `Feature` trait lifecycle (`register` → `prepare` → `on_state_change`). 
 
 ### [The Deferred Pipeline](./deferred-pipeline)
 
-The depth prepass, hierarchical-Z occlusion culling, the four-target G-buffer, GPU-driven `multi_draw_indexed_indirect`, deferred lighting bind groups, transparent forward pass, and the full bind group assignment table.
+The depth prepass, hierarchical-Z occlusion culling, the four-target G-buffer, workflow-resolved specular `F0` packing, GPU-driven `multi_draw_indexed_indirect`, deferred lighting bind groups, transparent forward pass, and the full bind group assignment table.
 
 ---
 
@@ -98,7 +98,13 @@ The depth prepass, hierarchical-Z occlusion culling, the four-target G-buffer, G
 
 ### [Materials and Geometry](./materials)
 
-The `Material` / `GpuMaterial` type system. Cook-Torrance BRDF parameters. Texture channel conventions (ORM packing, sRGB vs linear). `PackedVertex` SNORM8x4 layout. Frustum culling with Gribb-Hartmann plane extraction and Arvo AABB transform.
+The `Material` / `GpuMaterial` type system. Metallic-roughness and explicit specular/IOR workflows. Texture channel conventions (ORM packing, sRGB vs linear). `PackedVertex` SNORM8x4 layout with tangent handedness. Frustum culling with Gribb-Hartmann plane extraction and Arvo AABB transform.
+
+---
+
+### [Asset Loading and Material Workflows](./asset-loading)
+
+The `helio-asset-compat` bridge for FBX, glTF 2.0, OBJ, and USD scenes. Relative texture resolution, embedded bytes, UV Y-flip handling, per-primitive mesh splitting, and how imported materials map into Helio's metallic-roughness vs specular/IOR workflows.
 
 ---
 

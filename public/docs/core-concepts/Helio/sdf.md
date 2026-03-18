@@ -2,7 +2,7 @@
 title: SDF Constructive Solid Geometry
 description: Real-time constructive solid geometry using signed distance fields, edit lists, clip maps, and ray marching in Helio
 category: experiments
-lastUpdated: '2026-03-12'
+lastUpdated: '2026-03-18'
 tags: [sdf, csg, ray-marching, constructive-solid-geometry, terrain, edit-bvh]
 related:
   - core-concepts/experiments/Helio
@@ -73,13 +73,14 @@ Every piece of SDF geometry begins with a **primitive** — a simple, analytical
 
 | Variant | Description | Parameters |
 |---------|-------------|------------|
-| `Sphere` | Perfect sphere | `data[0]` = radius (metres) |
-| `Box` | Axis-aligned box (before transform) | `data[0..2]` = half-extents xyz |
-| `Capsule` | Cylinder capped with hemispheres | `data[0]` = radius, `data[1]` = half-height |
-| `Cylinder` | Flat-capped cylinder | `data[0]` = radius, `data[1]` = half-height |
-| `Torus` | Donut / ring shape | `data[0]` = major radius, `data[1]` = minor radius |
+| `Sphere` | Perfect sphere | `param0` = radius (metres) |
+| `Cube` | Axis-aligned box in local space | `param0..2` = half-extents xyz |
+| `Capsule` | Cylinder capped with hemispheres | `param0` = radius, `param1` = half-height |
+| `Cylinder` | Flat-capped cylinder | `param0` = radius, `param1` = half-height |
+| `Torus` | Donut / ring shape | `param0` = major radius, `param1` = minor radius |
 
-Shape parameters are packed into the four-element `SdfShapeParams::data` array. Unused slots are ignored. Convenience constructors handle the packing for you:
+Shape parameters are packed into the four scalar fields on `SdfShapeParams` (`param0` through
+`param3`). Unused slots are ignored. Convenience constructors handle the packing for you:
 
 ```rust
 use helio::sdf::{SdfShapeType, SdfShapeParams};
@@ -87,8 +88,8 @@ use helio::sdf::{SdfShapeType, SdfShapeParams};
 // A sphere of radius 3 metres
 let sphere_params = SdfShapeParams::sphere(3.0);
 
-// A box with half-extents 1×2×1 (so 2m wide, 4m tall, 2m deep)
-let box_params = SdfShapeParams::box_shape([1.0, 2.0, 1.0]);
+// A cube/box with half-extents 1×2×1 (so 2m wide, 4m tall, 2m deep)
+let cube_params = SdfShapeParams::cube(1.0, 2.0, 1.0);
 
 // A capsule: 0.5m radius, 2m half-height (total height 5m including caps)
 let capsule_params = SdfShapeParams::capsule(0.5, 2.0);
@@ -100,7 +101,10 @@ let torus_params = SdfShapeParams::torus(4.0, 0.4);
 > [!TIP]
 > All primitive SDFs are evaluated *in local space*. Scaling, rotating, and translating the primitive is done through the `SdfEdit::transform` field, which is a full `glam::Mat4`. This means you can create an ellipsoid by applying a non-uniform scale to a sphere, or a slanted cylinder by rotating a cylinder primitive — without adding any new primitive types.
 
-The `SdfShapeParams::data` array is sent verbatim to the GPU inside `GpuSdfEdit`. The GPU-side WGSL shader unpacks the values and evaluates the appropriate analytical SDF formula. Adding a new primitive type requires only a new WGSL branch and a corresponding Rust constructor — no pipeline rebuild or buffer layout change is needed.
+The packed `SdfShapeParams` struct is sent verbatim to the GPU inside `GpuSdfEdit`. The GPU-side
+WGSL shader unpacks the values and evaluates the appropriate analytical SDF formula. Adding a new
+primitive type requires only a new WGSL branch and a corresponding Rust constructor — no pipeline
+rebuild or buffer layout change is needed.
 
 ### Primitive SDF Formulas
 
@@ -118,7 +122,7 @@ fn sdf_sphere(p: vec3<f32>, radius: f32) -> f32 {
 }
 ```
 
-**Box** — centred at origin, half-extents **b = (b_x, b_y, b_z)**:
+**Cube / Box** — centred at origin, half-extents **b = (b_x, b_y, b_z)**:
 
 $$f_{\text{box}}(\mathbf{p}, \mathbf{b}) = \left\|\max\!\left(\lvert\mathbf{p}\rvert - \mathbf{b},\; \mathbf{0}\right)\right\| + \min\!\left(\max(|p_x|-b_x,\; |p_y|-b_y,\; |p_z|-b_z),\; 0\right)$$
 
@@ -184,18 +188,18 @@ pub struct SdfEdit {
     /// Which primitive geometry this edit uses.
     pub shape: SdfShapeType,
 
-    /// Packed shape-specific parameters (radius, extents, etc.).
-    pub params: SdfShapeParams,
+    /// How this edit combines with the accumulated SDF so far.
+    pub op: BooleanOp,
 
     /// World-space transform: position, rotation, and scale of the primitive.
     /// The GPU inverts this to evaluate the SDF in local space.
     pub transform: glam::Mat4,
 
-    /// How this edit combines with the accumulated SDF so far.
-    pub operation: BooleanOp,
+    /// Packed shape-specific parameters (radius, extents, etc.).
+    pub params: SdfShapeParams,
 
     /// Blend radius in metres for smooth operations. Zero means sharp boolean.
-    pub smoothing: f32,
+    pub blend_radius: f32,
 }
 ```
 
@@ -203,25 +207,22 @@ Every field matters:
 
 - **`shape` + `params`** define the geometry in the primitive's own local coordinate space.
 - **`transform`** is the full 4×4 affine transform that moves, rotates, and scales the primitive into world space. Internally, the GPU stores the *inverse* transform so that world-space sample points can be efficiently mapped back to local space for SDF evaluation.
-- **`operation`** controls how this edit modifies the accumulated field. See [Boolean Operations](#boolean-operations) below.
-- **`smoothing`** is the smooth blend radius. At zero, boolean operations produce sharp edges exactly at the SDF zero crossing. Positive values blend the two fields together over that radius, producing organic rounded joints between shapes.
+- **`op`** controls how this edit modifies the accumulated field. See [Boolean Operations](#boolean-operations) below.
+- **`blend_radius`** is the smooth blend radius. At zero, boolean operations produce sharp edges exactly at the SDF zero crossing. Positive values blend the two fields together over that radius, producing organic rounded joints between shapes.
 
-<!-- screenshot: Side-by-side comparison of sharp Union vs SmoothUnion with smoothing=0.8 between two spheres -->
+<!-- screenshot: Side-by-side comparison of sharp Union vs blended Union with blend_radius=0.8 between two spheres -->
 
 ---
 
 ## Boolean Operations
 
-`BooleanOp` defines the six ways a new SDF primitive can modify the accumulated field:
+`BooleanOp` currently defines **three** set-theoretic operations:
 
 ```rust
 pub enum BooleanOp {
     Union,
     Subtraction,
     Intersection,
-    SmoothUnion,
-    SmoothSubtraction,
-    SmoothIntersection,
 }
 ```
 
@@ -232,11 +233,8 @@ At each sample point, the GPU holds the accumulated SDF value `a` (the field so 
 | `Union` | `min(a, b)` | The solid is the region inside *either* shape |
 | `Subtraction` | `max(a, -b)` | Subtracts the primitive from the accumulated solid |
 | `Intersection` | `max(a, b)` | Keeps only the region inside *both* shapes |
-| `SmoothUnion` | polynomial blend of `min(a, b)` | Union with rounded edge at the join |
-| `SmoothSubtraction` | polynomial blend of `max(a, -b)` | Subtraction with rounded concave edge |
-| `SmoothIntersection` | polynomial blend of `max(a, b)` | Intersection with rounded convex edge |
-
-The sharp boolean operations have exact set-theoretic interpretations. Given accumulated field **d1** and new primitive **d2**:
+The sharp boolean operations have exact set-theoretic interpretations. Given accumulated field
+**d1** and new primitive **d2**:
 
 $$f_{A \cup B}(\mathbf{p}) = \min(f_A(\mathbf{p}),\; f_B(\mathbf{p}))$$
 
@@ -252,30 +250,34 @@ fn op_subtract (d1: f32, d2: f32) -> f32 { return max(d1, -d2); }
 fn op_intersect(d1: f32, d2: f32) -> f32 { return max(d1, d2); }
 ```
 
-The smooth variants use Inigo Quilez's polynomial smooth-min / smooth-max functions, parameterised by `SdfEdit::smoothing`. A smoothing value of `0.0` degrades to the sharp boolean. A value of `1.0` blends the two shapes together over a one-metre radius, producing a seamless organic junction.
+Smoothing is controlled separately through `SdfEdit::blend_radius`. In other words, the operation
+kind remains `Union`, `Subtraction`, or `Intersection`; setting `blend_radius > 0.0` tells the CPU
+and GPU evaluators to use a blended transition instead of the sharp form.
 
-The polynomial smooth-min **smin(d1, d2, k)** is defined as:
+The current CPU implementation uses a clamped interpolation factor **h** plus a correction term,
+rather than separate public `SmoothUnion` / `SmoothSubtraction` / `SmoothIntersection` enum
+variants:
 
-$$h = \max\!\left(\frac{k - |a-b|}{k},\; 0\right)$$
-
-$$\text{smin}_{\text{poly}}(a,\, b,\, k) = \min(a, b) - \frac{h^2\, k}{4}$$
-
-When **|d1 − d2| > k** (the two primitives are further apart than the blend radius), **h = 0** or **h = 1** and this reduces to the sharp `min`. When **|d1 − d2| ≤ k** (within the blend zone), the `h²·k/4` term subtracts a smooth correction that rounds the junction. The parameter **k** is `SdfEdit::smoothing` — the blend radius in metres.
-
-```wgsl
-fn smooth_union(d1: f32, d2: f32, k: f32) -> f32 {
-    let h = max(k - abs(d1 - d2), 0.0) / k;
-    return min(d1, d2) - h * h * k * 0.25;
-}
-fn smooth_subtract(d1: f32, d2: f32, k: f32) -> f32 {
-    let h = max(k - abs(d1 + d2), 0.0) / k;
-    return max(d1, -d2) + h * h * k * 0.25;
-}
-fn smooth_intersect(d1: f32, d2: f32, k: f32) -> f32 {
-    let h = max(k - abs(d1 - d2), 0.0) / k;
-    return max(d1, d2) + h * h * k * 0.25;
+```rust
+match op {
+    BooleanOp::Union => {
+        let h = (0.5 + 0.5 * (d2 - d1) / k).clamp(0.0, 1.0);
+        d1 * h + d2 * (1.0 - h) - k * h * (1.0 - h)
+    }
+    BooleanOp::Subtraction => {
+        let h = (0.5 - 0.5 * (d2 + d1) / k).clamp(0.0, 1.0);
+        d1 * (1.0 - h) + (-d2) * h + k * h * (1.0 - h)
+    }
+    BooleanOp::Intersection => {
+        let h = (0.5 - 0.5 * (d2 - d1) / k).clamp(0.0, 1.0);
+        d1 * h + d2 * (1.0 - h) + k * h * (1.0 - h)
+    }
 }
 ```
+
+At `blend_radius = 0.0`, Helio falls back to the sharp boolean forms. Positive values produce the
+rounded joins and softened cuts that earlier prototypes described as "smooth union" or "smooth
+subtraction", but the smoothing is now a property of the edit rather than a separate enum variant.
 
 ```rust
 // Sharp union — hard edge between sphere and box
@@ -283,17 +285,17 @@ sdf.add_edit(SdfEdit {
     shape: SdfShapeType::Sphere,
     params: SdfShapeParams::sphere(2.0),
     transform: Mat4::from_translation(vec3(0.0, 0.0, 0.0)),
-    operation: BooleanOp::Union,
-    smoothing: 0.0,
+    op: BooleanOp::Union,
+    blend_radius: 0.0,
 });
 
-// Smooth union — organic blob merging with the sphere
+// Blended union — organic blob merging with the sphere
 sdf.add_edit(SdfEdit {
-    shape: SdfShapeType::Box,
-    params: SdfShapeParams::box_shape([1.5, 1.5, 1.5]),
+    shape: SdfShapeType::Cube,
+    params: SdfShapeParams::cube(1.5, 1.5, 1.5),
     transform: Mat4::from_translation(vec3(2.5, 0.0, 0.0)),
-    operation: BooleanOp::SmoothUnion,
-    smoothing: 0.8,   // blend over 0.8 metres
+    op: BooleanOp::Union,
+    blend_radius: 0.8,   // blend over 0.8 metres
 });
 
 // Carve a tunnel through everything so far
@@ -304,8 +306,8 @@ sdf.add_edit(SdfEdit {
         Quat::from_rotation_x(std::f32::consts::FRAC_PI_2),
         vec3(0.0, 0.0, 0.0),
     ),
-    operation: BooleanOp::Subtraction,
-    smoothing: 0.0,
+    op: BooleanOp::Subtraction,
+    blend_radius: 0.0,
 });
 ```
 
@@ -316,16 +318,21 @@ sdf.add_edit(SdfEdit {
 
 ## The Edit List
 
-`SdfEditList` is a `Vec<SdfEdit>` plus a monotonically increasing generation counter:
+`SdfEditList` is a `Vec<SdfEdit>` plus dirty tracking and a monotonically increasing generation
+counter:
 
 ```rust
 pub struct SdfEditList {
     edits: Vec<SdfEdit>,
+    dirty: bool,
     generation: u64,
 }
 ```
 
-Every mutation — `push`, `remove`, or `clear` — increments `generation`. `SdfFeature.prepare` compares `edit_list.generation` against `last_uploaded_gen`. If they differ, the entire edit list is serialised into `GpuSdfEdit` structs and uploaded to the GPU `edit_buffer`. This lazy upload pattern means that frames where nothing changes incur zero buffer-write overhead.
+Every mutation — `add`, `set`, `remove`, or `clear` — increments `generation` and marks the list
+dirty. `SdfFeature::prepare` compares `edit_list.generation()` against `last_uploaded_gen`. If they
+differ, the edit list is serialised into `GpuSdfEdit` structs and uploaded to the GPU `edit_buffer`.
+This lazy upload pattern means that frames where nothing changes incur zero buffer-write overhead.
 
 > [!NOTE]
 > The generation counter does not track *which* edits changed, only *whether* they changed. Any mutation triggers a full re-upload of all edits. For typical edit counts (tens to low hundreds) this is fast; the buffer is compact and a single `write_buffer` call suffices.
@@ -619,32 +626,38 @@ SDF terrain provides a procedurally generated base layer that is sculpted into t
 
 ```rust
 pub enum TerrainStyle {
-    Flat,       // Infinite flat plane at y=0
-    Layered,    // Horizontal rock strata with noise-modulated thickness
-    Canyon,     // Eroded canyon shapes with near-vertical walls
-    Volcanic,   // Lava fields with craters and cone features
+    Rolling,
 }
 
 pub struct TerrainConfig {
     pub style: TerrainStyle,
-    pub scale: f32,    // World-space scale of terrain features (metres)
-    pub height: f32,   // Maximum terrain height above the base plane (metres)
-    pub seed: u32,     // Random seed for reproducibility
+    pub height: f32,
+    pub amplitude: f32,
+    pub frequency: f32,
+    pub octaves: u32,
+    pub lacunarity: f32,
+    pub persistence: f32,
 }
 ```
 
-Terrain is generated by the `noise` submodule, which provides GPU-side noise functions (simplex, fractal Brownian motion, domain-warped fBm) evaluated directly in the `SdfClipUpdatePass` shader. The terrain SDF is computed per-voxel alongside the edit list evaluation — there is no separate terrain pass.
+The current terrain system exposes a single built-in style, `Rolling`, backed by a layered
+fractal-noise heightfield. `height` is the base elevation offset, while `amplitude`, `frequency`,
+`octaves`, `lacunarity`, and `persistence` control the FBM shape. Terrain is evaluated directly in
+the clip update path alongside the edit list — there is no separate terrain bake pass.
 
 ```rust
-// Setting up a canyon terrain with manual cave edits layered on top
+// Setting up rolling terrain with manual cave edits layered on top
 let sdf = renderer.get_feature_mut::<SdfFeature>("sdf").unwrap();
 
 // Configure terrain as the base layer (done during feature setup)
 sdf.set_terrain(TerrainConfig {
-    style: TerrainStyle::Canyon,
-    scale: 80.0,
-    height: 40.0,
-    seed: 0xDEAD_BEEF,
+    style: TerrainStyle::Rolling,
+    height: -2.0,
+    amplitude: 4.0,
+    frequency: 0.08,
+    octaves: 5,
+    lacunarity: 2.0,
+    persistence: 0.5,
 });
 
 // Now add manual edits — these subtract from / add to the terrain
@@ -652,22 +665,26 @@ sdf.add_edit(SdfEdit {
     shape: SdfShapeType::Sphere,
     params: SdfShapeParams::sphere(8.0),
     transform: Mat4::from_translation(vec3(0.0, 5.0, 0.0)),
-    operation: BooleanOp::Subtraction,  // carve a spherical chamber
-    smoothing: 1.5,
+    op: BooleanOp::Subtraction,  // carve a spherical chamber
+    blend_radius: 1.5,
 });
 ```
 
 > [!TIP]
-> The `Layered` style produces convincing geological strata that look great when intersected with a subtraction edit representing a mineshaft or cave entrance — the cross-section reveals the layered rock texture automatically.
+> `TerrainConfig::rolling()` is the easiest starting point. Use `amplitude` to control relief,
+> `frequency` for feature size, `octaves` for detail layering, and `persistence` / `lacunarity` to
+> tune how quickly the higher-frequency noise tapers off.
 
 ---
 
-## CPU-Side Ray Marching: `pick_ray`
+## CPU-Side Ray Marching: `pick_surface`
 
-`SdfFeature` includes a CPU-side ray marcher for interaction, selection, and gameplay queries. It marches through the *CPU copy* of the SDF volume (or re-evaluates the edit list analytically) to find where a ray hits the SDF surface:
+`SdfFeature` includes a CPU-side ray marcher for interaction, selection, and gameplay queries. It
+does **not** sample the GPU clip map back to the CPU; instead, it analytically re-evaluates the
+terrain and edit list on the CPU to find where a ray hits the SDF surface:
 
 ```rust
-pub fn pick_ray(
+pub fn pick_surface(
     &self,
     ray_origin: Vec3,
     ray_dir: Vec3,
@@ -694,25 +711,30 @@ Typical use cases:
 
 ```rust
 // Place a sphere where the player is pointing
-if let Some(hit) = sdf.pick_ray(camera_pos, camera_forward, 50.0) {
+if let Some(hit) = sdf.pick_surface(camera_pos, camera_forward, 50.0) {
     sdf.add_edit(SdfEdit {
         shape: SdfShapeType::Sphere,
         params: SdfShapeParams::sphere(1.0),
         transform: Mat4::from_translation(hit.position),
-        operation: BooleanOp::Union,
-        smoothing: 0.3,
+        op: BooleanOp::Union,
+        blend_radius: 0.3,
     });
 }
 ```
 
 > [!WARNING]
-> `pick_ray` runs on the CPU and analytically evaluates every edit in the list per march step. For large edit lists (> 100 edits) or high `max_distance` values, this can be slow enough to cause frame hitches if called every frame. Consider rate-limiting to once per interaction event, or caching the last result until the edit list changes.
+> `pick_surface` runs on the CPU and analytically evaluates every edit in the list per march step.
+> For large edit lists (> 100 edits) or high `max_distance` values, this can be slow enough to cause
+> frame hitches if called every frame. Consider rate-limiting to once per interaction event, or
+> caching the last result until the edit list changes.
 
 ---
 
 ## Configuring SdfFeature
 
-`SdfFeature` uses a builder pattern for initial configuration. All settings must be applied before the feature is registered with the renderer — they cannot be changed at runtime.
+`SdfFeature` uses a builder pattern for initial configuration. Grid size, volume bounds, and initial
+terrain can be set up front; terrain can also be changed later with `set_terrain(...)`, and debug
+visualization is toggled at runtime with `toggle_debug()`.
 
 ```rust
 let sdf_feature = SdfFeature::new()
@@ -727,28 +749,37 @@ let sdf_feature = SdfFeature::new()
         [ 100.0,  50.0,  100.0],
     )
 
-    // Enable debug visualisation: shows clip map level boundaries,
-    // SDF value colour-coding, and BVH node outlines.
-    .with_debug_mode(false);
+    // Optional initial terrain
+    .with_terrain(TerrainConfig::rolling());
 
 renderer.register_feature(sdf_feature)?;
 ```
 
-**`with_grid_dim`** is the most impactful configuration choice. The VRAM cost per clip level scales as `grid_dim³`. With `DEFAULT_CLIP_LEVELS = 4`:
+After registration:
 
-| `grid_dim` | VRAM per level (dense) | Total (4 levels, R8Unorm) |
+```rust
+let sdf = renderer.get_feature_mut::<SdfFeature>("sdf").unwrap();
+sdf.toggle_debug();
+```
+
+**`with_grid_dim`** is the most impactful configuration choice. The VRAM cost per clip level scales
+as `grid_dim³`. With `DEFAULT_CLIP_LEVELS = 8`:
+
+| `grid_dim` | VRAM per level (dense) | Total (8 levels, R8Unorm) |
 |------------|----------------------|--------------------------|
-| 64 | 256 KB | ~1 MB |
-| 128 | 2 MB | ~8 MB |
-| 256 | 16 MB | ~64 MB |
-| 512 | 128 MB | ~512 MB |
+| 64 | 256 KB | ~2 MB |
+| 128 | 2 MB | ~16 MB |
+| 256 | 16 MB | ~128 MB |
+| 512 | 128 MB | ~1 GB |
 
 Sparse brick storage (see [Brick Maps](#brick-maps-sparse-sdf-storage)) reduces these figures significantly in practice, but plan for the worst case when budgeting VRAM.
 
 **`with_volume_bounds`** sets the world-space box that the clip map may cover. The finest clip level is centered on the camera and never exceeds these bounds; the coarser levels clamp similarly. If your world is larger than the bounds, SDF geometry outside the bounds simply won't be rendered.
 
 > [!NOTE]
-> `with_debug_mode(true)` overlays a colour-coded SDF visualisation on the rendered output: blue = negative (inside solid), red = positive (outside), bright green = surface crossing. Clip level boundaries are shown as translucent planes. This is invaluable for debugging unexpected holes or surfaces.
+> `toggle_debug()` overlays a colour-coded SDF visualisation on the rendered output: blue =
+> negative (inside solid), red = positive (outside), bright green = surface crossing. This is
+> invaluable for debugging unexpected holes or surfaces.
 
 ---
 
@@ -769,7 +800,7 @@ flowchart TD
     H --> I
     I --> J["SdfRayMarchPass<br/>fullscreen render"]
     J --> K[Player interaction?]
-    K -->|pick / place| L["pick_ray<br/>add_edit / remove_edit"]
+    K -->|pick / place| L["pick_surface<br/>add_edit / remove_edit"]
     L --> F
     K -->|no| F
 ```
@@ -795,17 +826,17 @@ fn setup(renderer: &mut Renderer) -> anyhow::Result<()> {
         shape: SdfShapeType::Sphere,
         params: SdfShapeParams::sphere(5.0),
         transform: Mat4::IDENTITY,
-        operation: BooleanOp::Union,
-        smoothing: 0.0,
+        op: BooleanOp::Union,
+        blend_radius: 0.0,
     });
 
-    // Smooth blob attached to it
+    // Blended blob attached to it
     sdf.add_edit(SdfEdit {
-        shape: SdfShapeType::Box,
-        params: SdfShapeParams::box_shape([2.0, 2.0, 2.0]),
+        shape: SdfShapeType::Cube,
+        params: SdfShapeParams::cube(2.0, 2.0, 2.0),
         transform: Mat4::from_translation(vec3(5.5, 0.0, 0.0)),
-        operation: BooleanOp::SmoothUnion,
-        smoothing: 1.2,
+        op: BooleanOp::Union,
+        blend_radius: 1.2,
     });
 
     // Cylindrical bore through both
@@ -816,8 +847,8 @@ fn setup(renderer: &mut Renderer) -> anyhow::Result<()> {
             Quat::from_rotation_z(std::f32::consts::FRAC_PI_2),
             vec3(0.0, 0.0, 0.0),
         ),
-        operation: BooleanOp::Subtraction,
-        smoothing: 0.2,
+        op: BooleanOp::Subtraction,
+        blend_radius: 0.2,
     });
 
     Ok(())
@@ -857,7 +888,10 @@ For most interactive applications, `128` is a good default. Use `64` for mobile 
 
 ### Clip Level Count
 
-`DEFAULT_CLIP_LEVELS = 4` is a soft constant. Reducing to 3 levels saves 25% of clip map VRAM and 25% of compute dispatch slots, at the cost of shorter SDF render range. Increasing to 5 levels extends range but costs proportionally more. The level count should match the furthest distance at which SDF geometry appears in your scene.
+`DEFAULT_CLIP_LEVELS = 8` is the current baseline. Reducing the level count would save VRAM and
+clip update work proportionally, at the cost of shorter SDF render range. Increasing it extends
+coverage but costs more memory and dispatch work. The level count should match the furthest distance
+at which SDF geometry appears in your scene.
 
 ### Edit Count and BVH
 
@@ -886,7 +920,11 @@ Understanding the current limitations of the SDF CSG system helps you design you
 
 **Volume bounds are fixed at registration.** `with_volume_bounds` is a setup-time parameter. The world-space bounding box cannot be changed after the feature is registered. Design your volume bounds to cover the full playable area of your scene.
 
-**Quantisation precision at coarse levels.** u8 quantisation over a large world extent (level 3 in a 64-metre clip level covers ±64 metres) gives approximately 0.5-metre precision per quantisation step. This is usually invisible in rendering, but `pick_ray` at long distances against a coarse clip level may have sub-metre inaccuracy. For precise interaction at range, consider limiting `pick_ray`'s `max_distance` to the extent of clip level 1 or 2.
+**Quantisation precision at coarse levels.** u8 quantisation over a large world extent gives coarse
+distance steps in the far clip levels. This is usually invisible in rendering, but `pick_surface`
+at long distances may still have sub-metre inaccuracy because it relies on the analytic CPU
+evaluation and finite-difference normals. For precise interaction at range, consider limiting
+`pick_surface`'s `max_distance` to the near gameplay area.
 
 > [!WARNING]
 > Do not set `grid_dim` above 256 without profiling first. At 512, the four R8Unorm clip level textures alone consume 512 MB of VRAM before any brick atlas overhead. On most desktop GPUs this will cause the driver to fall back to system memory, causing catastrophic performance degradation.
@@ -900,24 +938,24 @@ classDiagram
     class SdfFeature {
         +add_edit(SdfEdit)
         +remove_edit(usize)
+        +set_edit(usize, SdfEdit)
         +clear_edits()
-        +edit_count() usize
-        +pick_ray(Vec3, Vec3, f32) Option~PickResult~
+        +pick_surface(Vec3, Vec3, f32) Option~PickResult~
         +with_grid_dim(u32) Self
         +with_volume_bounds([f32;3], [f32;3]) Self
-        +with_debug_mode(bool) Self
+        +with_terrain(TerrainConfig) Self
+        +toggle_debug()
     }
     class SdfEdit {
         +shape: SdfShapeType
-        +params: SdfShapeParams
+        +op: BooleanOp
         +transform: Mat4
-        +operation: BooleanOp
-        +smoothing: f32
+        +params: SdfShapeParams
+        +blend_radius: f32
     }
     class SdfShapeParams {
-        +data: [f32; 4]
         +sphere(f32) Self
-        +box_shape([f32;3]) Self
+        +cube(f32, f32, f32) Self
         +capsule(f32, f32) Self
         +cylinder(f32, f32) Self
         +torus(f32, f32) Self
@@ -934,9 +972,12 @@ classDiagram
     }
     class TerrainConfig {
         +style: TerrainStyle
-        +scale: f32
         +height: f32
-        +seed: u32
+        +amplitude: f32
+        +frequency: f32
+        +octaves: u32
+        +lacunarity: f32
+        +persistence: f32
     }
     SdfFeature --> SdfEdit
     SdfFeature --> SdfClipMap
@@ -948,10 +989,10 @@ classDiagram
 | Concept | Default | Config |
 |---------|---------|--------|
 | Grid dimension | 128³ | `with_grid_dim` |
-| Clip levels | 4 | `DEFAULT_CLIP_LEVELS` |
+| Clip levels | 8 | `DEFAULT_CLIP_LEVELS` |
 | Brick size | 8³ | `DEFAULT_BRICK_SIZE` |
 | SDF quantisation | u8 R8Unorm | fixed |
-| Boolean ops | 6 variants | `BooleanOp` enum |
+| Boolean ops | 3 variants + `blend_radius` smoothing | `BooleanOp` + `SdfEdit` |
 | Terrain base layer | none | `set_terrain` |
-| CPU picking | analytical | `pick_ray` |
+| CPU picking | analytical | `pick_surface` |
 | PBR shading | shared bind group | fixed |
