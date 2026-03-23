@@ -55,21 +55,21 @@ The renderer is optimized for large dynamic scenes, wide platform support (Vulka
 
 ## Navigation (co-documents)
 
-- [Scene API](./scene/index.md)
+- [Scene API](./scene)
   - full scene ownership model
   - meshes, materials, objects, lights, groups, virtual geometry, camera
   - flush/dirty-tracking and handle semantics
 
-- [The Render Graph](./render-graph.md)
+- [The Render Graph](./render-graph)
   - pass ordering, FrameResources lifecycle (`publish`, `prepare`, `execute`)
   - default pass architecture and how to add custom passes
 
-- [GPU-Driven Pipeline & Automatic Instancing](./gpu-driven-pipeline.md)
+- [GPU-Driven Pipeline & Automatic Instancing](./gpu-driven-pipeline)
   - per-frame dispatch/indirect draw flow
   - O(1) CPU hot path and batch instancing algorithm
   - persistent vs optimized pipeline modes
 
-- [Render Passes](./passes/index.md)
+- [Render Passes](./passes)
   - pass contracts (`RenderPass` trait, `PassContext`, resources)
   - built-in passes (shadow, G-buffer, lighting, post-processing)
 
