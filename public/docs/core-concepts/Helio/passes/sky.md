@@ -69,7 +69,7 @@ SkyLutPass (producer)          SkyPass (consumer)
 `SkyLutPass` publishes its LUT view through `frame.sky_lut`, which `SkyPass` holds a reference to as a `texture_2d<f32>` binding. Both passes share the same `ShaderSkyUniforms` layout (112 bytes) and are driven from the same `earth_like()` defaults.
 
 > [!IMPORTANT]
-> Both `SkyLutPass` and `SkyPass` maintain **independent** copies of the sky uniform buffer. If you change sky parameters at runtime you must upload the new uniforms to both passes. In production engines, a shared `SkySystem` component uploads once to a single buffer that both passes share by reference.
+> Both `SkyLutPass` and `SkyPass` maintain **independent** copies of the sky uniform buffer. If you change sky parameters at runtime you must upload the new uniforms to both passes. In the future, a shared `SkySystem` component uploads once to a single buffer that both passes share by reference.
 
 ---
 
