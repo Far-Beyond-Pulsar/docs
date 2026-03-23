@@ -87,12 +87,16 @@ async function buildNavigationNode(dirPath, basePath = '') {
         // Skip index pages - they represent the category itself, not a child
         if (itemSlug === 'index') {
           // Store index page info on the category node itself
+          const indexPath = `/docs/${basePath}`;
           node.indexPage = {
             title: item.title || node.title,
             slug: 'index',
-            path: `/docs/${basePath}`,
+            path: indexPath,
             icon: item.icon
           };
+          // Also set path on the node so renderNavItem renders it as a clickable link
+          // when this category appears as a child item in the sidebar
+          node.path = indexPath;
           continue;
         }
 
