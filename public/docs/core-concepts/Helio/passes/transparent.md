@@ -1,4 +1,4 @@
-﻿---
+---
 title: Transparent Pass
 description: Forward-shaded alpha-blended geometry rendering with read-only depth, composited after the deferred lighting pass using the over operator.
 category: helio
@@ -176,7 +176,7 @@ Alpha compositing is formalized by the **over operator**, which defines how a se
 
 ### Mathematical Definition
 
-When rendering a fragment with color $C_s$ and alpha $\alpha_s$ on top of framebuffer color $C_d$ (from opaque geometry) and alpha $\alpha_d = 1.0$:
+When rendering a fragment with color $$C_s$$ and alpha $$\alpha_s$$ on top of framebuffer color $$C_d$$ (from opaque geometry) and alpha $$\alpha_d = 1.0$$:
 
 $$
 C_{out} = C_s \alpha_s + C_d (1 - \alpha_s)
@@ -186,7 +186,7 @@ $$
 \alpha_{out} = \alpha_s + \alpha_d (1 - \alpha_s)
 $$
 
-Since opaque geometry has $\alpha_d = 1$, this simplifies to:
+Since opaque geometry has $$\alpha_d = 1$$, this simplifies to:
 
 $$
 C_{out} = C_s \alpha_s + C_d (1 - \alpha_s)
@@ -231,17 +231,17 @@ The correctness of alpha blending depends critically on **back-to-front draw ord
 
 Three overlapping transparent layers A, B, C (front to back) in **incorrect order** (C, B, A):
 
-1. Render C: $C_{out} = C_C \alpha_C + C_{opaque} (1 - \alpha_C)$
-2. Render B: $C_{out} = C_B \alpha_B + C_{out} (1 - \alpha_B)$ ← *blends with C's output, not the opaque background*
-3. Render A: $C_{out} = C_A \alpha_A + C_{out} (1 - \alpha_A)$ ← *blends with B+C's output*
+1. Render C: $$C_{out} = C_C \alpha_C + C_{opaque} (1 - \alpha_C)$$
+2. Render B: $$C_{out} = C_B \alpha_B + C_{out} (1 - \alpha_B)$$ ← *blends with C's output, not the opaque background*
+3. Render A: $$C_{out} = C_A \alpha_A + C_{out} (1 - \alpha_A)$$ ← *blends with B+C's output*
 
 The result is **alpha confusion**: the transparent layer B blends with C instead of the background, producing physically incorrect colors.
 
 **Correct order** (C, B, A → A, B, C from back to front):
 
-1. Render A: $C_{out} = C_A \alpha_A + C_{opaque} (1 - \alpha_A)$ ← *blends with opaque*
-2. Render B: $C_{out} = C_B \alpha_B + C_A (1 - \alpha_B)$ ← *blends with A*
-3. Render C: $C_{out} = C_C \alpha_C + C_B (1 - \alpha_C)$ ← *blends with B*
+1. Render A: $$C_{out} = C_A \alpha_A + C_{opaque} (1 - \alpha_A)$$ ← *blends with opaque*
+2. Render B: $$C_{out} = C_B \alpha_B + C_A (1 - \alpha_B)$$ ← *blends with A*
+3. Render C: $$C_{out} = C_C \alpha_C + C_B (1 - \alpha_C)$$ ← *blends with B*
 
 Each layer correctly blends with what appears behind it. The final result is physically correct.
 
@@ -478,11 +478,11 @@ let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
 **`color`** (the over operator):
 - `src_factor: SrcAlpha` → multiply the source color by its alpha
 - `dst_factor: OneMinusSrcAlpha` → multiply the destination color by (1 - source alpha)
-- `operation: Add` → add them together: $C_{out} = C_s \alpha_s + C_d (1 - \alpha_s)$
+- `operation: Add` → add them together: $$C_{out} = C_s \alpha_s + C_d (1 - \alpha_s)$$
 
 **`alpha`** (framebuffer alpha):
 - `OVER` preset → equivalent to `(src_factor = One, dst_factor = Zero, operation = Add)`
-- Result: $\alpha_{out} = 1.0$ (framebuffer always remains fully opaque)
+- Result: $$\alpha_{out} = 1.0$$ (framebuffer always remains fully opaque)
 
 ### Primitive State
 

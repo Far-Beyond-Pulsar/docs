@@ -1,4 +1,4 @@
-﻿---
+---
 title: SDF Clipmap Pass
 description: Volumetric clipmap-based signed distance field system with sparse brick atlases, toroidal scrolling, and fullscreen ray marching for efficient global SDF queries.
 category: helio
@@ -41,12 +41,12 @@ The older approach used **Jump Flooding Algorithm (JFA)** on depth: compute scre
 
 The clipmap consists of **8 levels** (0–7), each exponentially coarser in resolution. Level structure:
 
-- **Level 0 (finest)**: voxel_size = 0.5 world units, coverage = 512 × 512 × 512 voxels = $2^9$ per axis
-- **Level $k$**: voxel_size = $2^k \cdot 0.5$, coverage = $2^{9+k}$ per axis
+- **Level 0 (finest)**: voxel_size = 0.5 world units, coverage = 512 × 512 × 512 voxels = $$2^9$$ per axis
+- **Level $$k$$**: voxel_size = $$2^k \cdot 0.5$$, coverage = $$2^{9+k}$$ per axis
 
 ### Level Coverage Formula
 
-For level $k$, the **world coverage** is:
+For level $$k$$, the **world coverage** is:
 
 $$\text{coverage}_k = 2^{9+k} \text{ voxels} \times 2^{k} \cdot 0.5 \text{ units per voxel} = 2^{8+2k} \text{ world units per axis}$$
 
@@ -89,13 +89,13 @@ Total: 256 × 256 × 256 voxels per level (compact), but only active bricks occu
 
 ### Sparse Atlas
 
-Instead of storing all $16^3 = 4096$ bricks in VRAM, only **active bricks** (those overlapping scene geometry or edits) are allocated from an **8³ = 512-brick atlas**. Each level binds a separate atlas.
+Instead of storing all $$16^3 = 4096$$ bricks in VRAM, only **active bricks** (those overlapping scene geometry or edits) are allocated from an **8³ = 512-brick atlas**. Each level binds a separate atlas.
 
 **Memory per level:**
 - Atlas: 512 bricks × 512 voxels/brick = 262,144 voxels
 - Packed as u8 (4 per u32): 262,144 / 4 = 65,536 × u32 = **256 KB** per atlas (8 levels = 2 MB)
 
-Compare to dense: $16^3 \times 8^3 = 262,144$ voxels per level × 8 levels = 2,097,152 voxels if dense, effectively the same, but **sparse gives flexibility**: if a level has 100 active bricks (122 KB), we save VRAM by not allocating the remaining 412 bricks.
+Compare to dense: $$16^3 \times 8^3 = 262,144$$ voxels per level × 8 levels = 2,097,152 voxels if dense, effectively the same, but **sparse gives flexibility**: if a level has 100 active bricks (122 KB), we save VRAM by not allocating the remaining 412 bricks.
 
 ### Brick Classification
 
@@ -140,7 +140,7 @@ pub struct SdfShapeParams {
 
 #### **Sphere**
 
-A sphere of radius $r$ at the origin:
+A sphere of radius $$r$$ at the origin:
 
 $$d_{\text{sphere}}(\mathbf{p}, r) = |\mathbf{p}| - r$$
 
@@ -157,10 +157,10 @@ fn sd_sphere(p: vec3<f32>, r: f32) -> f32 {
 
 #### **Cube (Axis-Aligned Box)**
 
-A box with half-extents $\mathbf{b}$ centered at the origin:
+A box with half-extents $$\mathbf{b}$$ centered at the origin:
 
 $$d_{\text{box}}(\mathbf{p}, \mathbf{b}) = |\mathbf{q}_{\max}| + \text{min}(\text{max}(\mathbf{q}_{\max}), 0)$$
-where $\mathbf{q} = |\mathbf{p}| - \mathbf{b}$.
+where $$\mathbf{q} = |\mathbf{p}| - \mathbf{b}$$.
 
 This evaluates correctly for points inside, on, and outside the box.
 
@@ -178,7 +178,7 @@ fn sd_box(p: vec3<f32>, b: vec3<f32>) -> f32 {
 
 #### **Capsule**
 
-A capsule (cylinder with hemispherical caps) with radius $r$ and half-height $h$:
+A capsule (cylinder with hemispherical caps) with radius $$r$$ and half-height $$h$$:
 
 $$d_{\text{capsule}}(\mathbf{p}, r, h) = \left| \left[ \text{clamp}(p_y, -h, h), \sqrt{p_x^2 + p_z^2} \right] \right| - r$$
 
@@ -197,7 +197,7 @@ fn sd_capsule(p: vec3<f32>, r: f32, hh: f32) -> f32 {
 
 #### **Torus**
 
-A torus with major radius $R$ and minor radius $r$:
+A torus with major radius $$R$$ and minor radius $$r$$:
 
 $$d_{\text{torus}}(\mathbf{p}, R, r) = \left| \left[ \left| \sqrt{p_x^2 + p_z^2} \right| - R, p_y \right] \right| - r$$
 
@@ -215,7 +215,7 @@ fn sd_torus(p: vec3<f32>, R: f32, r: f32) -> f32 {
 
 #### **Cylinder**
 
-A cylinder with radius $r$ and half-height $h$:
+A cylinder with radius $$r$$ and half-height $$h$$:
 
 $$d_{\text{cyl}}(\mathbf{p}, r, h) = \begin{cases}
 \left| [\sqrt{p_x^2 + p_z^2} - r, p_y] \right| & \text{if both components outside} \\
@@ -252,24 +252,24 @@ As the camera moves, the clipmap **scrolls toroidally**—the grid wraps around 
 
 After updating the camera position each frame:
 
-1. Snap the camera position to the brick grid: $\text{snap}_k = \lfloor \text{camera} / (8 \times \text{brick\_size}_k) \rfloor$
-2. Compute grid movement: $\Delta = \text{snap}_k - \text{prev\_snap}_k$
-3. If $\Delta \neq 0$, the level has scrolled; set dirty bit
+1. Snap the camera position to the brick grid: $$\text{snap}_k = \lfloor \text{camera} / (8 \times \text{brick\_size}_k) \rfloor$$
+2. Compute grid movement: $$\Delta = \text{snap}_k - \text{prev\_snap}_k$$
+3. If $$\Delta \neq 0$$, the level has scrolled; set dirty bit
 
 ### Per-Level Scrolling
 
 For each scrolled level:
 
-1. **Update grid origin**: $\text{world\_min} \leftarrow \text{world\_min} + \Delta \times 8 \times \text{brick\_size} \times \text{voxel\_size}$
+1. **Update grid origin**: $$\text{world\_min} \leftarrow \text{world\_min} + \Delta \times 8 \times \text{brick\_size} \times \text{voxel\_size}$$
 2. **Classify newly visible bricks**: test only the 1-2 voxel-thick shell of newly-exposed bricks against the Edit BVH
 3. **Deallocate old bricks**: free atlas slots for bricks that scrolled out and are now empty
 4. **Upload only dirty bricks**: GPU compute pass evaluates only changed active bricks
 
 ### CPU Cost
 
-- **First frame**: full classification of all $16^3 = 4096$ bricks per level
-- **Subsequent frames, no movement**: $O(1)$ (no updates)
-- **Frame with movement**: $O(\text{shell size}) = O(16^2) = O(256)$ bricks per level (shell is 1-2 bricks thick)
+- **First frame**: full classification of all $$16^3 = 4096$$ bricks per level
+- **Subsequent frames, no movement**: $$O(1)$$ (no updates)
+- **Frame with movement**: $$O(\text{shell size}) = O(16^2) = O(256)$$ bricks per level (shell is 1-2 bricks thick)
 
 This makes clipmap updates **extremely cheap** compared to global grid rebuild.
 
@@ -388,7 +388,7 @@ fn eval_sdf(world_pos: vec3<f32>, brick_flat: u32) -> f32 {
 
 ### Atlas Packing: u8 Quantization
 
-SDF values are **quantized to u8** for storage efficiency (memory bandwidth and per-level 256 KB vs. 1 MB). The quantization maps $[-\text{max\_d}, +\text{max\_d}] \to [0, 255]$:
+SDF values are **quantized to u8** for storage efficiency (memory bandwidth and per-level 256 KB vs. 1 MB). The quantization maps $$[-\text{max\_d}, +\text{max\_d}] \to [0, 255]$$:
 
 ```wgsl
 fn pack_u8(value: f32, voxel_size: f32) -> u32 {
@@ -399,7 +399,7 @@ fn pack_u8(value: f32, voxel_size: f32) -> u32 {
 }
 ```
 
-**Precision:** with $\text{max\_d} = 4 \times \text{voxel\_size}$, each u8 level ≈ 0.06× voxel_size. For level 0 (voxel_size = 0.5), this is ~0.03 world units—sufficient for accurate ray marching.
+**Precision:** with $$\text{max\_d} = 4 \times \text{voxel\_size}$$, each u8 level ≈ 0.06× voxel_size. For level 0 (voxel_size = 0.5), this is ~0.03 world units—sufficient for accurate ray marching.
 
 ---
 
@@ -582,7 +582,7 @@ fn sdf_union(a: f32, b: f32, k: f32) -> f32 {
 }
 ```
 
-**Interpretation:** $k$ is the blend radius in world units. $k = 0$ gives hard union; $k > 0$ creates a soft transition band.
+**Interpretation:** $$k$$ is the blend radius in world units. $$k = 0$$ gives hard union; $$k > 0$$ creates a soft transition band.
 
 ---
 

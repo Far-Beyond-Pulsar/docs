@@ -43,7 +43,7 @@ $$
 \text{FOV} = 2 \cdot \arccos(\cos\theta_{\text{outer}})
 $$
 
-This is clamped to $[45°, 179°]$ to prevent degenerate near-zero and near-180° projections. The far plane equals `range` — the physical extent of the light's influence — rather than the 2.5× extension used for point lights, because a spot's cone already constrains the shadow volume.
+This is clamped to $$[45°, 179°]$$ to prevent degenerate near-zero and near-180° projections. The far plane equals `range` — the physical extent of the light's influence — rather than the 2.5× extension used for point lights, because a spot's cone already constrains the shadow volume.
 
 **Directional lights** have no position; they cast parallel rays from infinite distance. The shadow volume is not anchored to a light position but to the camera's view frustum — only geometry inside the frustum can produce visible shadows. This requires a fundamentally different algorithm: Cascaded Shadow Maps (CSM). The CSM algorithm is detailed in Section 3.
 
@@ -70,7 +70,7 @@ t_0 = \text{clamp}\!\left(\frac{d_{\text{prev}} - d_{\text{near}}}{d_{\text{far}
 t_1 = \text{clamp}\!\left(\frac{d_{\text{split},i} - d_{\text{near}}}{d_{\text{far}} - d_{\text{near}}},\ 0,\ 1\right)
 $$
 
-The eight world-space corners of the frustum slice are then built by linearly interpolating between corresponding near and far frustum corners at $t_0$ and $t_1$:
+The eight world-space corners of the frustum slice are then built by linearly interpolating between corresponding near and far frustum corners at $$t_0$$ and $$t_1$$:
 
 $$
 \vec{c}_j^{\text{near}} = \text{lerp}(\vec{p}_j^{\text{near}},\ \vec{p}_j^{\text{far}},\ t_0), \quad
@@ -87,7 +87,7 @@ $$
 \vec{c} = \frac{1}{8}\sum_{i=0}^{7} \vec{c}_i, \qquad r = \max_{i} \left\|\vec{c}_i - \vec{c}\right\|
 $$
 
-The orthographic projection is then $[-r, +r] \times [-r, +r]$ in light space, with a depth range of $[0.1, \text{SCENE\_DEPTH} \times 2]$ — the 2× factor allows the light view to look down through geometry that extends below the shadow receiver.
+The orthographic projection is then $$[-r, +r] \times [-r, +r]$$ in light space, with a depth range of $$[0.1, \text{SCENE\_DEPTH} \times 2]$$ — the 2× factor allows the light view to look down through geometry that extends below the shadow receiver.
 
 ### 3.3 Texel Snapping
 
@@ -99,7 +99,7 @@ $$
 s_{\text{texel}} = \frac{2r}{N_{\text{atlas}}}
 $$
 
-where $N_{\text{atlas}} = 2048$ is the atlas tile resolution. The radius itself is first snapped to a texel boundary — `radius_snap = ceil(r / s_texel) * s_texel` — to prevent the grid spacing from changing between frames. Then the centroid is transformed into the (unsnapped) light view space, and its X and Y coordinates are rounded to the nearest multiple of $s_{\text{texel}}$:
+where $$N_{\text{atlas}} = 2048$$ is the atlas tile resolution. The radius itself is first snapped to a texel boundary — `radius_snap = ceil(r / s_texel) * s_texel` — to prevent the grid spacing from changing between frames. Then the centroid is transformed into the (unsnapped) light view space, and its X and Y coordinates are rounded to the nearest multiple of $$s_{\text{texel}}$$:
 
 $$
 x_{\text{snap}} = \text{round}\!\left(\frac{x_\text{ls}}{s_\text{texel}}\right) \cdot s_\text{texel}, \quad
@@ -237,7 +237,7 @@ fn execute(&mut self, ctx: &mut PassContext) -> HelioResult<()> {
 }
 ```
 
-The dispatch geometry is $\lceil N / 64 \rceil \times 1 \times 1$ workgroups. Each workgroup contains 64 threads; each thread handles exactly one light. Threads with index ≥ `light_count` return immediately — the overhead is at most 63 idle threads in the final workgroup, negligible at any light count. With 64 lights the dispatch is exactly one workgroup; with 192 lights (32 point lights × 6 faces, represented as 32 lights each writing 6 matrices) it is three workgroups.
+The dispatch geometry is $$\lceil N / 64 \rceil \times 1 \times 1$$ workgroups. Each workgroup contains 64 threads; each thread handles exactly one light. Threads with index ≥ `light_count` return immediately — the overhead is at most 63 idle threads in the final workgroup, negligible at any light count. With 64 lights the dispatch is exactly one workgroup; with 192 lights (32 point lights × 6 faces, represented as 32 lights each writing 6 matrices) it is three workgroups.
 
 The matrix count per dispatch is:
 

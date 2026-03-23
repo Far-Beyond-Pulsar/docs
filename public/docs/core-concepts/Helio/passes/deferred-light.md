@@ -16,8 +16,6 @@ position: 4
 icon: lightbulb
 ---
 
-# Deferred Lighting Pass
-
 The `DeferredLightPass` is Helio's single most expensive and most feature-rich render pass. It evaluates the full physically-based lighting model — Cook-Torrance BRDF with GGX distribution, cascaded shadow maps with optional contact-hardening (PCSS), Radiance Cascades indirect illumination, and environment IBL — across every visible pixel in a single screen-space draw call. This document covers the complete architecture, every shader function, and the design decisions behind each technique.
 
 ---

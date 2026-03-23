@@ -122,7 +122,7 @@ pub fn generate_lod_meshes(
 }
 ```
 
-A 64-cell grid produces approximately 25 % of the original triangle count; a 16-cell grid produces approximately 6 %. These ratios emerge from the fact that each cell contains on average $64^3 / V$ vertices, where $V$ is the total vertex count, but the precise ratio depends on the spatial distribution of the source geometry. The fallback is conservative: if simplification would reduce the triangle count to zero — which can happen for very small or degenerate meshes — the original mesh is returned unchanged.
+A 64-cell grid produces approximately 25 % of the original triangle count; a 16-cell grid produces approximately 6 %. These ratios emerge from the fact that each cell contains on average $$64^3 / V$$ vertices, where $$V$$ is the total vertex count, but the precise ratio depends on the spatial distribution of the source geometry. The fallback is conservative: if simplification would reduce the triangle count to zero — which can happen for very small or degenerate meshes — the original mesh is returned unchanged.
 
 Each LOD level is uploaded to the shared MeshPool independently, occupying its own slice in the vertex and index mega-buffers. The returned `MeshId` handles are stored in the `VirtualMeshRecord.mesh_ids` array at indices 0, 1, and 2, which correspond to full, medium, and coarse detail. The three distinct mesh pool entries share no GPU memory — each LOD is a complete, independent vertex and index dataset, sized to its own simplified geometry.
 
@@ -139,7 +139,7 @@ With sorted indices in hand, `meshletize()` performs a simple greedy sequential 
 
 - **Bounding sphere** using Ritter's incremental algorithm: find the axis-aligned extent along X, initialise a sphere from the extreme pair, then expand to cover every remaining point in a single pass. The result is a tight but not optimal sphere — optimal sphere construction is O(n) with a larger constant; Ritter's is fast and deterministic.
 
-- **Backface cone** — the apex (centroid of the cluster), a normalised average face normal (the cone axis), and a cosine cutoff angle. The cutoff is computed as $\sqrt{1 - \dot{\mathbf{n}}_\text{min}^2} + 0.1$, where $\dot{\mathbf{n}}_\text{min}$ is the minimum dot product between any individual face normal and the cluster average. The 0.1 margin guards against false culls at silhouette edges. When the spread angle exceeds 90°, cone culling cannot reject the meshlet from any viewing direction and the cutoff is set to the sentinel value `2.0`.
+- **Backface cone** — the apex (centroid of the cluster), a normalised average face normal (the cone axis), and a cosine cutoff angle. The cutoff is computed as $$\sqrt{1 - \dot{\mathbf{n}}_\text{min}^2} + 0.1$$, where $$\dot{\mathbf{n}}_\text{min}$$ is the minimum dot product between any individual face normal and the cluster average. The 0.1 margin guards against false culls at silhouette edges. When the spread angle exceeds 90°, cone culling cannot reject the meshlet from any viewing direction and the cutoff is set to the sentinel value `2.0`.
 
 All coordinates in `GpuMeshletEntry` are stored in mesh-local space. The world-space position and scale are applied in the compute shader at cull time.
 
@@ -238,7 +238,7 @@ $$
 s = \frac{r_{\text{obj}} \cdot f}{\|c_{\text{cluster}} - p_{\text{camera}}\|}
 $$
 
-where $r_{\text{obj}}$ is the **object's** world-space bounding sphere radius (from `inst.bounds.w`), $f = \cot(\theta_\text{vfov}/2) = \texttt{proj}[1][1]$ is the perspective focal length extracted directly from the projection matrix, and the denominator is the distance from the camera to this **meshlet's** world-space center.
+where $$r_{\text{obj}}$$ is the **object's** world-space bounding sphere radius (from `inst.bounds.w`), $$f = \cot(\theta_\text{vfov}/2) = \texttt{proj}[1][1]$$ is the perspective focal length extracted directly from the projection matrix, and the denominator is the distance from the camera to this **meshlet's** world-space center.
 
 The subtlety here — using the object's radius but the meshlet's center distance — is deliberate. It ensures that clusters on opposite sides of a large object receive different screen-coverage values and therefore independently transition between LODs, giving per-cluster LOD selectivity without any seam artefacts. Because every cluster of the same object uses the same object radius, the LOD bands are mutually exclusive: at any given cluster distance, exactly one `lod_level` satisfies the threshold conditions.
 

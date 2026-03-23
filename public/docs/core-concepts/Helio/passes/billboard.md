@@ -40,15 +40,15 @@ The vertex shader's core job is to transform a small local quad vertex into worl
 ### Orthonormal Basis Construction
 
 Given:
-- Billboard world position: $\mathbf{p}_{world}$
-- Camera world position: $\mathbf{p}_{cam}$
-- Quad local position (in unit square): $\mathbf{q} \in [-0.5, 0.5]^2$
+- Billboard world position: $$\mathbf{p}_{world}$$
+- Camera world position: $$\mathbf{p}_{cam}$$
+- Quad local position (in unit square): $$\mathbf{q} \in [-0.5, 0.5]^2$$
 
 The shader first computes the *view direction*:
 
 $$\mathbf{v} = \text{normalize}(\mathbf{p}_{cam} - \mathbf{p}_{world})$$
 
-Next, it constructs a right-hand orthonormal basis perpendicular to $\mathbf{v}$. Using the world up direction as a reference:
+Next, it constructs a right-hand orthonormal basis perpendicular to $$\mathbf{v}$$. Using the world up direction as a reference:
 
 $$\mathbf{right} = \text{normalize}(\mathbf{up}_{world} \times \mathbf{v})$$
 
@@ -62,7 +62,7 @@ The quad's local position is expanded along the basis:
 
 $$\mathbf{offset}_{world} = \mathbf{q}_x \cdot \text{scale}_x \cdot \mathbf{right} + \mathbf{q}_y \cdot \text{scale}_y \cdot \mathbf{up}$$
 
-where $\text{scale} = (\text{scale}_x, \text{scale}_y)$ is the per-instance width/height in world units.
+where $$\text{scale} = (\text{scale}_x, \text{scale}_y)$$ is the per-instance width/height in world units.
 
 The final world position becomes:
 
@@ -74,7 +74,7 @@ The final world position is then transformed by the combined view-projection mat
 
 $$\mathbf{p}_{clip} = \mathbf{VP} \cdot \mathbf{p}_{final}$$
 
-where $\mathbf{VP}$ is the 4×4 view-projection matrix (camera.view_proj).
+where $$\mathbf{VP}$$ is the 4×4 view-projection matrix (camera.view_proj).
 
 This standard perspective division ensures that billboards recede into the distance and shrink naturally as the camera moves away—the hallmark of world-space sizing.
 
@@ -474,10 +474,10 @@ For each output pixel:
 $$C_{out} = C_{src} \cdot A_{src} + C_{dst} \cdot (1 - A_{src})$$
 
 where:
-- $C_{src}$ = billboard fragment color (RGB from sprite × instance tint)
-- $A_{src}$ = billboard fragment alpha (sprite alpha × instance alpha)
-- $C_{dst}$ = existing framebuffer color
-- $C_{out}$ = final blended color
+- $$C_{src}$$ = billboard fragment color (RGB from sprite × instance tint)
+- $$A_{src}$$ = billboard fragment alpha (sprite alpha × instance alpha)
+- $$C_{dst}$$ = existing framebuffer color
+- $$C_{out}$$ = final blended color
 
 This produces correct **over** compositing: opaque billboards fully occlude the background, semi-transparent ones blend smoothly.
 
@@ -650,7 +650,7 @@ The `0.001` clamp prevents division-by-zero artifacts when billboards are behind
 
 The orthonormal basis computation assumes:
 - The view direction is not parallel to the world up vector (0, 1, 0)
-- The cross product $\text{world\_up} \times \text{to\_cam}$ is non-zero
+- The cross product $$\text{world\_up} \times \text{to\_cam}$$ is non-zero
 
 If the billboard is directly above/below the camera, the right vector computation becomes unstable. Helio does **not** explicitly handle this edge case; the resulting basis will be rotated but still orthonormal. For critical applications, consider a more robust basis construction (e.g., choosing an alternative "up" vector if collinearity is detected).
 
