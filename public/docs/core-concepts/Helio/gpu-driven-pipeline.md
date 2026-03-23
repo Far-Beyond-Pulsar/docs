@@ -585,3 +585,113 @@ The key difference is **topology change cost**:
 
 > [!TIP]
 > For static environments: Load all objects, call `renderer.optimize_scene_layout()` once, then render. For dynamic environments: Stay in persistent mode — modern GPUs handle many draw calls efficiently, and O(1) add/remove often outweighs instancing benefits.
+
+---
+
+## 14. Best Practices: When to Optimize
+
+The hybrid slot architecture gives you explicit control over the performance trade-off between add/remove speed and GPU rendering efficiency. Here are recommended patterns:
+
+### Pattern 1: Static Level Loading
+
+```rust
+// Load entire level at startup
+for object_desc in level.load_all_objects() {
+    renderer.insert_object(object_desc)?;
+}
+
+// Optimize once before gameplay starts
+renderer.optimize_scene_layout();
+
+// Render loop — optimal instancing, zero rebuild cost
+loop {
+    // Only transform updates here, no add/remove
+    for (id, pos) in moving_entities {
+        renderer.update_object_transform(id, pos)?;
+    }
+    renderer.render(&camera, &target)?;
+}
+```
+
+### Pattern 2: Streaming Open World
+
+```rust
+// Stay in persistent mode for O(1) streaming
+loop {
+    // Stream in/out chunks as player moves
+    for chunk in chunks_to_load {
+        for obj in chunk.objects {
+            renderer.insert_object(obj)?;  // O(1)
+        }
+    }
+
+    for chunk in chunks_to_unload {
+        for id in chunk.object_ids {
+            renderer.remove_object(id)?;  // O(1)
+        }
+    }
+
+    // Optional: optimize during loading screens
+    if showing_loading_screen {
+        renderer.optimize_scene_layout();
+    }
+
+    renderer.render(&camera, &target)?;
+}
+```
+
+### Pattern 3: Particle Systems / Dynamic Objects
+
+```rust
+// Persistent mode is ideal for high-frequency add/remove
+loop {
+    // Spawn/despawn particles every frame
+    for _ in 0..particles_to_spawn {
+        let id = renderer.insert_object(particle_desc)?;  // O(1)
+        active_particles.push(id);
+    }
+
+    for id in particles_to_remove {
+        renderer.remove_object(id)?;  // O(1)
+    }
+
+    // Don't call optimize_scene_layout() here!
+    // The rebuild cost would dominate frame time.
+
+    renderer.render(&camera, &target)?;
+}
+```
+
+### Pattern 4: Editor / Level Builder
+
+```rust
+// Use persistent mode during editing
+loop {
+    // User places/deletes objects interactively
+    if mouse_clicked && creating_object {
+        renderer.insert_object(desc)?;  // Instant, no stutter
+    }
+
+    if delete_key_pressed && object_selected {
+        renderer.remove_object(selected_id)?;  // Instant
+    }
+
+    // Optimize when user enters play mode
+    if entered_play_mode {
+        renderer.optimize_scene_layout();
+    }
+
+    renderer.render(&camera, &target)?;
+}
+```
+
+| Use Case | Recommended Mode | When to Optimize |
+|----------|-----------------|------------------|
+| Static levels | Optimized | Once after initial load |
+| Open world streaming | Persistent (with periodic optimization) | During loading screens |
+| Particle systems | Persistent | Never (too frequent changes) |
+| Level editors | Persistent | When entering play mode |
+| VFX / destruction | Persistent | After burst is complete |
+| Large crowds (same mesh+material) | Optimized | Once after spawn |
+
+The golden rule: **optimize when you have a batch of objects that will remain stable for many frames**. If objects are frequently added or removed, the O(1) benefit of persistent mode outweighs the draw call overhead on modern GPUs.
