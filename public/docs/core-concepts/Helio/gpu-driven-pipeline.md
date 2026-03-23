@@ -36,22 +36,28 @@ The deeper problem is that CPU frustum culling itself has an unavoidable O(N) lo
 
 ## 2. Helio's Answer: The GPU-Driven Pipeline
 
-Helio's solution is a three-buffer system that lives entirely on the GPU between frames:
+Helio's solution is a three-buffer system that lives entirely on the GPU between frames, operating in one of two modes depending on your scene's needs:
 
 The **instance buffer** is a flat array of `GpuInstanceData` structs (128 bytes each). Every object in the scene has exactly one slot in this buffer. It holds the object's model matrix, normal matrix, bounding sphere, mesh index, material index, and flags. The CPU writes to this buffer only when object data changes.
 
-The **draw call buffer** is a parallel flat array of `GpuDrawCall` structs (20 bytes each). Each entry describes one instanced draw group — a contiguous range of instances in the instance buffer that share the same mesh geometry, along with the index count and first-index for that mesh. One entry covers all objects that share the same `(mesh_id, material_id)` pair. This buffer is rebuilt whenever the scene topology changes (objects added or removed), but is otherwise unchanged between frames.
+The **draw call buffer** is a parallel flat array of `GpuDrawCall` structs (20 bytes each). Each entry describes one draw group. In **persistent mode** (default), one entry per object. In **optimized mode** (after calling `optimize_scene_layout()`), one entry per unique `(mesh_id, material_id)` pair with automatic instancing.
 
 The **indirect buffer** is the output written by the compute shader and consumed by the render pass. It contains `DrawIndexedIndirectArgs` structs in the layout expected by `multi_draw_indexed_indirect`. The compute shader copies entries from the draw call buffer into the indirect buffer, setting `instance_count` to zero for any group whose bounding sphere lies outside the camera frustum.
 
+### Two Operating Modes
+
+**Persistent Mode (default):** When you add or remove objects, Helio uses **O(1) delta uploads** — new objects are appended to GPU buffers, removed objects are swap-removed in O(1). Each object gets one draw call. This is ideal for dynamic scenes with frequent add/remove operations.
+
+**Optimized Mode (explicit):** When you call `renderer.optimize_scene_layout()`, Helio sorts all objects by `(mesh_id, material_id)` and rebuilds buffers for optimal GPU cache coherency and automatic hardware instancing. Objects with the same mesh and material share one instanced draw call. This is ideal for static scenes or after bulk loading.
+
 The per-frame CPU path reduces to two operations:
 
-`scene.flush()` uploads any dirty instance data to the GPU. When scene topology is stable and only transforms are moving, this is an `O(changed)` operation — only the modified instance slots are written. When objects have been added or removed, `rebuild_instance_buffers()` runs once to re-sort and re-upload the complete instance and draw call data, then the dirty flag is cleared and subsequent frames pay only the per-change cost again.
+`scene.flush()` uploads any dirty instance data to the GPU. In persistent mode, this is O(changed) — only modified slots are written. In optimized mode, it remains O(1) for transform updates until topology changes, then reverts to persistent mode.
 
 `graph.execute()` encodes the full render graph. The `IndirectDispatchPass` issues one `dispatch_workgroups` call whose workgroup count equals `ceil(draw_count / 64)`. The `GBufferPass` then issues `multi_draw_indexed_indirect` once. From the CPU's perspective, these are two wgpu commands — the GPU does everything else.
 
 > [!IMPORTANT]
-> The CPU **never iterates draw calls** in the per-frame hot path. Object count does not appear in any per-frame CPU loop. Doubling the number of scene objects does not increase per-frame CPU work when the scene topology is stable.
+> The CPU **never iterates draw calls** in the per-frame hot path. Object count does not appear in any per-frame CPU loop. In persistent mode, adding/removing objects is O(1). In optimized mode, doubling the number of scene objects does not increase per-frame CPU work when the scene topology is stable.
 
 ---
 
@@ -105,16 +111,20 @@ The 128-byte size is not accidental. WGSL storage buffer indexing requires eleme
 
 ---
 
-## 4. Automatic Instancing: How It Works
+## 4. Automatic Instancing: How It Works (Optimized Mode)
 
-The most important user-facing consequence of the GPU-driven design is that **manual instancing is never required**. When you call `scene.insert_object()` multiple times with the same `MeshId` and `MaterialId`, Helio automatically batches all those objects into a single instanced draw call. This happens in `rebuild_instance_buffers()`, which is called from `scene.flush()` whenever the `objects_dirty` flag is set.
+The most important user-facing consequence of the GPU-driven design is that **manual instancing is never required**. Helio operates in two modes:
+
+**Persistent Mode (default):** Each object gets one draw call (no automatic instancing). Add/remove is O(1). Ideal for dynamic scenes.
+
+**Optimized Mode (after calling `optimize_scene_layout()`):** Objects with the same `MeshId` and `MaterialId` are automatically batched into a single instanced draw call. This happens in `rebuild_instance_buffers_optimized()`, which sorts all objects and rebuilds buffers for optimal GPU performance.
 
 The algorithm is a stable grouped sort over all objects by `(mesh_id, material_id)`. After sorting, all objects that share the same mesh and material are contiguous in the sorted order. The function then makes a single pass over this contiguous range to emit one `GpuDrawCall` entry per unique pair, with `instance_count` set to the number of objects in the group and `first_instance` pointing to the start of that group in the sorted instance array. The sorted instance data is written into the GPU instance buffer in the same pass.
 
-The complete rebuild function, simplified for clarity:
+The complete optimized rebuild function, simplified for clarity:
 
 ```rust
-fn rebuild_instance_buffers(&mut self) {
+fn rebuild_instance_buffers_optimized(&mut self) {
     let n = self.objects.dense_len();
 
     // 1. Build a sort order grouped by (mesh_id, material_id).
@@ -157,10 +167,12 @@ fn rebuild_instance_buffers(&mut self) {
 }
 ```
 
-The result is that the number of draw calls the GPU ultimately executes equals the number of distinct `(mesh_id, material_id)` pairs in the scene, not the number of objects. A scene with 50 unique material–mesh combinations and 100 000 objects issues 50 draw calls — each one instancing thousands of objects in a single `DrawIndexedIndirect` command. Hardware instancing is activated implicitly and automatically, with no API surface the caller must operate.
+In **optimized mode** (after calling `optimize_scene_layout()`), the number of draw calls the GPU ultimately executes equals the number of distinct `(mesh_id, material_id)` pairs in the scene, not the number of objects. A scene with 50 unique material–mesh combinations and 100 000 objects issues 50 draw calls — each one instancing thousands of objects in a single `DrawIndexedIndirect` command. Hardware instancing is activated implicitly and automatically.
+
+In **persistent mode** (default), each object gets one draw call, but add/remove operations are O(1) instead of triggering expensive rebuilds.
 
 > [!TIP]
-> To maximise automatic batching, share `MeshId` and `MaterialId` values aggressively. Every unique material (even a tiny parameter difference like roughness value) creates a new instancing group. If you are placing a forest of trees, use one mesh and one material for all tree trunks — they will all be batched into a single draw call.
+> For static scenes or after bulk loading, call `renderer.optimize_scene_layout()` to enable automatic instancing. To maximise batching in optimized mode, share `MeshId` and `MaterialId` values aggressively. Every unique material creates a new instancing group. For dynamic scenes with frequent add/remove operations, persistent mode's O(1) performance often outweighs the draw call overhead on modern GPUs.
 
 ---
 
@@ -203,15 +215,24 @@ let trunk_b = renderer.insert_object(ObjectDescriptor {
     groups:    GroupMask::NONE,
 })?;
 
-// Both trunks are now batched into a single instanced draw call automatically.
-// From this point forward, adding more trees with the same mesh+material
-// simply increases the instance_count of that one draw call — no new GPU
-// commands are issued, no additional CPU work accrues per frame.
+// At this point, objects are in PERSISTENT MODE (default).
+// Each object has its own draw call, but add/remove is O(1).
+
+// 4. Optimize the scene layout for maximum GPU performance (optional).
+// This sorts objects by (mesh, material) and enables automatic instancing.
+// Call this after bulk loading, before entering the render loop.
+renderer.optimize_scene_layout();
+
+// Now both trunks are batched into a single instanced draw call.
+// Adding more objects will revert to persistent mode, but you can
+// call optimize_scene_layout() again when appropriate (e.g., loading screen).
 ```
 
 `insert_object` returns a `Result<ObjectId>`, where the error case occurs only if the provided `MeshId` or `MaterialId` no longer refers to a live resource. `ObjectId` is a generational handle — a slot plus a generation counter — so stale handles from removed objects are safely rejected.
 
-On the first call to `renderer.render()` after inserting objects, `scene.flush()` detects the `objects_dirty` flag, runs `rebuild_instance_buffers()`, uploads the resulting sorted arrays to GPU, and clears the flag. All subsequent frames with the same set of objects skip the rebuild entirely and proceed directly to per-frame GPU upload of only changed transforms.
+**Persistent Mode (default):** Objects are added with O(1) delta uploads. Each object gets one draw call. No automatic rebuild occurs.
+
+**Optimized Mode (after `optimize_scene_layout()`):** Objects are sorted and instanced. Subsequent add/remove operations invalidate the optimization and revert to persistent mode. Call `optimize_scene_layout()` again when you want to re-optimize (e.g., after a batch of changes during a loading screen).
 
 ---
 
@@ -230,14 +251,14 @@ pub fn update_object_transform(&mut self, id: ObjectId, transform: Mat4) -> Resu
     // When layout is stable, update the exact GPU slot in-place.
     // The new transform is included automatically when a rebuild is pending.
     if !self.objects_dirty {
-        let slot = record.draw.first_instance as usize;
+        let slot = record.gpu_slot as usize;
         self.gpu_scene.instances.update(slot, record.instance);
     }
     Ok(())
 }
 ```
 
-The `slot` field stored in `record.draw.first_instance` is the object's current index in the sorted instance buffer. It is patched during `rebuild_instance_buffers()` and remains valid as long as no objects are added or removed. The `GrowableBuffer::update()` call marks the dirty range covering that single slot, so `flush()` later in the frame issues a `queue.write_buffer` targeting only those 128 bytes. The cost of moving N objects is proportional to N, not to total scene size.
+The `slot` field stored in `record.gpu_slot` is the object's current index in the instance buffer. In **persistent mode**, this equals the object's dense array index. In **optimized mode**, it is patched during `rebuild_instance_buffers_optimized()` to reflect the sorted order. The `GrowableBuffer::update()` call marks the dirty range covering that single slot, so `flush()` later in the frame issues a `queue.write_buffer` targeting only those 128 bytes. The cost of moving N objects is proportional to N, not to total scene size.
 
 The normal matrix must be recomputed whenever the model matrix changes, because it is the inverse-transpose of the model's 3×3 rotation-scale block. Helio computes this on the CPU with `Mat3::from_mat4(transform).inverse().transpose()` and stores it alongside the model matrix in the instance slot. This is the correct pre-computation to avoid per-vertex inverse operations in the vertex shader — a 3×3 matrix inverse on the CPU at O(1) per moved object is dramatically cheaper than computing it in the shader at O(vertices) per frame.
 
@@ -248,13 +269,45 @@ The normal matrix must be recomputed whenever the model matrix changes, because 
 
 ## 7. Dirty Tracking and GPU Uploads
 
-Helio's CPU-side dirty tracking operates at two levels, and understanding the difference between them is important for reasoning about per-frame cost.
+Helio's CPU-side dirty tracking operates at two levels, with behavior that depends on the current mode (persistent vs optimized).
 
-The first level is the **objects\_dirty flag**, a single boolean on the `Scene` struct. It is set to `true` in three situations: when `insert_object()` is called, when `remove_object()` is called, and when `update_object_material()` is called (because a material change may move an object to a different instancing group). When `flush()` runs and finds `objects_dirty = true`, it calls `rebuild_instance_buffers()` which is an O(N log N) operation — it sorts all objects, rebuilds both the instance and draw-call arrays, and writes them to GPU. This is the only truly expensive path, and it only activates when the topology of the scene changes.
+### Mode Tracking
 
-The second level is the **dirty range** tracked inside each `GrowableBuffer`. Each buffer maintains a `dirty_range: Option<(usize, usize)>` that records the minimum and maximum element indices that have been written since the last flush. When `update()` is called on a specific slot, the dirty range expands to cover that slot. When `flush()` runs, it issues a single `queue.write_buffer` covering the contiguous byte range from `start * sizeof(T)` to `end * sizeof(T)`. If nothing was written, `dirty_range` is `None` and `flush()` is a complete no-op for that buffer.
+The **objects\_layout\_optimized flag** tracks which mode the scene is in. It is `false` by default (persistent mode) and becomes `true` when you call `optimize_scene_layout()`. Any topology change (add/remove object, material change) in optimized mode reverts to persistent mode.
 
-At steady state — a scene where the same objects exist every frame, with some of them moving — the frame cost breaks down as follows. The objects\_dirty flag is false, so no rebuild runs. For each moved object, `update_object_transform` writes 128 bytes into the CPU mirror and expands the dirty range. When `flush()` runs before encoding, it calls `write_buffer` once per dirty buffer, covering only the bytes that changed. The per-frame CPU work is proportional to the number of objects that moved, completely independent of total scene size.
+The **objects\_dirty flag** controls when buffers need rebuilding. In **persistent mode**, this flag is only used for initial setup — add/remove operations use O(1) delta uploads directly to GPU buffers. In **optimized mode**, this flag triggers the expensive O(N log N) `rebuild_instance_buffers_optimized()`.
+
+### Persistent Mode (Default)
+
+When you call `insert_object()`:
+- Object is appended to the end of GPU buffers (O(1))
+- `GrowableBuffer::push()` marks the dirty range for the new slot
+- No sort, no rebuild
+
+When you call `remove_object()`:
+- Object is swap-removed from GPU buffers (O(1))
+- Last element is moved into the gap, its slot is updated
+- `GrowableBuffer::swap_remove()` marks the dirty range
+
+The per-frame cost is O(changed) — only modified slots are uploaded during `flush()`.
+
+### Optimized Mode (After `optimize_scene_layout()`)
+
+When `optimize_scene_layout()` is called:
+- All objects are sorted by `(mesh_id, material_id)` — O(N log N)
+- GPU buffers are rebuilt with optimal instancing — O(N) upload
+- `objects_layout_optimized = true`
+
+When you call `insert_object()` or `remove_object()` in optimized mode:
+- `objects_layout_optimized = false` (revert to persistent mode)
+- `objects_dirty = true` (mark for rebuild on next flush)
+- Topology change invalidates optimization
+
+### Dirty Range Tracking
+
+The **dirty range** tracked inside each `GrowableBuffer` works the same in both modes. Each buffer maintains a `dirty_range: Option<(usize, usize)>` that records the minimum and maximum element indices that have been written since the last flush. When `update()` is called on a specific slot, the dirty range expands to cover that slot. When `flush()` runs, it issues a single `queue.write_buffer` covering the contiguous byte range from `start * sizeof(T)` to `end * sizeof(T)`. If nothing was written, `dirty_range` is `None` and `flush()` is a complete no-op for that buffer.
+
+At steady state — a scene where the same objects exist every frame, with some of them moving — the frame cost is O(changed) in both modes. For each moved object, `update_object_transform` writes 128 bytes into the CPU mirror and expands the dirty range. When `flush()` runs before encoding, it calls `write_buffer` once per dirty buffer, covering only the bytes that changed. The per-frame CPU work is proportional to the number of objects that moved, completely independent of total scene size.
 
 > [!IMPORTANT]
 > When the GPU buffer must grow because capacity is exceeded, `GrowableBuffer` allocates a new buffer at 2× capacity and uploads the entire contents. This is an unavoidable O(N) operation, but it is amortised — like a `Vec::push` reallocation, it occurs at most O(log N) times over the lifetime of the scene.
@@ -479,24 +532,56 @@ The critical observation is that the CPU contributes to this diagram only throug
 
 ## 13. Performance Characteristics
 
-The following table summarises the asymptotic cost of each phase of the GPU-driven pipeline. In these expressions, N is the number of scene objects, D is the number of unique `(mesh_id, material_id)` pairs (draw groups), and C is the number of objects with changed data this frame.
+The following table summarises the asymptotic cost of each phase of the GPU-driven pipeline in both modes. In these expressions, N is the number of scene objects, D is the number of unique `(mesh_id, material_id)` pairs (draw groups in optimized mode, equals N in persistent mode), and C is the number of objects with changed data this frame.
+
+### Persistent Mode (Default)
 
 | Operation | CPU Cost | GPU Cost | When |
 |---|---|---|---|
-| Initial scene setup | O(N log N) | O(N) upload | Once on scene construction |
-| `insert_object` / `remove_object` | O(1) amortised | — (deferred) | On topology change |
-| `flush()` after topology change | O(N log N) rebuild | O(N) upload | Frame after object add/remove |
+| `insert_object` | O(1) delta upload | — | On object add |
+| `remove_object` | O(1) swap-remove | — | On object remove |
+| `update_object_transform` | O(1) | O(1) upload | Per-object change |
+| `update_object_material` | O(1) | O(1) upload | Per-object change |
 | `flush()` steady state | O(C) dirty range | O(C) upload | Every frame with moved objects |
 | `flush()` fully static | O(1) no-op | — | Every frame with no changes |
-| `IndirectDispatchPass` | O(1) one dispatch | O(D) cull test | Every frame |
+| `IndirectDispatchPass` | O(1) one dispatch | O(N) cull test | Every frame (1 test per object) |
+| `GBufferPass` | O(1) one draw call | O(visible triangles) | Every frame |
+
+### Optimized Mode (After `optimize_scene_layout()`)
+
+| Operation | CPU Cost | GPU Cost | When |
+|---|---|---|---|
+| `optimize_scene_layout()` | O(N log N) sort + rebuild | O(N) upload | User-triggered optimization |
+| `insert_object` / `remove_object` | O(1) + invalidate optimization | — | Reverts to persistent mode |
+| `update_object_transform` | O(1) | O(1) upload | Per-object change |
+| `update_object_material` | O(1) + invalidate optimization | — | Reverts to persistent mode |
+| `flush()` steady state | O(C) dirty range | O(C) upload | Every frame with moved objects |
+| `flush()` fully static | O(1) no-op | — | Every frame with no changes |
+| `IndirectDispatchPass` | O(1) one dispatch | O(D) cull test | Every frame (1 test per group) |
 | `GBufferPass` | O(1) one draw call | O(visible triangles) | Every frame |
 | `DeferredLightPass` | O(1) one draw call | O(screen pixels) | Every frame |
 
-The steady-state per-frame CPU cost for a fully static scene — one where objects are never added, removed, or moved — is effectively O(1). `flush()` finds no dirty data anywhere and returns immediately. The render graph encodes two GPU commands. The total CPU work for the geometry pipeline is bounded and constant regardless of scene complexity.
+### When to Use Each Mode
 
-For a dynamic scene where transforms are animated, the cost grows with C (the number of changed objects) rather than N (total objects). A scene with 500 000 objects where 1 000 are animated pays the cost of uploading 1 000 × 128 = 128 KB of instance data per frame, plus one `write_buffer` call. The remaining 499 000 objects contribute zero per-frame CPU cost.
+**Persistent Mode is best for:**
+- Scenes with frequent add/remove operations (particle systems, streaming, destruction)
+- Prototyping and iteration (fast scene changes without rebuild cost)
+- Scenes with many unique materials (where instancing provides little benefit)
 
-The rebuild triggered by topology changes — `insert_object` and `remove_object` — is the one genuinely expensive operation. At N = 100 000 objects, a full rebuild is a sort plus two `Vec` allocations plus two GPU uploads, taking perhaps a few milliseconds. For applications that stream objects in and out of the scene continuously (open-world streaming, particle systems), this cost should be amortised by batching insertions and removals into a single frame rather than distributing them across many frames. Inserting 100 objects in one frame triggers one rebuild; inserting one object per frame for 100 frames triggers 100 rebuilds.
+**Optimized Mode is best for:**
+- Static scenes after bulk loading (call `optimize_scene_layout()` once after level load)
+- Scenes with high material/mesh reuse (forests, buildings, crowds)
+- When GPU draw call overhead is measurable (very high object counts)
+
+### Cost Analysis
+
+The steady-state per-frame CPU cost for a fully static scene is effectively O(1) in both modes. `flush()` finds no dirty data anywhere and returns immediately. The render graph encodes two GPU commands. The total CPU work for the geometry pipeline is bounded and constant regardless of scene complexity.
+
+For a dynamic scene where transforms are animated, the cost grows with C (the number of changed objects) rather than N (total objects) in both modes. A scene with 500 000 objects where 1 000 are animated pays the cost of uploading 1 000 × 128 = 128 KB of instance data per frame, plus one `write_buffer` call. The remaining 499 000 objects contribute zero per-frame CPU cost.
+
+The key difference is **topology change cost**:
+- **Persistent mode:** O(1) per add/remove operation
+- **Optimized mode:** O(N log N) rebuild after any topology change (reverts to persistent mode)
 
 > [!TIP]
-> If your application adds all scene objects at startup and never changes the topology during gameplay, `rebuild_instance_buffers()` runs exactly once — at the end of the first `flush()` call — and is never called again. Every subsequent frame enters the fully-static O(1) path. This is the recommended setup for static environments: build your scene before the first render, then call `render()` every frame with only transform updates for moving entities.
+> For static environments: Load all objects, call `renderer.optimize_scene_layout()` once, then render. For dynamic environments: Stay in persistent mode — modern GPUs handle many draw calls efficiently, and O(1) add/remove often outweighs instancing benefits.
