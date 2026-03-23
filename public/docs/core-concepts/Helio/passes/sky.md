@@ -17,8 +17,6 @@ position: 5
 icon: sun
 ---
 
-# Sky & Atmosphere
-
 Helio's sky system is a two-pass, physically-based atmosphere renderer built on the **Hillaire 2020** single-scatter model. It separates the expensive atmosphere integration from the per-frame sky draw by caching the full hemisphere of sky colors into a compact **192×108 panoramic LUT** (Look-Up Texture). The main sky render pass then samples this LUT for each sky pixel — reducing the cost of accurate atmospheric scattering to a single bilinear texture fetch per fragment.
 
 The two passes are:

@@ -15,8 +15,6 @@ position: 3
 icon: layers
 ---
 
-# G-Buffer Pass
-
 The G-Buffer pass is the cornerstone of Helio's deferred rendering pipeline. Its sole responsibility is to transform raw scene geometry into a compact, screen-resolution description of every visible surface — capturing albedo, surface normals, material parameters, and emissive light into four textures that downstream passes read directly, never re-rasterizing geometry again.
 
 Every subsequent lighting computation — direct lighting, ambient occlusion, radiance cascades, screen-space effects — operates on this frozen snapshot of the scene. The G-Buffer pass shifts the cost model: geometry is touched exactly once per frame, and lighting is then a series of full-screen image operations with no vertex processing.

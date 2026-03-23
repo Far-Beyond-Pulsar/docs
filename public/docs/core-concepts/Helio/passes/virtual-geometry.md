@@ -14,8 +14,6 @@ position: 12
 icon: '🔺'
 ---
 
-# Virtual Geometry Pass
-
 The `VirtualGeometryPass` is Helio's answer to a fundamental scalability problem: how do you render scenes whose triangle counts exceed what the CPU can usefully manage per frame? Traditional draw-call-based pipelines require the CPU to examine every object in the scene, cull it against the view frustum, decide its LOD, and issue a draw call. At a few hundred objects this is unnoticeable overhead. At hundreds of thousands of distinct meshlets distributed across large static environments — terrain, architecture, dense foliage — the CPU becomes the bottleneck long before the GPU is saturated.
 
 Helio's virtual geometry system eliminates that bottleneck by moving the entire visibility and LOD decision onto the GPU. Meshes are decomposed at load time into small clusters of triangles called **meshlets**, each with a precomputed bounding sphere and backface cone. On every frame, a single compute dispatch tests all meshlets in parallel, writing one `DrawIndexedIndirect` command per visible cluster into a GPU-resident buffer. A subsequent `multi_draw_indexed_indirect` call then renders exactly the surviving meshlets, producing G-buffer output identical to the standard `GBufferPass`. The CPU never iterates over geometry; its per-frame cost is strictly O(1) regardless of how many triangles the scene contains.

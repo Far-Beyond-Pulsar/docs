@@ -14,8 +14,6 @@ position: 15
 icon: '✨'
 ---
 
-# TAA Pass
-
 The `TaaPass` is Helio's highest-quality anti-aliasing solution. It implements Temporal Anti-Aliasing: each frame the projection matrix is shifted by a sub-pixel jitter offset drawn from a Halton low-discrepancy sequence, and the resulting image is blended with a history buffer that accumulates the outputs of previous frames. Over 16 frames, the 16 different jitter positions jointly produce a fully supersampled image without the per-frame cost of rendering multiple samples. History samples are validated using velocity-based reprojection and protected against ghosting through YCoCg variance clamping of the 3×3 neighbourhood. This document covers the complete algorithm, the Halton sequence design, the YCoCg colour space transform, the Catmull-Rom history filter, and the ping-pong texture design.
 
 ---

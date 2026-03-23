@@ -13,7 +13,6 @@ position: 19
 icon: '🌑'
 ---
 
-# Shadow Matrix Pass
 The `ShadowMatrixPass` is a single-dispatch compute pass that derives every light-space view-projection matrix needed for shadow rendering — covering point light cube faces, spot light perspective projections, and directional light CSM cascades — entirely on the GPU. The CPU's only contribution per frame is writing two integers to a uniform buffer.
 
 ---

@@ -13,8 +13,6 @@ position: 21
 icon: '🌑'
 ---
 
-# SSAO Pass
-
 The `SsaoPass` approximates ambient occlusion entirely from the depth buffer and G-buffer normals, without any knowledge of scene geometry beyond what has already been rasterised. It samples a hemisphere of 64 view-space positions around each pixel's surface normal, projects them back to screen coordinates, and measures how many of those positions are occluded by nearby geometry — that ratio, raised to a contrast power and inverted, yields a scalar occlusion factor that the deferred lighting pass multiplies against the ambient irradiance term. The entire computation runs in a single fullscreen draw call with no geometry involved, making it an efficient O(pixels × kernel\_size) post-process.
 
 ---

@@ -12,8 +12,6 @@ position: 14
 icon: '✨'
 ---
 
-# SMAA Pass
-
 The `SmaaPass` implements Subpixel Morphological Anti-Aliasing across three sequential fullscreen draw calls. Where FXAA applies a single luma gradient softening filter and TAA accumulates results across frames, SMAA occupies the middle ground: it classifies edges by their geometric shape using a dedicated edge detection pass, computes per-pixel blend weights based on the detected morphology, and then applies those weights as a final neighbourhood blend. The result is higher edge quality than FXAA — particularly at T-junctions and diagonal edges — without any temporal dependency that would introduce ghosting on moving geometry. This document covers the complete three-pass architecture, the intermediate texture formats, the bind group layouts, and the cost model.
 
 ---

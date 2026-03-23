@@ -12,8 +12,6 @@ position: 22
 icon: '📦'
 ---
 
-# Simple Cube Pass
-
 `SimpleCubePass` renders a single hardcoded unit cube using only a camera uniform buffer. It owns its own vertex and index buffers, clears its own color and depth targets, and produces a visible, unambiguous result regardless of scene state. Nothing from the material system, scene graph, light array, or deferred pipeline is required. This makes it the canonical sanity-check baseline for Helio — the first pass to insert when bringing up a new platform, a new wgpu version, or a new GPU, and the first pass to reach for when any downstream pass produces a blank screen or corrupted output.
 
 ---

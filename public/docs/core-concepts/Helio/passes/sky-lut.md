@@ -15,8 +15,6 @@ position: 20
 icon: '🌅'
 ---
 
-# Sky LUT Pass
-
 The `SkyLutPass` bakes a 192×108 panoramic lookup texture that encodes physically-based single-scatter atmospheric luminance for every view direction around the horizon. It implements the sky-view LUT technique described in Sébastien Hillaire's 2020 EGSR paper, which observes that for an observer at sea level the sky colour depends only on view direction and sun angle — not on absolute camera position. By pre-integrating the atmosphere into this compact texture once per changed sky state, the downstream `SkyPass` can sample atmospheric luminance at O(1) cost per screen pixel instead of tracing a full radiative transfer integral for each one.
 
 ---

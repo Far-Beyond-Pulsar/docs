@@ -15,8 +15,6 @@ position: 1
 icon: layers
 ---
 
-# Depth Pre-Pass
-
 The depth pre-pass is one of the most impactful single optimizations available on modern GPU hardware. It is a deliberate decision to rasterize every opaque object **twice** — once cheaply (depth only), and once expensively (full GBuffer material evaluation) — with the goal of ensuring that the expensive pass only runs for pixels that are definitively visible. This document explains the problem it solves, the mechanism by which it solves it, the correctness requirements that must be satisfied for it to work, and the full implementation in Helio.
 
 ---

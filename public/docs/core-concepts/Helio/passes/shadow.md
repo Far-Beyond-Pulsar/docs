@@ -14,8 +14,6 @@ position: 2
 icon: sun
 ---
 
-# Shadow Pass
-
 Helio's shadow system is a fully GPU-driven, zero-CPU-overhead pipeline for rendering depth-only geometry into a persistent shadow atlas. It is split across two cooperating render passes that are executed back-to-back every frame: **ShadowMatrixPass** (compute) followed by **ShadowPass** (depth rasterisation). This document is the authoritative technical reference for both.
 
 > [!IMPORTANT]

@@ -14,8 +14,6 @@ position: 9
 icon: 📐
 ---
 
-# SDF Clipmap Pass
-
 ## 1. Introduction: Why Volumetric SDFs?
 
 Signed Distance Fields (SDFs) have become central to modern rendering engines. An SDF encodes for every point in space the signed distance to the nearest surface: **positive outside**, **negative inside**. This single scalar value enables remarkable capabilities:

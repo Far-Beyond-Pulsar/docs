@@ -13,8 +13,6 @@ position: 18
 icon: '⚡'
 ---
 
-# Indirect Dispatch Pass
-
 The `IndirectDispatchPass` is the engine that drives Helio's GPU-driven rendering pipeline. Its single compute dispatch, issued once per frame, tests every scene instance against the camera frustum, consults the visibility bitmask produced by the [Occlusion Cull Pass](./occlusion-cull), and writes one `DrawIndexedIndirect` command per draw call group into the indirect draw buffer. Downstream rasterisation passes — `GBufferPass`, `VirtualGeometryPass`, and `ShadowPass` — consume this buffer via `multi_draw_indexed_indirect` and never inspect individual draw calls or instance counts themselves. The CPU's role in the entire sequence is exactly one compute dispatch and one uniform upload, regardless of whether the scene contains ten objects or ten million.
 
 This design philosophy — that the CPU never iterates the draw list — is worth understanding as a first principle. In a traditional renderer, the CPU loops over every visible object, computes its visibility, and issues a separate draw call for each one. At 100 000 objects, that loop takes real CPU time and produces 100 000 API calls, each with non-trivial driver overhead. Indirect drawing decouples scene traversal from draw submission: the CPU issues one `multi_draw_indexed_indirect` command that hands the entire draw list to the GPU, which processes it in parallel. The `IndirectDispatchPass` is what makes that possible — it is the stage that populates the indirect buffer each frame with current visibility information, turning a static data structure into a dynamic, per-frame culled draw list at GPU speed.

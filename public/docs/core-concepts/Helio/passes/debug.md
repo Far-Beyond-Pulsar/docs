@@ -14,8 +14,6 @@ position: 11
 icon: bug
 ---
 
-# Debug Pass
-
 The `DebugPass` is a specialized lightweight render pass designed for runtime visualization of debug geometry — lines, wireframe shapes, editor gizmos, and diagnostic overlays. It decomposes all debug primitives (boxes, spheres, axes) into line segments that are rendered in a single O(1) draw call. The pass is completely **zero-cost when idle**: if no debug geometry is queued, the GPU skips all work and CPU cost is negligible.
 
 The pass demonstrates Helio's design philosophy: opt-in complexity where visualization needs don't penalise production code paths.

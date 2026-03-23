@@ -12,8 +12,6 @@ position: 13
 icon: '✨'
 ---
 
-# FXAA Pass
-
 The `FxaaPass` is Helio's lowest-cost anti-aliasing solution. It implements a single fullscreen post-process based on NVIDIA's FXAA 3.11 algorithm, detecting and smoothing aliased edges by analysing per-pixel luma contrast — all without any geometry knowledge, depth buffer access, or temporal history. This document covers the complete algorithm, the shader constants, the bind group layout, and the design trade-offs that make FXAA the right choice in specific rendering contexts.
 
 ---
