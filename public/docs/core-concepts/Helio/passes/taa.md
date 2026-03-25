@@ -2,7 +2,7 @@
 title: TAA Pass
 description: Temporal Anti-Aliasing — Halton-jittered sub-pixel accumulation with YCoCg variance clamping and velocity reprojection for the highest quality anti-aliasing in Helio
 category: helio
-lastUpdated: '2026-03-23'
+lastUpdated: '2026-03-25'
 tags:
   - anti-aliasing
   - taa
@@ -87,7 +87,14 @@ After 16 frames, the sequence repeats exactly. This means the accumulated averag
 
 ### 2.3 Applying the Jitter
 
-The jitter is uploaded to the GPU as part of the `TaaUniform` struct each frame in `prepare()`. The shader receives it as `taa.jitter_offset` — a `vec2<f32>` in normalised screen-space coordinates `(-0.5/width, 0.5/height)` to `(0.5/width, 0.5/height)`. The jitter is applied to the projection matrix on the CPU side before rendering the scene geometry, so that all G-buffer passes and the deferred lighting pass automatically inherit the sub-pixel shift. The TAA shader itself does not apply jitter to the current frame; it receives an already-jittered image. The jitter offset is uploaded to the TAA uniform so the shader can **remove** it from the UV when reading the current frame (see Section 7).
+The jitter is applied to the projection matrix on the CPU side before rendering the scene geometry, so that all G-buffer passes and the deferred lighting pass automatically inherit the sub-pixel shift. This means that in `current_frame`, the world-point that belongs to output pixel `in.uv` has been shifted and now lands at `in.uv + jitter_uv` in the rendered image. The TAA shader therefore **adds** the jitter back when reading the current frame:
+
+```wgsl
+let jitter_uv  = taa.jitter_offset * vec2<f32>(1.0, -1.0) / in_dims;
+let cur_uv     = in.uv + jitter_uv;  // world-point's location in jitter-shifted frame
+```
+
+The history buffer accumulates unjittered results, so history is read at `in.uv - velocity` — no jitter subtraction needed there. Section 7 covers the full current/history UV derivation.
 
 ---
 
@@ -156,13 +163,16 @@ Helio computes the variance bounding box from the 3×3 neighbourhood of the curr
 var m1 = vec3<f32>(0.0);   // first moment (sum)
 var m2 = vec3<f32>(0.0);   // second moment (sum of squares)
 
-for (var x = -1; x <= 1; x++) {
-    for (var y = -1; y <= 1; y++) {
-        let neighbor_ycocg = rgb_to_ycocg(
-            textureSample(current_frame, linear_sampler, in.uv + offset).rgb
-        );
-        m1 += neighbor_ycocg;
-        m2 += neighbor_ycocg * neighbor_ycocg;
+for (var x = -1; x <= 1; x = x + 1) {
+    for (var y = -1; y <= 1; y = y + 1) {
+        // Sample around cur_uv (jitter-corrected), not in.uv.
+        // Using point_sampler avoids bilinear softening of variance statistics.
+        let s = rgb_to_ycocg(tonemap(
+            textureSample(current_frame, point_sampler,
+                cur_uv + vec2<f32>(f32(x), f32(y)) * in_texel).rgb
+        ));
+        m1 += s;
+        m2 += s * s;
     }
 }
 
@@ -171,24 +181,29 @@ let variance = (m2 / 9.0) - (mean * mean);
 let std_dev  = sqrt(max(variance, vec3<f32>(0.0)));
 ```
 
-The bounding box is constructed as `mean ± 1.25 × std_dev`:
+The bounding box is constructed as `mean ± 1.0 × std_dev`:
 
 ```wgsl
-let box_min = mean - 1.25 * std_dev;
-let box_max = mean + 1.25 * std_dev;
+let aabb_min = mean - std_dev;
+let aabb_max = mean + std_dev;
 ```
 
-The factor `1.25` is a deliberate tuning constant. A factor of `1.0` (one standard deviation) is very aggressive: it clips frequently and produces a sharper image but can cause flickering at the clip boundary. A factor of `2.0` is conservative: it accepts more history and reduces flickering but allows more ghosting. The value `1.25` sits between these extremes, providing good ghosting suppression while keeping flickering at bay. This value can be adjusted at the shader level to trade ghosting for stability.
-
-The history sample is then clamped into this box before blending:
+Rather than clamping the history to the AABB surface (which discards all history outside the box), Helio uses **`clip_towards_aabb_center`** (Playdead's method, MIT licence). This casts a ray from the history colour towards the AABB centre and clips at the first AABB face — preserving more of the valid history signal:
 
 ```wgsl
-let history_ycocg      = rgb_to_ycocg(history_color);
-let clamped_history    = ycocg_to_rgb(clamp(history_ycocg, box_min, box_max));
+// Clip history towards AABB centre (Playdead method).
+let clipped_history = ycocg_to_rgb(clip_towards_aabb_center(
+    rgb_to_ycocg(history_color),
+    rgb_to_ycocg(current_color),
+    aabb_min,
+    aabb_max,
+));
 ```
+
+Plain `clamp` places the clipped point on the nearest AABB face, which can be far from the history colour if history is outside only one component. `clip_towards_aabb_center` instead finds the intersection along the segment from history to AABB centre, which tends to produce a more spatially coherent clipped value and suppresses less valid history.
 
 > [!NOTE]
-> The 3×3 neighbourhood tap uses the **linear sampler** (`linear_sampler`), which means each of the nine samples is bilinearly filtered from the current frame. At non-edge pixels this is equivalent to point sampling (the sample lands on a texel centre). At edge pixels the bilinear interpolation slightly softens the neighbourhood statistics, which has the secondary effect of reducing the variance bounding box's sensitivity to individual pixel outliers — a mild robustness benefit.
+> The neighbourhood samples use the **point sampler** at `cur_uv` (jitter-corrected UV) rather than `in.uv`. Using `cur_uv` ensures the neighbourhood AABB is built around the same world-point that is currently under consideration, which is essential for correct ghosting detection when the jitter shift is non-trivial (it can be up to half a pixel in either axis).
 
 ---
 
@@ -254,7 +269,7 @@ A more memory-efficient design would swap the roles of the two textures each fra
 
 ---
 
-## 7. The TaaUniform and Jitter Removal
+## 7. The TaaUniform, Jitter UVs, and RESET Mode
 
 Each frame the `prepare()` method uploads a `TaaUniform` to the GPU:
 
@@ -262,45 +277,122 @@ Each frame the `prepare()` method uploads a `TaaUniform` to the GPU:
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct TaaUniform {
-    feedback_min: f32,    // 0.88
-    feedback_max: f32,    // 0.97
-    jitter:       [f32; 2],
+    feedback_min:  f32,      // legacy — kept for GPU layout compatibility, unused
+    feedback_max:  f32,      // legacy — kept for GPU layout compatibility, unused
+    jitter_offset: [f32; 2], // centred Halton offset for this frame (normalised screen space)
+    reset:         u32,      // set to 1 on the very first rendered frame, then 0
+    _pad:          u32,
 }
 ```
 
-The struct is 16 bytes and satisfies WGSL's uniform buffer alignment requirements without padding. `feedback_min` and `feedback_max` are constants in the current implementation; in a more sophisticated system they could be adjusted dynamically based on detected motion or scene type.
+The struct is 24 bytes. `feedback_min` and `feedback_max` are retained for GPU buffer layout compatibility but are no longer consulted by the blending logic (see Section 8). `jitter_offset` carries the centred Halton sequence offset — values in `(-0.5/width … 0.5/width, -0.5/height … 0.5/height)`.
 
-The `jitter` field carries the centred Halton offset for the current frame. Its primary purpose in the shader is jitter removal. The current frame was rendered with a sub-pixel shift applied to the projection matrix, which means each pixel in `current_frame` samples from a slightly offset position compared to where a non-jittered render would have placed the sample. When the shader computes the 3×3 neighbourhood for variance clamping, it samples `current_frame` at `in.uv`, which already incorporates the jitter shift. No explicit jitter compensation is needed for the neighbourhood because all nine taps share the same jitter offset — the neighbourhood statistics are spatially coherent.
+### 7.1 UV Derivation in the Shader
 
-However, the `jitter_offset` is available in the `TaaUniform` for implementations that need to align the current-frame sample exactly with the history sample during blending. In the current shader the current frame is sampled at `in.uv` without removing the jitter, relying on the velocity reprojection and variance clamp to provide implicit alignment through the history fetch. More advanced implementations remove the jitter from the current-frame UV to produce a pixel-centre-aligned sample before blending, which reduces subpixel shimmer at the cost of one additional UV calculation.
-
----
-
-## 8. Blend Factor and Motion Adaptation
-
-The ratio of current-to-history in the final blend is controlled by `feedback_min` and `feedback_max`. The blend factor is computed as a function of the pixel's screen-space velocity magnitude:
+The shader converts the CPU-side jitter into UV-space, then derives both the current and history UVs:
 
 ```wgsl
-let velocity_len  = length(velocity);
-let blend_factor  = mix(taa.feedback_max, taa.feedback_min, saturate(velocity_len * 100.0));
-let result        = mix(current_color, clamped_history, blend_factor);
+let jitter_uv  = taa.jitter_offset * vec2<f32>(1.0, -1.0) / in_dims;
+let cur_uv     = in.uv + jitter_uv;      // world-point's location in current (jittered) frame
+let history_uv = in.uv - velocity;       // world-point's location in (unjittered) history
 ```
 
-When velocity is zero (stationary camera and objects), `blend_factor = feedback_max = 0.97`. The result is 3% current frame and 97% history — strong temporal accumulation. Over 16 frames, a stationary pixel effectively draws 97% of its value from history, producing a running weighted average that converges to the full 16× supersampled result.
+The Y axis of `jitter_uv` is negated because UV-space Y increases downward while the projection-matrix jitter Y increases upward.
 
-When velocity is high, `blend_factor` falls toward `feedback_min = 0.88`. At `velocity_len = 0.01` (one percent of screen width per frame, a rapid pan), `saturate(velocity_len × 100) = 1.0` and `blend_factor = 0.88`. The result is 12% current frame and 88% history — noticeably less accumulation, which reduces ghosting behind fast-moving objects at the cost of reduced supersampling quality on those pixels.
+`cur_uv` is used for the current-frame read **and** for the entire 3×3 neighbourhood AABB (Section 4.3), ensuring both are aligned to the same world-point. `history_uv` has no jitter removed because the history buffer stores accumulated unjittered output.
 
-The `× 100` velocity scale factor means that one percent of screen width per frame is treated as the maximum-velocity case. This is tuned for typical game camera motion; scenes with extremely rapid camera movement (cutscenes, vehicle interiors) may benefit from reducing this scale to push more pixels toward `feedback_min` during fast motion.
+### 7.2 RESET Mode — First-Frame Priming
 
-| `velocity_len` | `blend_factor` | Temporal weight | Effect |
-|---|---|---|---|
-| 0.0 (stationary) | 0.97 | 97% history | Maximum supersampling quality |
-| 0.005 | ~0.925 | ~92.5% history | Moderate motion |
-| 0.01+ | 0.88 | 88% history | Fast motion, reduced ghosting |
+On the very first rendered frame there is no valid history. The `reset` flag handles this by bypassing the accumulation loop and writing directly to the history buffer at full confidence:
+
+```wgsl
+if taa.reset != 0u {
+    // Prime the history buffer with the current frame at maximum confidence,
+    // so the next frame begins accumulation with a valid baseline.
+    return vec4<f32>(original_color.rgb, 1.0 / MIN_HISTORY_BLEND_RATE);
+}
+```
+
+`MIN_HISTORY_BLEND_RATE = 0.015`, so the primed confidence value is `1.0 / 0.015 ≈ 66.7`. On the following frame the confidence counter resumes normally. Without RESET, the first frame would blend against uninitialised history textures, producing a one-frame flash of garbage or black.
 
 ---
 
-## 9. O(1) Guarantee
+## 8. Confidence Counter and Adaptive Blend Rate
+
+Rather than computing the blend rate from a simple velocity-magnitude formula, Helio uses a **confidence counter** accumulated in the history texture's alpha channel:
+
+```wgsl
+const MIN_HISTORY_BLEND_RATE: f32 = 0.015;  // ~6.7% history each frame minimum
+const DEFAULT_BLEND_RATE:     f32 = 0.10;   // 10% current frame when unconstrained
+```
+
+Each frame the old confidence is read from `history_uv.a`, then updated:
+
+```wgsl
+let old_confidence = textureSample(history_tex, linear_sampler, history_uv).a;
+
+let new_confidence: f32;
+if velocity_len < 0.0001 {
+    // Stationary pixel — accumulate confidence quickly
+    new_confidence = old_confidence + 10.0;
+} else {
+    // Moving pixel — restart accumulation from scratch
+    new_confidence = 1.0;
+}
+
+let blend_rate = clamp(1.0 / new_confidence, MIN_HISTORY_BLEND_RATE, DEFAULT_BLEND_RATE);
+let result     = mix(clipped_history.rgb, current_color, blend_rate);
+// Store new confidence in alpha
+output = vec4<f32>(result, new_confidence);
+```
+
+| Stationary frames | `new_confidence` | `blend_rate` | Current-frame weight |
+|---|---|---|---|
+| 1 (first after reset) | 1.0 | 10% | 10% |
+| 2 | 11.0 | ~9.1% | ~9.1% |
+| 5 | 41.0 | ~2.4% | ~2.4% |
+| 10 | 91.0 | ~1.1% | ~1.1% |
+| 20+ | 191.0+ | ≤1.5% (floored) | 1.5% (floored at `MIN_HISTORY_BLEND_RATE`) |
+
+For a moving pixel, `new_confidence` resets to `1.0`, giving `blend_rate = 0.10` — 10% current frame each frame, or roughly 90% history. This is intentionally conservative: keeping 90% history even on moving pixels avoids the sharp transition artefacts that pure velocity-cutoff methods produce.
+
+The floor of `MIN_HISTORY_BLEND_RATE = 0.015` prevents the blend rate from reaching zero. This ensures that even fully-accumulated stationary pixels always accept a small fraction (1.5%) of the current frame, providing immunity to persistent ghosting from gradual lighting changes or transparent surfaces that don't produce reliable velocity vectors.
+
+> [!NOTE]
+> The confidence counter is stored in the alpha channel of the history texture (RGBA16Float). This reuses the existing history buffer storage with no additional memory cost. The output alpha is not composited into the final framebuffer — it is only ever read by the TAA shader in the following frame.
+
+---
+
+## 9. Reversible Reinhard Tonemapping Inside the Blend
+
+The AABB construction and the history blend are both performed in a **tonemapped space** using a reversible Reinhard operator:
+
+```wgsl
+fn tonemap(c: vec3<f32>) -> vec3<f32> {
+    return c / (1.0 + c);   // Reinhard per-channel
+}
+
+fn reverse_tonemap(c: vec3<f32>) -> vec3<f32> {
+    return c / (1.0 - c);   // inverse Reinhard
+}
+```
+
+The sequence around the blend is:
+
+1. Tonemap current frame sample → `tm_current`
+2. Build the 3×3 AABB in tonemapped YCoCg space
+3. Tonemap history sample → `tm_history`
+4. `clip_towards_aabb_center(tm_history, tm_current, aabb_min, aabb_max)` → `clipped_tm_history`
+5. Blend: `result_tm = mix(clipped_tm_history, tm_current, blend_rate)`
+6. Reverse-tonemap back: `result = reverse_tonemap(ycocg_to_rgb(result_tm))`
+
+Without this, the variance AABB computed in linear HDR space is dominated by high-luminance samples (fire, specular highlights). A single bright pixel can expand the AABB so much that ghosting from nearby moderate-luminance pixels is never rejected. Tonemapping compresses the dynamic range before variance statistics are computed, giving all pixels an equally-weighted contribution to the neighbourhood distribution regardless of their absolute luminance.
+
+The Reinhard operator is chosen for its reversibility: `reverse_tonemap(tonemap(x)) == x` (within floating-point precision). Operators like ACES or Filmic are not reversible, which would require the history texture to be permanently stored in tonemapped space — complicating integration with downstream HDR passes.
+
+---
+
+## 11. O(1) Guarantee
 
 The `execute()` method records exactly one render pass (one draw call) followed by one `copy_texture_to_texture`:
 
@@ -325,7 +417,7 @@ The `prepare()` method uploads exactly 16 bytes via `queue.write_buffer`. There 
 
 ---
 
-## 10. Trade-offs and Limitations
+## 11. Trade-offs and Limitations
 
 TAA is not universally superior to SMAA. Several situations exist where TAA's temporal accumulation is a liability rather than an asset.
 
@@ -339,9 +431,9 @@ TAA is not universally superior to SMAA. Several situations exist where TAA's te
 
 ---
 
-## 11. Rust API
+## 12. Rust API
 
-### 11.1 Construction
+### 12.1 Construction
 
 ```rust
 pub fn new(
@@ -357,7 +449,7 @@ pub fn new(
 
 All resource views are bound at construction time. `current_view` is the pre-TAA HDR colour buffer published as `FrameResources::pre_aa`. `velocity_view` is the screen-space velocity channel from the G-buffer. `depth_view` must be a view with `TextureAspect::DepthOnly` pointing at the scene depth buffer. `format` is the pixel format used for both the `output_texture` and `history_texture`.
 
-### 11.2 Integration
+### 12.2 Integration
 
 ```rust
 let taa = TaaPass::new(
@@ -374,9 +466,9 @@ renderer.add_pass(taa);
 
 After TAA, `taa.output_view` contains the anti-aliased frame. If further post-processing (tone mapping, bloom, lens flare) is applied after TAA, they should read from `output_view`. To expose the TAA output to downstream passes, implement `publish()` on a wrapper that sets `frame.pre_aa = Some(&self.taa.output_view)` — this allows a tone mapping or sharpening pass to consume the TAA result transparently.
 
-On window resize, a new `TaaPass` must be constructed at the new resolution. The history texture will start uninitialised, causing the first few frames to blend the current frame against garbage data; in practice this manifests as a brief flash on resize that disappears as soon as the first frame's output is copied to history. A clean transition can be achieved by clearing `history_texture` to the current frame's content on resize before recording any TAA draw calls.
+On window resize, a new `TaaPass` must be constructed at the new resolution. The `reset` flag in `TaaUniform` should be set to `1` for the first frame after construction so that the RESET path (Section 7.2) primes the history buffer with the current frame's output rather than blending against uninitialised data. This avoids a brief flash on resize. The `reset` flag is automatically cleared on the frame after it is set.
 
-### 11.3 Bind Group Layout Reference
+### 12.3 Bind Group Layout Reference
 
 | Binding | Resource | Type | Description |
 |---|---|---|---|
@@ -386,6 +478,6 @@ On window resize, a new `TaaPass` must be constructed at the new resolution. The
 | 3 | `depth_tex` | `TextureDepth2D` | Scene depth buffer (depth-only aspect) |
 | 4 | `linear_sampler` | `Sampler (Filtering)` | Bilinear filter for colour and history sampling |
 | 5 | `point_sampler` | `Sampler (NonFiltering)` | Nearest-neighbour for velocity sampling |
-| 6 | `taa` | `Uniform<TaaUniform>` | Per-frame feedback weights and jitter offset |
+| 6 | `taa` | `Uniform<TaaUniform>` | Jitter offset, reset flag, and legacy feedback fields (24 bytes) |
 
 The bind group is created at construction time and never rebuilt — the bound resources remain constant for the lifetime of the pass. The `taa` uniform buffer at binding 6 is updated each frame via `queue.write_buffer` in `prepare()`, which writes through the existing buffer binding without requiring a bind group rebuild.

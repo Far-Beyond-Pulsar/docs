@@ -2,7 +2,7 @@
 title: "Deferred Lighting Pass"
 description: "Complete reference for Helio's deferred lighting pass — Cook-Torrance PBR, cascaded shadow maps with PCF/PCSS, Radiance Cascades GI integration, and the fullscreen-triangle rendering technique."
 category: helio
-lastUpdated: '2026-03-22'
+lastUpdated: '2026-03-25'
 tags:
   - rendering
   - pbr
@@ -139,12 +139,12 @@ struct Globals {
     csm_splits:        vec4<f32>, // Cascade split distances (meters): x=C0, y=C1, z=C2, w=C3
     debug_mode:        u32,       // 0=normal, 1-20=various debug visualisations
     _pad0:             u32,
-    _pad1:             u32,
+    num_tiles_x:       u32,       // Tile count in X for tiled light culling (screen_width / TILE_SIZE)
     _pad2:             u32,
 }
 ```
 
-The `csm_splits` field holds the hard-coded cascade far-planes in world-space meters: `(5.0, 20.0, 60.0, 200.0)`. These are uploaded from the Rust side during `prepare()` and consumed by the cascade selection logic in the shader. The `frame` counter is used to seed per-pixel PCF rotation hashes — see Section 11.
+The `num_tiles_x` field is written by the CPU each frame and consumed by the direct lighting loop to compute the tile index from fragment coordinates — see Section 6b. The `csm_splits` field holds the hard-coded cascade far-planes in world-space meters: `(5.0, 20.0, 60.0, 200.0)`. These are uploaded from the Rust side during `prepare()` and consumed by the cascade selection logic in the shader. The `frame` counter is used to seed per-pixel PCF rotation hashes — see Section 11.
 
 The corresponding Rust struct mirrors the WGSL layout byte-for-byte using `bytemuck::Pod`:
 
@@ -162,7 +162,7 @@ struct DeferredGlobals {
     csm_splits:        [f32; 4],
     debug_mode:        u32,
     _pad0:             u32,
-    _pad1:             u32,
+    num_tiles_x:       u32,
     _pad2:             u32,
 }
 ```
@@ -247,6 +247,42 @@ struct GpuLight {
     _pad:            u32,
 }
 ```
+
+---
+
+## 6b. Bind Group 3 — Tiled Light Culling
+
+The tiled light culling results are supplied via a separate bind group (group 3) populated each frame by `LightCullPass`:
+
+```wgsl
+const TILE_SIZE:           u32 = 16u;           // pixels per tile axis
+const MAX_LIGHTS_PER_TILE: u32 = 64u;           // max lights recorded per tile
+
+@group(3) @binding(0) var<storage, read> tile_light_lists:  array<u32>;
+@group(3) @binding(1) var<storage, read> tile_light_counts: array<u32>;
+```
+
+Each tile maps to a 16×16 pixel region of the screen. `LightCullPass` runs a compute dispatch that, for each tile, tests every scene light against the tile's depth-range AABB and records the passing light indices into `tile_light_lists`. The count of passing lights for tile `t` is stored in `tile_light_counts[t]`.
+
+The direct lighting loop in the deferred shader consumes these lists:
+
+```wgsl
+let tile_x = u32(in.clip_pos.x) / TILE_SIZE;
+let tile_y = u32(in.clip_pos.y) / TILE_SIZE;
+let tile_idx         = tile_y * globals.num_tiles_x + tile_x;
+let tile_light_count = tile_light_counts[tile_idx];
+
+for (var i = 0u; i < tile_light_count; i++) {
+    let light_idx = tile_light_lists[tile_idx * MAX_LIGHTS_PER_TILE + i];
+    let light     = lights[light_idx];
+    // ... PBR evaluation
+}
+```
+
+This eliminates the O(lights × pixels) brute-force loop. Each pixel only processes the N lights that actually overlap its tile (N ≤ `MAX_LIGHTS_PER_TILE`). The `globals.num_tiles_x` field (Section 4.2) is needed so that the shader can convert from 2D tile coordinates to the flat `tile_light_counts` index.
+
+> [!NOTE]
+> Group 3 uses a separate `BindGroup` and `BindGroupLayout` from group 0 (pass-level G-buffer). This is intentional: group 3 is rebuilt each frame because the light-list buffers are re-allocated when the screen is resized, while group 0 contents rarely change. The separation avoids an unnecessary rebuild of the larger G-buffer bind group.
 
 ---
 
@@ -621,8 +657,6 @@ The shadow texture transform, bounds check, and PCF loop:
 ```wgsl
 const ATLAS_SIZE: f32 = 1024.0;
 
-override PCF_SAMPLE_COUNT: u32 = 16u;
-
 fn sample_cascade_shadow(
     layer: u32,
     cascade_scale: f32,
@@ -646,8 +680,8 @@ fn sample_cascade_shadow(
     let theta = hash22(frag_coord + vec2<f32>(f32(frame))) * 6.28318530718;
 
     var lit_sum = 0.0;
-    for (var i = 0u; i < PCF_SAMPLE_COUNT; i++) {
-        let offset = vogel_disk_sample(i, PCF_SAMPLE_COUNT, theta) * filter_radius;
+    for (var i = 0u; i < shadow_config.pcf_sample_count; i++) {
+        let offset = vogel_disk_sample(i, shadow_config.pcf_sample_count, theta) * filter_radius;
         lit_sum += textureSampleCompareLevel(
             shadow_atlas, shadow_sampler,
             shadow_uv + offset,
@@ -655,11 +689,13 @@ fn sample_cascade_shadow(
             biased_depth,
         );
     }
-    return lit_sum / f32(PCF_SAMPLE_COUNT);
+    return lit_sum / f32(shadow_config.pcf_sample_count);
 }
 ```
 
-The `PCF_SAMPLE_COUNT` constant is declared with the `override` keyword, which means its value is injected at pipeline compilation time. This allows quality-tier selection by creating separate pipelines with different override values (8, 16, 32 samples) without any branching in the shader.
+The PCF sample count is read at runtime from `shadow_config.pcf_sample_count` — a field in the `ShadowConfig` uniform (Section 4.3). This allows the quality level to be changed per-frame by simply updating the uniform, without recompiling the pipeline. The performance cost scales linearly with the sample count; typical values are 8 (low quality, mobile), 16 (default), and 32 (high quality, cutscenes).
+
+The cascade scale factor for the filter radius is `1.0 + cascade_idx × 1.5`. Farther cascades cover more world-space area per texel, so their effective filter radius needs to be larger to produce the same world-space coverage as the near cascade.
 
 The cascade scale factor for the filter radius is `1.0 + cascade_idx × 1.5`. Farther cascades cover more world-space area per texel, so their effective filter radius needs to be larger to produce the same world-space coverage as the near cascade.
 
@@ -1283,7 +1319,9 @@ The shader uses WGSL `override` declarations for configuration values that are i
 | `MAX_SHADOW_LIGHTS` | `42` | Maximum lights that can cast shadows |
 | `BLOOM_INTENSITY` | `0.3` | Bloom intensity multiplier |
 | `BLOOM_THRESHOLD` | `1.0` | Luminance threshold for bloom |
-| `PCF_SAMPLE_COUNT` | `16` | PCF shadow samples per pixel |
+
+> [!NOTE]
+> `PCF_SAMPLE_COUNT` was previously an `override` constant. It is now a runtime field in the `ShadowConfig` uniform (`shadow_config.pcf_sample_count`) — see Section 4.3 and the PCF loop in Section 11.3. This change allows quality-level selection without pipeline recompilation.
 
 At pipeline creation, the Rust-side code can inject different values via `wgpu::ShaderModuleDescriptor` compilation options, enabling quality tiers without needing separate shader source files or runtime `#ifdef` equivalents.
 

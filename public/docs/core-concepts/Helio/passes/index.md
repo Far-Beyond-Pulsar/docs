@@ -2,7 +2,7 @@
 title: Render Passes
 description: An overview of every pass crate in Helio's default render graph — what each one does, which resources it reads and writes, and how to compose or replace them.
 category: helio
-lastUpdated: '2026-03-22'
+lastUpdated: '2026-03-25'
 tags:
   - render-graph
   - passes
@@ -66,38 +66,50 @@ flowchart TD
         direction TB
         SM["ShadowMatrixPass\ncompute — light-space VP matrices"]
         SP["ShadowPass\ndepth-only — fill atlas per face"]
+        SL["SkyLutPass\n192×108 panoramic atmosphere LUT\nbakes when sky changes"]
+        OC["OcclusionCullPass\ntemporal Hi-Z GPU cull\nwrites visibility bits before Z-prepass"]
         DP["DepthPrepassPass\nearly-Z fill — position only"]
+        HZ["HiZBuildPass\nmax-depth mip pyramid\nmust run after depth prepass"]
+        LC["LightCullPass\ntiled 16×16 light lists\nrequires Hi-Z depth range"]
         GB["GBufferPass\nMRT write: albedo/normal/ORM/emissive"]
         VG["VirtualGeometryPass\nmeshlet cull + indirect draw"]
-        DL["DeferredLightPass\nfullscreen PBR + shadows + RC GI"]
-        SL["SkyLutPass\n192×108 panoramic atmosphere LUT\nbakes when sky changes"]
+        DL["DeferredLightPass\nfullscreen PBR + shadows + RC GI\ntile-culled lights (group 3)"]
         SK["SkyPass\nfullscreen — sample LUT + clouds"]
         RC["RadianceCascadesPass\ncompute — update 8×8×8 probe grid"]
+        TA["TaaPass\ntemporal accumulation + upscale\njitter-corrected UV resolve"]
         TR["TransparentPass\nforward alpha-blend"]
         BB["BillboardPass\nGPU-instanced camera-facing quads"]
         DB["DebugPass\nLineList wireframe primitives"]
         FX["FxaaPass\nluma-edge anti-aliasing"]
     end
 
-    SM --> SP --> DP --> GB --> VG --> DL
+    SM --> SP
     SL --> SK --> DL
+    SP --> OC --> DP --> HZ --> LC --> GB --> VG --> DL
     RC --> DL
-    DL --> TR --> BB --> DB --> FX
+    DL --> TA --> TR --> BB --> DB --> FX
 
     style SM fill:#2196F3,color:#fff
     style SP fill:#2196F3,color:#fff
+    style SL fill:#FF9800,color:#fff
+    style OC fill:#E91E63,color:#fff
     style DP fill:#4CAF50,color:#fff
+    style HZ fill:#E91E63,color:#fff
+    style LC fill:#E91E63,color:#fff
     style GB fill:#4CAF50,color:#fff
     style VG fill:#4CAF50,color:#fff
     style DL fill:#9C27B0,color:#fff
-    style SL fill:#FF9800,color:#fff
     style SK fill:#FF9800,color:#fff
     style RC fill:#FF5722,color:#fff
+    style TA fill:#00BCD4,color:#fff
     style TR fill:#607D8B,color:#fff
     style BB fill:#607D8B,color:#fff
     style DB fill:#795548,color:#fff
     style FX fill:#009688,color:#fff
 ```
+
+> [!NOTE]
+> Passes highlighted in pink/magenta (`OcclusionCullPass`, `HiZBuildPass`, `LightCullPass`) form the **GPU-driven performance tier**. They depend on each other strictly in sequence: OcclusionCull requires last frame's Hi-Z; DepthPrepass refills depth; HiZBuild rebuilds the mip pyramid; LightCull reads depth ranges per tile. `TaaPass` (cyan) resolves jitter and accumulates history after all lighting is complete.
 
 ## Resource Flow
 
@@ -105,13 +117,17 @@ flowchart TD
 |------|-------|--------------------|
 | `ShadowMatrixPass` | lights buffer, camera uniform | shadow matrices buffer |
 | `ShadowPass` | shadow matrices, scene instances, indirect buffer | `frame.shadow_atlas`, `frame.shadow_sampler` |
+| `SkyLutPass` | sky uniforms | `frame.sky_lut` — 192×108 Rgba16Float |
+| `OcclusionCullPass` | `frame.hiz` (previous frame), instance buffer | indirect dispatch buffer (visibility bits) |
 | `DepthPrepassPass` | scene instances, indirect buffer | depth buffer |
+| `HiZBuildPass` | depth buffer | `frame.hiz` — max-depth mip pyramid, `frame.hiz_sampler` |
+| `LightCullPass` | depth (full-res), lights, camera, globals | `frame.tile_light_lists`, `frame.tile_light_counts` |
 | `GBufferPass` | camera, globals, instances, materials, textures | `frame.gbuffer` (albedo/normal/ORM/emissive), depth |
 | `VirtualGeometryPass` | meshlet buffer, instances | `frame.gbuffer` (appended), depth |
-| `SkyLutPass` | sky uniforms | `frame.sky_lut` — 192×108 Rgba16Float |
 | `SkyPass` | camera, sky uniforms, sky LUT | HDR target (sky region) |
 | `RadianceCascadesPass` | G-buffer, sky LUT, scene geometry | `frame.rc_cascade` — 32×256 Rgba16Float |
-| `DeferredLightPass` | G-buffer, shadow atlas, RC probes, sky LUT, depth | HDR target (lit geometry) |
+| `DeferredLightPass` | G-buffer, shadow atlas, RC probes, sky LUT, depth, `frame.tile_light_lists/counts` | HDR target (lit geometry) |
+| `TaaPass` | HDR target (pre-AA), velocity texture, depth | `frame.pre_aa` (resolved), history buffer |
 | `TransparentPass` | camera, materials, depth (read-only) | HDR target |
 | `BillboardPass` | camera, billboard instances | HDR target |
 | `DebugPass` | camera, debug vertices | HDR target |
@@ -119,12 +135,16 @@ flowchart TD
 
 ## CPU Cost Model
 
-A key design goal is that CPu cost per frame is **O(1) with respect to scene complexity**. This means doubling the number of meshes or lights does not increase the per-frame CPU work in the hot path. Here is how each pass achieves this:
+A key design goal is that CPU cost per frame is **O(1) with respect to scene complexity**. This means doubling the number of meshes or lights does not increase the per-frame CPU work in the hot path. Here is how each pass achieves this:
 
 - **ShadowPass**: face loop bounded by `MAX_SHADOW_FACES = 256` (compile-time constant). One `multi_draw_indexed_indirect` per face — no per-object iteration.
+- **OcclusionCullPass**: one compute dispatch — workgroup count is `ceil(total_instance_slots / 64)`, which is constant for a given scene capacity. No per-frame CPU object iteration.
+- **HiZBuildPass**: `mip_count - 1` small uniform writes + `mip_count - 1` compute dispatches (one per mip level). For a 1920×1080 target, `mip_count ≈ 11`, so about 10 dispatches. Constant cost regardless of scene complexity.
+- **LightCullPass**: one compute dispatch — tile count is constant for a given resolution (`ceil(width/16) × ceil(height/16)` workgroups). Adding more lights increases GPU work inside the shader but not CPU dispatch cost.
 - **GBufferPass**: one `multi_draw_indexed_indirect` per unique material. With 50 materials and 100,000 objects, the CPU issues 50 GPU commands.
 - **VirtualGeometryPass**: one compute dispatch + one indirect draw. GPU does all per-meshlet work.
-- **DeferredLightPass**: one fullscreen triangle draw. GPU iterates all lights in the fragment shader.
+- **DeferredLightPass**: one fullscreen triangle draw. GPU iterates tile-culled lights per fragment.
+- **TaaPass**: one fullscreen triangle draw + one `copy_texture_to_texture`. 16 bytes uploaded via `queue.write_buffer`. Zero dynamic allocations.
 - **SkyLutPass**: one fullscreen draw. Skipped via early return when sky state hasn't changed.
 - **SkyPass**: one fullscreen triangle draw.
 - **RadianceCascadesPass**: one compute dispatch per cascade level.

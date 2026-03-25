@@ -2,7 +2,7 @@
 title: Occlusion Cull Pass
 description: GPU Hi-Z occlusion culling — projecting per-instance AABBs into screen space and testing against the hierarchical depth pyramid to produce a per-instance visibility bitmask
 category: helio
-lastUpdated: '2026-03-23'
+lastUpdated: '2026-03-25'
 tags:
   - culling
   - occlusion
@@ -14,6 +14,9 @@ icon: '🔭'
 ---
 
 The `OcclusionCullPass` is Helio's GPU-driven occlusion culling stage. It receives the hierarchical depth pyramid produced by the [Hi-Z Build Pass](./hiz) and the world-space axis-aligned bounding boxes (AABBs) of every scene instance, projects each AABB into screen space, and tests whether the projected region is entirely behind the occluder geometry encoded in the pyramid. The result is a per-instance visibility bitmask written to a GPU buffer. The [Indirect Dispatch Pass](./indirect-dispatch) consumes this bitmask to suppress draw commands for hidden instances before they ever reach the rasteriser.
+
+> [!NOTE]
+> `OcclusionCullPass` is active in the default render graph. It runs after `ShadowPass` and before `DepthPrepassPass`, using last frame's `frame.hiz` pyramid for temporal reprojection. See the [pipeline diagram](./index.md#default-pipeline-execution-order) for the full pass ordering.
 
 To understand why this pass exists alongside frustum culling, it helps to think about what frustum culling cannot accomplish. Frustum culling, handled by `IndirectDispatchPass`, eliminates every instance whose bounding volume lies completely outside the six planes of the view frustum. In an outdoor scene with a wide field of view this is a substantial reduction. But in an indoor scene — a city street viewed from street level, a cave system, an interior environment — the frustum may contain dozens or hundreds of objects that are entirely hidden behind walls, floors, and other large occluders. Frustum culling keeps all of them, and they proceed through the vertex and fragment pipeline generating real GPU work. Occlusion culling eliminates this redundant work at the cost of a single compute dispatch per frame.
 

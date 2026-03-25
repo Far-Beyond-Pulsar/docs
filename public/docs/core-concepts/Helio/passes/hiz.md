@@ -2,7 +2,7 @@
 title: Hi-Z Build Pass
 description: Hierarchical depth pyramid construction — building a conservative max-depth mip chain from the scene depth buffer for GPU occlusion culling
 category: helio
-lastUpdated: '2026-03-23'
+lastUpdated: '2026-03-25'
 tags:
   - culling
   - hierarchical-z
@@ -14,6 +14,9 @@ icon: '🔭'
 ---
 
 The `HiZBuildPass` constructs Helio's hierarchical depth pyramid — a compact multi-resolution representation of the scene's depth buffer where each mip level stores the maximum depth within its 2×2 footprint in the level above. This pyramid is the cornerstone of Helio's GPU occlusion culling system, and understanding its design requires understanding the problem it was built to solve.
+
+> [!NOTE]
+> `HiZBuildPass` is active in the default render graph. It runs after `DepthPrepassPass` and its output (`frame.hiz`) is consumed by both `OcclusionCullPass` (the following frame) and `LightCullPass` (the same frame). See the [pipeline diagram](./index.md#default-pipeline-execution-order) for the full pass ordering.
 
 Traditional occlusion culling — testing each object in the scene to determine whether it is hidden behind other geometry — is a straightforward problem in concept and an expensive one in practice. The brute-force approach queries the depth buffer on the CPU, comparing each object's bounding volume against the depths stored for its projected screen region. At 100 000 scene objects, this means 100 000 CPU-side depth buffer reads, each incurring the latency of a GPU readback, per frame. That cost grows linearly with scene complexity and defeats every other optimisation in the pipeline. The Hi-Z pyramid moves the depth test entirely to the GPU, where it can be parallelised across all scene instances simultaneously with no CPU iteration and no GPU-to-CPU readback.
 

@@ -2,7 +2,7 @@
 title: The Render Graph
 description: How helio-v3's RenderGraph orchestrates pass execution, FrameResources inter-pass communication, the prepare/execute lifecycle, and how to extend or replace the default pipeline
 category: helio
-lastUpdated: '2026-03-23'
+lastUpdated: '2026-03-25'
 tags:
   - render-graph
   - passes
@@ -102,6 +102,10 @@ pub struct FrameResources<'a> {
     /// Billboard instances for this frame
     pub billboards:     Option<BillboardFrameData<'a>>,
 
+    /// Tiled light culling results (populated after LightCullPass)
+    pub tile_light_lists:  Option<&'a wgpu::Buffer>,
+    pub tile_light_counts: Option<&'a wgpu::Buffer>,
+
     /// Virtual geometry meshlet and instance data
     pub vg:             Option<VgFrameData<'a>>,
 }
@@ -111,7 +115,7 @@ pub struct FrameResources<'a> {
 
 The lifetime `'a` on `FrameResources<'a>` ties all borrowed views to the lifetime of the textures that own them, which in turn are owned either by the pass that produced them (for pass-owned textures such as the G-buffer targets) or by the `RenderGraph` itself (for transient textures declared via `declare_resources`). Because the graph holds both simultaneously — `&mut self` for execution and `&TransientTexture` for texture views — the internal bookkeeping uses a split-borrow pattern to satisfy the borrow checker without unsafe code.
 
-The ordering guarantee is simple: `FrameResources` slots fill from top to bottom in the pass list. The high-level `Renderer::render` pre-populates `main_scene`, `sky`, `billboards`, and `vg` before calling the graph. `ShadowPass` fills `shadow_atlas` and `shadow_sampler` in its `publish`. `SkyLutPass` fills `sky_lut` and `sky_lut_sampler`. `GBufferPass` fills `gbuffer`. By the time `DeferredLightPass` runs, all four of those slots are populated and available in `ctx.frame`.
+The ordering guarantee is simple: `FrameResources` slots fill from top to bottom in the pass list. The high-level `Renderer::render` pre-populates `main_scene`, `sky`, `billboards`, and `vg` before calling the graph. `ShadowPass` fills `shadow_atlas` and `shadow_sampler` in its `publish`. `SkyLutPass` fills `sky_lut` and `sky_lut_sampler`. `OcclusionCullPass` reads `hiz` from the previous frame and writes updated indirect draw data. `DepthPrepassPass` refills the depth buffer. `HiZBuildPass` rebuilds `hiz` and `hiz_sampler` from the fresh depth. `LightCullPass` fills `tile_light_lists` and `tile_light_counts` from the depth ranges. `GBufferPass` fills `gbuffer`. By the time `DeferredLightPass` runs, all of those slots are populated and available in `ctx.frame`.
 
 ---
 
