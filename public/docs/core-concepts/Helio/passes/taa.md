@@ -392,7 +392,7 @@ The Reinhard operator is chosen for its reversibility: `reverse_tonemap(tonemap(
 
 ---
 
-## 11. O(1) Guarantee
+## 10. O(1) Guarantee
 
 The `execute()` method records exactly one render pass (one draw call) followed by one `copy_texture_to_texture`:
 
