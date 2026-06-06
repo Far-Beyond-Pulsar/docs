@@ -34,6 +34,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Legacy redirect shims (generated at build time by generate:redirects)
+/public/docs/**/index.html
+
 # Auto-generated documentation files
 /public/docs/**/_meta.json
 /public/docs-structure.json
