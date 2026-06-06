@@ -4,16 +4,16 @@ import React, { useEffect, useLayoutEffect, useState } from "react";
 import "./globals.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { Inter } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { usePathname } from "next/navigation";
 import mermaid from "mermaid";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 const metadata = {
   title: "Pulsar Docs",
-  description:
-    "A blog about game and web development, backend programming, hardware, security, privacy, and technology.",
+  description: "Documentation for the Pulsar game engine — a high-performance, open-source engine built entirely in Rust.",
 };
 
 // -----------------------------------------------------------------------------
@@ -163,7 +163,7 @@ export default function RootLayout({
         />
       </head>
 
-      <body className={`${inter.className} bg-black text-gray-100`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans bg-black text-gray-100`}>
         <Header />
         <NoticeBanner visible={bannerVisible} headerHeight={headerHeight} />
 

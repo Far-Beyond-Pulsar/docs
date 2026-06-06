@@ -1,48 +1,130 @@
-"use client"
+"use client";
 
-import React from 'react';
-import { Github, Book, Users, FileQuestionIcon, HomeIcon } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Github, Menu, X } from "lucide-react";
 
-const MobileNavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <a
-    href={href}
-    className="block px-3 py-2 text-base font-medium text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-md transition-colors"
-  >
-    {children}
-  </a>
-);
+const NAV_LINKS = [
+  { label: "Home", href: "/", external: false },
+  { label: "Features", href: "/#features", external: false },
+  { label: "Docs", href: "/docs", external: false },
+  { label: "Changelog", href: "https://github.com/Far-Beyond-Pulsar/Pulsar-Native/releases", external: true },
+  { label: "Community", href: "https://github.com/orgs/Far-Beyond-Pulsar/discussions", external: true },
+];
+
+function PulsarMark() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+      <circle cx="11" cy="11" r="10" stroke="#0ea5e9" strokeWidth="1.5" opacity="0.3" />
+      <circle cx="11" cy="11" r="5" fill="#0ea5e9" opacity="0.9" />
+      <circle cx="11" cy="11" r="2.5" fill="white" />
+    </svg>
+  );
+}
 
 export const Header = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <div className="bg-transparent">
-      {/* Header */}
-      <header className="fixed w-full top-0 z-50 border-b border-gray-800 bg-black/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="text-blue-500 font-bold text-xl">◆ PULSAR ENGINE</div>
-          </div>
-          <nav className="hidden md:flex space-x-6">
-            <a href='/' className="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-2">
-              <HomeIcon className="w-4 h-4" /> Home
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-black/90 backdrop-blur-md border-b border-white/[0.07]"
+          : "bg-black/80 backdrop-blur-sm border-b border-white/[0.07]"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
+        {/* Logo */}
+        <a href="/" className="flex items-center gap-2.5 shrink-0">
+          <PulsarMark />
+          <span className="text-white font-semibold text-[15px] tracking-tight">
+            Pulsar
+          </span>
+        </a>
+
+        {/* Desktop nav */}
+        <nav className="hidden md:flex items-center gap-1">
+          {NAV_LINKS.map(({ label, href, external }) => (
+            <a
+              key={label}
+              href={href}
+              {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              className="px-3.5 py-1.5 text-sm text-white/55 hover:text-white transition-colors rounded-md hover:bg-white/[0.05]"
+            >
+              {label}
             </a>
-            <a href="/why" className="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-2">
-              <FileQuestionIcon className="w-4 h-4" /> Why
+          ))}
+        </nav>
+
+        {/* Right actions */}
+        <div className="hidden md:flex items-center gap-2">
+          <a
+            href="https://github.com/Far-Beyond-Pulsar/Pulsar-Native"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white/55 hover:text-white transition-colors"
+          >
+            <Github className="w-4 h-4" />
+            <span>GitHub</span>
+          </a>
+          <a
+            href="/docs/getting-started/installation/windows"
+            className="flex items-center px-4 py-1.5 bg-[#0ea5e9] hover:bg-[#0284c7] text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            Get Started
+          </a>
+        </div>
+
+        {/* Mobile toggle */}
+        <button
+          className="md:hidden p-2 text-white/60 hover:text-white"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Mobile menu */}
+      {menuOpen && (
+        <div className="md:hidden bg-black/95 backdrop-blur-lg border-t border-white/[0.07] px-5 py-4 flex flex-col gap-1">
+          {NAV_LINKS.map(({ label, href, external }) => (
+            <a
+              key={label}
+              href={href}
+              {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              className="px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/[0.05] rounded-md transition-colors"
+              onClick={() => setMenuOpen(false)}
+            >
+              {label}
             </a>
-            <a href="/docs" className="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-2">
-              <Book className="w-4 h-4" /> Docs
-            </a>
-            <a href="#" className="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-2">
-              <Users className="w-4 h-4" /> Community
-            </a>
-            <a href="https://github.com/Far-Beyond-Pulsar/Pulsar-Native" target='_blank' className="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-2">
+          ))}
+          <div className="mt-3 pt-3 border-t border-white/[0.07] flex flex-col gap-2">
+            <a
+              href="https://github.com/Far-Beyond-Pulsar/Pulsar-Native"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3 py-2.5 text-sm text-white/60 hover:text-white"
+            >
               <Github className="w-4 h-4" /> GitHub
             </a>
-          </nav>
+            <a
+              href="/docs/getting-started/installation/windows"
+              className="px-4 py-2.5 bg-[#0ea5e9] text-white text-sm font-medium rounded-lg text-center"
+              onClick={() => setMenuOpen(false)}
+            >
+              Get Started
+            </a>
+          </div>
         </div>
-      </header>
-    </div>
+      )}
+    </header>
   );
 };
 
