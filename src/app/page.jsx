@@ -228,7 +228,7 @@ export default async function DocsHome() {
         <div className="max-w-5xl mx-auto px-5 pt-20 pb-16">
           <div className="flex flex-col items-start gap-5">
             <div className="flex items-center gap-2.5">
-              <Image src="/assets/pulsar.png" alt="Pulsar" width={34} height={34} className="opacity-90" />
+              <img src={`${BASE}/assets/pulsar.png`} alt="Pulsar" width={34} height={34} className="opacity-90" style={{ objectFit: 'contain' }} />
               <span className="text-white/35 text-sm font-medium">/&nbsp;docs</span>
             </div>
 
