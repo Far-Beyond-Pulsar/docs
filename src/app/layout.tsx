@@ -139,7 +139,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isDocsPage = pathname?.startsWith("/docs") && pathname !== "/docs";
+  const isDocsPage = pathname !== "/" && pathname !== "";
 
   const bannerVisible = useBannerVisibility();
   const headerHeight = useHeaderHeight();

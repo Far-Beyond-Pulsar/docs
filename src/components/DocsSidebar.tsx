@@ -37,7 +37,10 @@ interface DocsSidebarProps {
 }
 
 export default function DocsSidebar({ navigation }: DocsSidebarProps) {
-  const pathname = usePathname();
+  const rawPathname = usePathname();
+  // item.path values are absolute like /docs/core-concepts/Helio.
+  // usePathname() strips basePath, so /core-concepts/Helio comes back — prepend it.
+  const pathname = rawPathname === '/' ? '/docs' : `/docs${rawPathname}`;
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 

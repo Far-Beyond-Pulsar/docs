@@ -7,11 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prebuild": "npm run generate:meta && npm run generate:docs && npm run generate:search",
-    "predev": "npm run generate:meta && npm run generate:docs && npm run generate:search",
+    "prebuild": "npm run generate:meta && npm run generate:docs && npm run generate:search && npm run generate:redirects",
+    "predev": "npm run generate:meta && npm run generate:docs && npm run generate:search && npm run generate:redirects",
     "generate:meta": "node scripts/generate-meta-files.js",
     "generate:docs": "node scripts/generate-docs-structure.js",
-    "generate:search": "node scripts/generate-search-index.js"
+    "generate:search": "node scripts/generate-search-index.js",
+    "generate:redirects": "node scripts/generate-legacy-redirects.js"
   },
   "dependencies": {
     "@fontsource/opendyslexic": "^5.2.5",
