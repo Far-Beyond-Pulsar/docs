@@ -31,13 +31,17 @@ const SECTIONS = [
   },
 ];
 
+const BASE = process.env.NEXT_PUBLIC_CUSTOM_BASE_PATH || '';
+
 function PulsarMark() {
   return (
-    <svg width="20" height="20" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-      <circle cx="11" cy="11" r="10" stroke="#0ea5e9" strokeWidth="1.5" opacity="0.3" />
-      <circle cx="11" cy="11" r="5" fill="#0ea5e9" opacity="0.9" />
-      <circle cx="11" cy="11" r="2.5" fill="white" />
-    </svg>
+    <img
+      src={`${BASE}/assets/pulsar.png`}
+      alt="Pulsar"
+      width={20}
+      height={20}
+      style={{ objectFit: 'contain', width: 20, height: 20 }}
+    />
   );
 }
 
