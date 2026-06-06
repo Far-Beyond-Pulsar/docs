@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { Github, Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "Home", href: "/", external: false },
   { label: "Features", href: "/#features", external: false },
   { label: "Docs", href: "/docs", external: false },
   { label: "Changelog", href: "https://github.com/Far-Beyond-Pulsar/Pulsar-Native/releases", external: true },
