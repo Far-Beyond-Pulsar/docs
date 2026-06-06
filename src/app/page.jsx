@@ -1,5 +1,6 @@
-import Image from "next/image";
 import { Search, ArrowRight, Github, MessageSquare, ChevronRight } from "lucide-react";
+
+const BASE = process.env.NEXT_PUBLIC_CUSTOM_BASE_PATH || '';
 import { getNavigationTree } from "@/utils/docs";
 
 export const metadata = {
