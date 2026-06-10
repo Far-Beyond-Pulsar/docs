@@ -4,11 +4,21 @@ import React, { useState, useEffect } from "react";
 import { Github, Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "Features", href: "/#features", external: false },
-  { label: "Docs", href: "/docs", external: false },
-  { label: "Blog", href: "/blog", external: false },
-  { label: "Changelog", href: "https://github.com/Far-Beyond-Pulsar/Pulsar-Native/releases", external: true },
-  { label: "Community", href: "https://github.com/orgs/Far-Beyond-Pulsar/discussions", external: true },
+  { label: "Features", href: "/#features" },
+  { label: "Blog", href: "/blog" },
+  { label: "Docs", href: "/docs" },
+  { label: "Research", href: "/Research", external: true },
+  { label: "Studio", href: "/studio" },
+  {
+    label: "Changelog",
+    href: "https://github.com/Far-Beyond-Pulsar/Pulsar-Native/releases",
+    external: true,
+  },
+  {
+    label: "Community",
+    href: "https://github.com/orgs/Far-Beyond-Pulsar/discussions",
+    external: true,
+  },
 ];
 
 const BASE = process.env.NEXT_PUBLIC_CUSTOM_BASE_PATH || '';
